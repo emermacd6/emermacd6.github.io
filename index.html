@@ -283,6 +283,7 @@
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="bg-grid"></div>
@@ -304,6 +305,10 @@
 </header>
 
 <main>
+
+  <div id="config-banner" style="display:none;background:var(--short-dim);border:1px solid var(--short);color:var(--short);padding:14px 18px;border-radius:10px;margin-bottom:18px;font-size:13px;line-height:1.6;">
+    ⚠️ 尚未配置 Supabase：请打开 index.html，在 <code>&lt;script&gt;</code> 顶部把 <code>SUPABASE_URL</code> 和 <code>SUPABASE_ANON_KEY</code> 换成你自己 Supabase 项目的值，否则交易记录无法保存或同步。
+  </div>
 
   <!-- ================= CHECKLIST VIEW ================= -->
   <section class="view active" id="view-checklist">
@@ -392,6 +397,11 @@
 
   <!-- ================= HISTORY VIEW ================= -->
   <section class="view" id="view-history">
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:14px;">
+      <button class="btn-cancel" id="export-btn" type="button" style="padding:9px 16px;border-radius:8px;cursor:pointer;">⭳ 导出备份</button>
+      <button class="btn-cancel" id="import-btn" type="button" style="padding:9px 16px;border-radius:8px;cursor:pointer;">⭱ 导入备份</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none;">
+    </div>
     <div id="history-mount"></div>
   </section>
 
@@ -749,31 +759,67 @@
     recalc();
   }
 
-  /* ================= STORAGE ================= */
-  const STORE_KEY = 'trades';
-  let storageAvailable = typeof window.storage !== 'undefined';
+  /* ================= SUPABASE STORAGE ================= */
+  /* 把下面两个值换成你自己 Supabase 项目 Settings → API 里的 Project URL 和 anon public key */
+  const SUPABASE_URL = 'https://sxhbtljurxdqowvymtwb.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4aGJ0bGp1cnhkcW93dnltdHdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNjQ5NTEsImV4cCI6MjA5OTg0MDk1MX0.3lPkq6JXvIrax0kcz8vS7WdGSW0B78RJP-Bpep9ujBQ';
+
+  const configReady = !SUPABASE_URL.includes('YOUR_SUPABASE_URL') && !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY');
+  let supabaseClient = null;
+  if(configReady){
+    try{ supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+    catch(e){ console.error('Supabase init failed', e); }
+  }
+  if(!configReady || !supabaseClient){
+    document.getElementById('config-banner').style.display = 'block';
+  }
+  let storageAvailable = !!supabaseClient;
+
+  function rowToTrade(r){
+    return {
+      id:r.id, ts:Number(r.ts), direction:r.direction, symbol:r.symbol,
+      result:r.result, score:r.score, notes:r.notes||'',
+      rows:r.rows||[], snapshot:r.snapshot||{}
+    };
+  }
+  function tradeToRow(t){
+    return {
+      id:t.id, ts:t.ts, direction:t.direction, symbol:t.symbol,
+      result:t.result, score:t.score, notes:t.notes||'',
+      rows:t.rows||[], snapshot:t.snapshot||{}
+    };
+  }
 
   async function loadTrades(){
     if(!storageAvailable) return [];
     try{
-      const res = await window.storage.get(STORE_KEY, false);
-      return res ? JSON.parse(res.value) : [];
-    }catch(e){ return []; }
+      const {data, error} = await supabaseClient.from('trades').select('*').order('ts', {ascending:false});
+      if(error) throw error;
+      return (data||[]).map(rowToTrade);
+    }catch(e){ console.error(e); return []; }
   }
   async function saveTrade(trade){
-    if(!storageAvailable){ alert('存储功能当前不可用，本次记录不会被保存。'); return; }
+    if(!storageAvailable){ alert('尚未连接 Supabase，本次记录不会被保存。请先在代码里填入 SUPABASE_URL 和 SUPABASE_ANON_KEY。'); return; }
     try{
-      const trades = await loadTrades();
-      trades.unshift(trade);
-      await window.storage.set(STORE_KEY, JSON.stringify(trades), false);
-    }catch(e){ alert('保存失败，请重试。'); }
+      const {error} = await supabaseClient.from('trades').insert(tradeToRow(trade));
+      if(error) throw error;
+    }catch(e){ alert('保存失败：'+e.message); }
   }
   async function deleteTrade(id){
+    if(!storageAvailable) return;
     try{
-      const trades = await loadTrades();
-      const next = trades.filter(t=>t.id!==id);
-      await window.storage.set(STORE_KEY, JSON.stringify(next), false);
-    }catch(e){}
+      const {error} = await supabaseClient.from('trades').delete().eq('id', id);
+      if(error) throw error;
+    }catch(e){ alert('删除失败：'+e.message); }
+  }
+  async function importTrades(newTrades){
+    if(!storageAvailable) return false;
+    try{
+      const rows = newTrades.map(tradeToRow);
+      const {error} = await supabaseClient.from('trades').upsert(rows, {onConflict:'id'});
+      if(error) throw error;
+      return true;
+    }catch(e){ console.error(e); return false; }
   }
 
   const RESULT_META = {
@@ -951,6 +997,38 @@
       </div>
     `;
   }
+
+  /* ================= EXPORT / IMPORT BACKUP ================= */
+  document.getElementById('export-btn').addEventListener('click', async ()=>{
+    const trades = await loadTrades();
+    if(trades.length===0){ alert('暂无记录可导出。'); return; }
+    const blob = new Blob([JSON.stringify(trades, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'emer-macd-trades-backup-'+new Date().toISOString().slice(0,10)+'.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById('import-btn').addEventListener('click', ()=>{
+    document.getElementById('import-file').click();
+  });
+  document.getElementById('import-file').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt)=>{
+      try{
+        const data = JSON.parse(evt.target.result);
+        if(!Array.isArray(data)) throw new Error('格式错误');
+        const ok = await importTrades(data);
+        if(ok){ alert('导入成功，已合并 '+data.length+' 条记录。'); renderHistory(); }
+        else{ alert('导入失败。'); }
+      }catch(err){ alert('文件格式不正确，请选择之前导出的备份 JSON 文件。'); }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
 
   syncDirection();
 })();
