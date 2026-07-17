@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EMER MACD Trading Checklist</title>
+<link rel="icon" type="image/png" href="white_logo_macd.png">
+<link rel="shortcut icon" type="image/png" href="white_logo_macd.png">
+<link rel="apple-touch-icon" href="white_logo_macd.png">
 <style>
   :root{
     --bg:#1d1d1d;
@@ -60,11 +63,11 @@
     position:sticky;top:0;
   }
   .brand{display:flex;align-items:center;gap:12px;}
-  .brand img{height:34px;width:auto;display:block;}
+  .brand img{height:56px;width:auto;display:block;}
   .brand .logo-fallback{
-    height:34px;padding:0 10px;display:none;align-items:center;
+    height:56px;padding:0 14px;display:none;align-items:center;
     font-family:var(--disp);font-weight:700;letter-spacing:.5px;
-    color:var(--accent);border:1px solid var(--accent);border-radius:6px;font-size:13px;
+    color:var(--accent);border:1px solid var(--accent);border-radius:6px;font-size:17px;
   }
   .brand-text{display:flex;flex-direction:column;line-height:1.15;}
   .brand-text .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
@@ -78,6 +81,13 @@
   }
   nav.tabs button.active{background:var(--accent);color:#062223;}
   nav.tabs button:not(.active):hover{color:var(--text);background:var(--line-soft);}
+
+  .relock-btn{
+    appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);
+    width:38px;height:38px;border-radius:9px;font-size:16px;cursor:pointer;margin-left:10px;
+    transition:.15s ease;flex-shrink:0;
+  }
+  .relock-btn:hover{border-color:var(--accent);color:var(--accent);}
 
   main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 90px;}
   .view{display:none;animation:fade .25s ease;}
@@ -116,7 +126,11 @@
   .card-header h3{margin:0;font-family:var(--disp);}
   .tf-card .card-header h3{font-size:19px;font-weight:700;letter-spacing:.2px;}
   .card-header .sub-h3{font-size:15px;font-weight:700;}
-  .chevron{color:var(--accent);transition:transform .2s ease;font-size:13px;}
+  .chevron{
+    color:var(--accent);transition:transform .2s ease, background .15s ease;font-size:15px;font-weight:700;
+    display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+    border-radius:50%;background:var(--accent-dim);border:1px solid rgba(39,221,223,.35);flex-shrink:0;
+  }
   .card.collapsed .chevron{transform:rotate(-90deg);}
   .card-body{padding:0 18px 18px;}
   .card.collapsed .card-body{display:none;}
@@ -177,6 +191,33 @@
   .detail-row .w-neg{color:var(--short);font-family:var(--mono);}
   .detail-empty{color:var(--text-faint);font-size:12.5px;text-align:center;padding:12px 0;}
 
+  .analysis-summary{
+    margin-top:14px;padding:14px;border-radius:11px;
+    background:var(--bg-raise);border:1px solid var(--line);text-align:left;
+  }
+  .analysis-summary .as-title{
+    font-family:var(--mono);font-size:11px;letter-spacing:1.2px;color:var(--text-dim);
+    text-transform:uppercase;margin-bottom:10px;text-align:center;
+  }
+  .as-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .as-row:last-of-type{margin-bottom:0;}
+  .as-row .as-label{width:56px;flex-shrink:0;font-size:12.5px;color:var(--text-dim);font-weight:600;}
+  .as-row .as-bar-bg{flex:1;height:7px;border-radius:4px;background:var(--line-soft);overflow:hidden;}
+  .as-row .as-bar-fg{height:100%;border-radius:4px;background:var(--accent);transition:width .3s ease;}
+  .as-row .as-val{width:42px;flex-shrink:0;text-align:right;font-family:var(--mono);font-size:12.5px;color:var(--text);}
+  .as-overall{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-soft);
+  }
+  .as-overall .as-overall-label{font-size:12px;color:var(--text-dim);}
+  .as-badge{
+    font-family:var(--disp);font-weight:700;font-size:12.5px;letter-spacing:.5px;
+    padding:4px 12px;border-radius:20px;border:1px solid var(--line);color:var(--text-dim);
+  }
+  .as-badge.strong{color:var(--long);border-color:var(--long);background:var(--long-dim);}
+  .as-badge.medium{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);}
+  .as-badge.weak{color:var(--short);border-color:var(--short);background:var(--short-dim);}
+
   .complete-btn{
     width:100%;background:var(--accent);color:#062223;border:none;padding:14px;
     border-radius:11px;font-family:var(--disp);font-weight:700;font-size:14.5px;cursor:pointer;
@@ -186,8 +227,8 @@
   .complete-btn:disabled{opacity:.4;cursor:not-allowed;}
 
   .tagline{
-    text-align:center;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);
-    padding:12px 8px 0;line-height:1.6;
+    text-align:center;font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text-dim);
+    padding:12px 8px 0;line-height:1.6;letter-spacing:.3px;
   }
 
   /* ---------- modal ---------- */
@@ -282,10 +323,217 @@
 
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+  /* ================= VAULT LOCK SCREEN ================= */
+  .vault-overlay{
+    position:fixed;inset:0;z-index:999;
+    background:radial-gradient(ellipse 80% 60% at 50% 20%, #202020 0%, #131313 70%, #0c0c0c 100%);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;transition:opacity .5s ease, visibility .5s ease;
+  }
+  .vault-overlay.unlocking{opacity:0;pointer-events:none;}
+  .vault-overlay.hidden{display:none;}
+  .vault-bg-grid{
+    position:absolute;inset:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(39,221,223,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(39,221,223,.05) 1px, transparent 1px);
+    background-size:38px 38px;
+    mask-image:radial-gradient(ellipse 70% 55% at 50% 35%, black 30%, transparent 85%);
+  }
+  .vault-card{
+    position:relative;z-index:1;width:100%;max-width:360px;
+    background:linear-gradient(180deg, var(--bg-card), #1a1a1a);
+    border:1px solid var(--line);border-radius:20px;
+    padding:32px 26px 26px;text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.03);
+    transition:transform .5s cubic-bezier(.4,0,.2,1), opacity .5s ease;
+  }
+  .vault-overlay.unlocking .vault-card{transform:scale(.92) translateY(-10px);opacity:0;}
+  .vault-card.shake{animation:vaultShake .4s ease;}
+  @keyframes vaultShake{
+    10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(4px);}
+    30%,50%,70%{transform:translateX(-8px);} 40%,60%{transform:translateX(8px);}
+  }
+  .vault-ring{
+    width:84px;height:84px;margin:0 auto 18px;border-radius:50%;
+    background:conic-gradient(var(--accent) 0deg, rgba(39,221,223,.12) 0deg);
+    display:flex;align-items:center;justify-content:center;
+    animation:vaultSpin 6s linear infinite;padding:4px;
+  }
+  @keyframes vaultSpin{to{transform:rotate(360deg);}}
+  .vault-ring-inner{
+    width:100%;height:100%;border-radius:50%;background:var(--bg-card);
+    display:flex;align-items:center;justify-content:center;
+    animation:vaultSpinBack 6s linear infinite;
+  }
+  @keyframes vaultSpinBack{to{transform:rotate(-360deg);}}
+  .vault-lock-icon{font-size:30px;filter:grayscale(0) drop-shadow(0 0 8px rgba(39,221,223,.4));}
+  .vault-brand{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:1px;color:var(--text);}
+  .vault-sub{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);margin-top:6px;letter-spacing:.4px;}
+
+  .vault-dots{display:flex;justify-content:center;gap:14px;margin:22px 0 6px;}
+  .vault-dot{
+    width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line);
+    background:var(--bg-chip);transition:.15s ease;
+  }
+  .vault-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(39,221,223,.6);}
+  .vault-dot.wrong{background:var(--short);border-color:var(--short);box-shadow:0 0 8px rgba(246,79,79,.6);}
+
+  .vault-error{
+    height:16px;font-size:12px;color:var(--short);font-family:var(--mono);
+    margin-bottom:8px;opacity:0;transition:opacity .2s ease;
+  }
+  .vault-error.show{opacity:1;}
+
+  .vault-keypad{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;
+  }
+  .vault-key{
+    appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text);
+    font-family:var(--disp);font-size:19px;font-weight:600;padding:15px 0;border-radius:12px;
+    cursor:pointer;transition:.12s ease;
+  }
+  .vault-key:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+  .vault-key:active{transform:scale(.94);}
+  .vault-key-fn{font-size:14px;color:var(--text-dim);}
+  .vault-hint{margin-top:16px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.3px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<!-- ================= VAULT LOCK SCREEN ================= -->
+<div class="vault-overlay" id="vault-overlay">
+  <div class="vault-bg-grid"></div>
+  <div class="vault-card" id="vault-card">
+    <div class="vault-ring">
+      <div class="vault-ring-inner">
+        <span class="vault-lock-icon" id="vault-lock-icon">🔒</span>
+      </div>
+    </div>
+    <div class="vault-brand">EMER MACD SYSTEM</div>
+    <div class="vault-sub">私人交易保险箱 · 请输入密码解锁</div>
+
+    <div class="vault-dots" id="vault-dots">
+      <span class="vault-dot" data-i="0"></span>
+      <span class="vault-dot" data-i="1"></span>
+      <span class="vault-dot" data-i="2"></span>
+      <span class="vault-dot" data-i="3"></span>
+    </div>
+    <div class="vault-error" id="vault-error">密码错误，请重新输入</div>
+
+    <div class="vault-keypad" id="vault-keypad">
+      <button type="button" class="vault-key" data-k="1">1</button>
+      <button type="button" class="vault-key" data-k="2">2</button>
+      <button type="button" class="vault-key" data-k="3">3</button>
+      <button type="button" class="vault-key" data-k="4">4</button>
+      <button type="button" class="vault-key" data-k="5">5</button>
+      <button type="button" class="vault-key" data-k="6">6</button>
+      <button type="button" class="vault-key" data-k="7">7</button>
+      <button type="button" class="vault-key" data-k="8">8</button>
+      <button type="button" class="vault-key" data-k="9">9</button>
+      <button type="button" class="vault-key vault-key-fn" data-k="clear">C</button>
+      <button type="button" class="vault-key" data-k="0">0</button>
+      <button type="button" class="vault-key vault-key-fn" data-k="del">⌫</button>
+    </div>
+    <div class="vault-hint">数字键盘或键盘直接输入 4 位密码</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var VAULT_PASSWORD = '0624';
+  var STORAGE_KEY = 'emer_macd_vault_unlocked';
+  var entered = '';
+
+  var overlay = document.getElementById('vault-overlay');
+  var card = document.getElementById('vault-card');
+  var dots = Array.prototype.slice.call(document.querySelectorAll('.vault-dot'));
+  var errEl = document.getElementById('vault-error');
+  var lockIcon = document.getElementById('vault-lock-icon');
+
+  function renderDots(state){
+    dots.forEach(function(d, i){
+      d.classList.remove('filled','wrong');
+      if(i < entered.length) d.classList.add(state==='wrong' ? 'wrong' : 'filled');
+    });
+  }
+
+  function unlock(){
+    lockIcon.textContent = '🔓';
+    try{ localStorage.setItem(STORAGE_KEY, '1'); }catch(e){}
+    overlay.classList.add('unlocking');
+    setTimeout(function(){ overlay.classList.add('hidden'); document.body.style.overflow=''; }, 520);
+  }
+
+  function wrongShake(){
+    renderDots('wrong');
+    errEl.classList.add('show');
+    card.classList.add('shake');
+    setTimeout(function(){
+      card.classList.remove('shake');
+      entered = '';
+      renderDots();
+    }, 420);
+  }
+
+  function tryUnlock(){
+    if(entered.length !== 4) return;
+    if(entered === VAULT_PASSWORD){
+      errEl.classList.remove('show');
+      unlock();
+    } else {
+      wrongShake();
+    }
+  }
+
+  function pressKey(k){
+    if(overlay.classList.contains('hidden') || overlay.classList.contains('unlocking')) return;
+    errEl.classList.remove('show');
+    if(k === 'clear'){ entered=''; renderDots(); return; }
+    if(k === 'del'){ entered = entered.slice(0,-1); renderDots(); return; }
+    if(entered.length >= 4) return;
+    entered += k;
+    renderDots();
+    if(entered.length === 4) setTimeout(tryUnlock, 150);
+  }
+
+  document.querySelectorAll('.vault-key').forEach(function(btn){
+    btn.addEventListener('click', function(){ pressKey(btn.dataset.k); });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(overlay.classList.contains('hidden')) return;
+    if(e.key >= '0' && e.key <= '9') pressKey(e.key);
+    else if(e.key === 'Backspace') pressKey('del');
+    else if(e.key === 'Escape') pressKey('clear');
+    else if(e.key === 'Enter') tryUnlock();
+  });
+
+  var relockBtn = document.getElementById('relock-btn');
+  if(relockBtn){
+    relockBtn.addEventListener('click', function(){
+      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+      entered='';
+      renderDots();
+      lockIcon.textContent = '🔒';
+      overlay.classList.remove('hidden','unlocking');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  // already unlocked in this browser previously?
+  var already = false;
+  try{ already = localStorage.getItem(STORAGE_KEY) === '1'; }catch(e){}
+  if(already){
+    overlay.classList.add('hidden');
+  } else {
+    document.body.style.overflow = 'hidden';
+  }
+})();
+</script>
+
 <div class="bg-grid"></div>
 
 <header>
@@ -297,11 +545,14 @@
       <h1>MACD Trading Checklist</h1>
     </div>
   </div>
-  <nav class="tabs">
-    <button class="tab-btn active" data-view="checklist">检查清单</button>
-    <button class="tab-btn" data-view="history">历史记录</button>
-    <button class="tab-btn" data-view="dashboard">仪表盘</button>
-  </nav>
+  <div style="display:flex;align-items:center;">
+    <nav class="tabs">
+      <button class="tab-btn active" data-view="checklist">📋 检查清单</button>
+      <button class="tab-btn" data-view="history">🕘 历史记录</button>
+      <button class="tab-btn" data-view="dashboard">📊 仪表盘</button>
+    </nav>
+    <button id="relock-btn" class="relock-btn" type="button" title="重新锁定">🔒</button>
+  </div>
 </header>
 
 <main>
@@ -377,11 +628,34 @@
               <circle class="gauge-fg" id="gauge-fg" cx="80" cy="80" r="70" stroke-dasharray="0 440"></circle>
             </svg>
             <div class="gauge-center">
-              <div class="pct" id="score-pct">50%</div>
+              <div class="pct" id="score-pct">0%</div>
               <div class="pct-label">CONFIDENCE</div>
             </div>
           </div>
           <div id="dir-tag" class="dir-tag">尚未选择方向</div>
+
+          <div class="analysis-summary" id="analysis-summary">
+            <div class="as-title">分析总结 · Summary</div>
+            <div class="as-row">
+              <span class="as-label">大时间</span>
+              <div class="as-bar-bg"><div class="as-bar-fg" id="as-big-bar" style="width:0%"></div></div>
+              <span class="as-val" id="as-big-val">0%</span>
+            </div>
+            <div class="as-row">
+              <span class="as-label">中时间</span>
+              <div class="as-bar-bg"><div class="as-bar-fg" id="as-medium-bar" style="width:0%"></div></div>
+              <span class="as-val" id="as-medium-val">0%</span>
+            </div>
+            <div class="as-row">
+              <span class="as-label">小时间</span>
+              <div class="as-bar-bg"><div class="as-bar-fg" id="as-small-bar" style="width:0%"></div></div>
+              <span class="as-val" id="as-small-val">0%</span>
+            </div>
+            <div class="as-overall">
+              <span class="as-overall-label">整体信号</span>
+              <span class="as-badge weak" id="as-overall-badge">WEAK</span>
+            </div>
+          </div>
 
           <button class="detail-toggle" id="detail-toggle" type="button">
             <span>查看计算明细</span><span id="detail-chevron">▾</span>
@@ -452,7 +726,7 @@
 (function(){
 
   /* ================= CONFIG ================= */
-  const BASELINE = 50;
+  const BASELINE = 0; // 进场前检查清单：未勾选任何条件时不给予默认胜率，需靠实际条件累积
 
   const TF_GROUPS = [
     { key:'big', name:'大时间', tfs:['12H','1D','2D','3D','4D','5D','6D','7D'] },
@@ -468,6 +742,7 @@
     {id:'bottomdiv', label:'底部背离确定', w:3},
     {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:5},
     {id:'ema52', label:'EMA52 支撑', w:5},
+    {id:'nearema52', label:'靠近EMA52', w:1},
     {id:'nopress', label:'分时没有压力', w:3},
   ];
   const DIS_OPTS = [
@@ -650,33 +925,39 @@
     }
 
     const tripleCheck = [];
+    const tfGroupSums = {};
     TF_GROUPS.forEach(g=>{
       const t = state.tf[g.key];
-      if(t.tfs.size >= TF_COUNT_THRESHOLD) rows.push({label:`${g.name}: 已选 ${t.tfs.size} 个级别`, w:TF_COUNT_BONUS});
+      let gSum = 0;
+      if(t.tfs.size >= TF_COUNT_THRESHOLD){ rows.push({label:`${g.name}: 已选 ${t.tfs.size} 个级别`, w:TF_COUNT_BONUS}); gSum += TF_COUNT_BONUS; }
       if(t.confluence){
         const o = CONFLUENCE_OPTS.find(x=>x.id===t.confluence);
         rows.push({label:`${g.name}两个时间配合: ${o.label}`, w:o.w});
+        gSum += o.w;
       }
       let hasBonusSetup = false;
       ADV_OPTS.forEach(o=>{
         if(t.adv.has(o.id)){
           rows.push({label:`${g.name}优势: ${o.label}`, w:o.w});
+          gSum += o.w;
           if(TRIPLE_BONUS_IDS.includes(o.id)) hasBonusSetup = true;
         }
       });
       DIS_OPTS.forEach(o=>{
-        if(t.dis.has(o.id)) rows.push({label:`${g.name}劣势: ${o.label}`, w:o.w});
+        if(t.dis.has(o.id)){ rows.push({label:`${g.name}劣势: ${o.label}`, w:o.w}); gSum += o.w; }
       });
       tripleCheck.push(hasBonusSetup);
+      tfGroupSums[g.key] = gSum;
     });
     if(tripleCheck.every(Boolean)){
       rows.push({label:'大 + 中 + 小时间三重共振（零轴反弹+能量柱 / EMA52支撑）', w:TRIPLE_BONUS_WEIGHT});
+      TF_GROUPS.forEach(g=>{ tfGroupSums[g.key] += TRIPLE_BONUS_WEIGHT/TF_GROUPS.length; });
     }
-    return rows;
+    return {rows, tfGroupSums};
   }
 
   function recalc(){
-    const rows = computeBreakdown();
+    const {rows, tfGroupSums} = computeBreakdown();
     const rawSum = rows.reduce((s,r)=>s+r.w,0);
     const score = Math.max(0, Math.min(100, BASELINE + rawSum));
     document.getElementById('score-pct').textContent = Math.round(score)+'%';
@@ -691,12 +972,42 @@
     fg.style.stroke = color;
     document.getElementById('score-pct').style.color = color;
 
+    // 亮度随百分比变化：百分比越高越亮（带发光），越低越暗越沉
+    const brightness = (0.5 + (score/100)*0.9).toFixed(2);
+    const glow = Math.max(0, (score-50)/50);
+    fg.style.filter = `brightness(${brightness}) drop-shadow(0 0 ${(7*glow).toFixed(1)}px ${color})`;
+    document.getElementById('score-pct').style.filter = `brightness(${brightness})`;
+    document.getElementById('score-pct').style.opacity = (0.55 + (score/100)*0.45).toFixed(2);
+
     const list = document.getElementById('detail-list');
     if(rows.length===0){
-      list.innerHTML = '<div class="detail-empty">尚未勾选任何条件，基础胜率 50%</div>';
+      list.innerHTML = '<div class="detail-empty">尚未勾选任何条件，胜率从 0% 开始累积</div>';
     } else {
       list.innerHTML = rows.map(r=>`<div class="detail-row"><span>${r.label}</span><span class="${r.w>=0?'w-pos':'w-neg'}">${r.w>0?'+':''}${r.w}%</span></div>`).join('');
     }
+
+    // ---- analysis summary: per-timeframe percentage + overall strength ----
+    TF_GROUPS.forEach(g=>{
+      const gScore = Math.max(0, Math.min(100, BASELINE + (tfGroupSums[g.key]||0)));
+      const bar = document.getElementById(`as-${g.key}-bar`);
+      const val = document.getElementById(`as-${g.key}-val`);
+      if(bar) bar.style.width = gScore+'%';
+      if(val) val.textContent = Math.round(gScore)+'%';
+      let barColor = 'var(--short)';
+      if(gScore>=80) barColor='var(--long)';
+      else if(gScore>=60) barColor='var(--accent)';
+      else if(gScore>=40) barColor='var(--text-faint)';
+      if(bar) bar.style.background = barColor;
+    });
+    const badge = document.getElementById('as-overall-badge');
+    let overallLabel = 'WEAK', overallCls = 'weak';
+    if(score>=70){ overallLabel='STRONG'; overallCls='strong'; }
+    else if(score>=45){ overallLabel='MEDIUM'; overallCls='medium'; }
+    if(badge){
+      badge.textContent = overallLabel;
+      badge.className = 'as-badge '+overallCls;
+    }
+
     window.__currentScore = Math.round(score);
     window.__currentRows = rows;
   }
