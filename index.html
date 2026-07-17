@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMER MACD Trading Checklist</title>
+<style>
+  :root{
+    --bg:#1d1d1d;
+    --bg-raise:#242424;
+    --bg-card:#232323;
+    --bg-chip:#2a2a2a;
+    --line:#333333;
+    --line-soft:#2c2c2c;
+    --text:#eeeeee;
+    --text-dim:#8f8f8f;
+    --text-faint:#666666;
+    --accent:#27dddf;
+    --accent-dim:rgba(39,221,223,.14);
+    --long:#37df8e;
+    --long-dim:rgba(55,223,142,.14);
+    --short:#f64f4f;
+    --short-dim:rgba(246,79,79,.14);
+    --radius:14px;
+    --mono: 'IBM Plex Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans: 'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft Yahei',sans-serif;
+    --disp: 'Space Grotesk','Inter',-apple-system,'PingFang SC','Microsoft Yahei',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  ::selection{background:var(--accent);color:#08282a;}
+  a{color:var(--accent);}
+
+  /* ---------- background texture ---------- */
+  .bg-grid{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(39,221,223,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(39,221,223,.035) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(ellipse 90% 60% at 50% 0%, black 40%, transparent 90%);
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative;z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(29,29,29,.98), rgba(29,29,29,.9));
+    backdrop-filter:blur(6px);
+    position:sticky;top:0;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand img{height:34px;width:auto;display:block;}
+  .brand .logo-fallback{
+    height:34px;padding:0 10px;display:none;align-items:center;
+    font-family:var(--disp);font-weight:700;letter-spacing:.5px;
+    color:var(--accent);border:1px solid var(--accent);border-radius:6px;font-size:13px;
+  }
+  .brand-text{display:flex;flex-direction:column;line-height:1.15;}
+  .brand-text .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
+  .brand-text h1{margin:0;font-family:var(--disp);font-size:17px;font-weight:600;letter-spacing:.2px;}
+
+  nav.tabs{display:flex;gap:4px;background:var(--bg-raise);padding:4px;border-radius:10px;border:1px solid var(--line);}
+  nav.tabs button{
+    appearance:none;border:none;background:transparent;color:var(--text-dim);
+    font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 16px;border-radius:7px;cursor:pointer;
+    transition:.15s ease;
+  }
+  nav.tabs button.active{background:var(--accent);color:#062223;}
+  nav.tabs button:not(.active):hover{color:var(--text);background:var(--line-soft);}
+
+  main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 90px;}
+  .view{display:none;animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- layout ---------- */
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start;}
+  @media (max-width:920px){.layout{grid-template-columns:1fr;}}
+
+  /* ---------- direction switch ---------- */
+  .direction-bar{
+    display:flex;gap:10px;margin-bottom:20px;
+  }
+  .dir-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:14px;border-radius:var(--radius);border:1px solid var(--line);
+    background:var(--bg-card);color:var(--text-dim);cursor:pointer;
+    font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.3px;
+    transition:.15s ease;
+  }
+  .dir-btn .arrow{font-size:15px;line-height:1;}
+  .dir-btn:hover{border-color:var(--text-faint);}
+  .dir-btn.long.active{background:var(--long-dim);border-color:var(--long);color:var(--long);box-shadow:0 0 0 1px var(--long) inset;}
+  .dir-btn.short.active{background:var(--short-dim);border-color:var(--short);color:var(--short);box-shadow:0 0 0 1px var(--short) inset;}
+
+  /* ---------- cards ---------- */
+  .card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+    margin-bottom:16px;overflow:hidden;
+  }
+  .card-header{
+    width:100%;display:flex;align-items:center;justify-content:space-between;
+    background:transparent;border:none;padding:16px 18px;cursor:pointer;color:var(--text);
+  }
+  .card-header h3{margin:0;font-family:var(--disp);}
+  .tf-card .card-header h3{font-size:19px;font-weight:700;letter-spacing:.2px;}
+  .card-header .sub-h3{font-size:15px;font-weight:700;}
+  .chevron{color:var(--accent);transition:transform .2s ease;font-size:13px;}
+  .card.collapsed .chevron{transform:rotate(-90deg);}
+  .card-body{padding:0 18px 18px;}
+  .card.collapsed .card-body{display:none;}
+
+  .field-group{margin-bottom:16px;}
+  .field-group:last-child{margin-bottom:0;}
+  .field-label{
+    display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;
+    color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;
+  }
+  .field-label.good{color:var(--long);}
+  .field-label.bad{color:var(--short);}
+  .field-label .hint{color:var(--text-faint);text-transform:none;font-weight:500;letter-spacing:0;font-family:var(--mono);font-size:11px;}
+
+  .chip-row,.radio-row,.checkbox-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip,.pill{
+    appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
+    padding:8px 13px;border-radius:8px;font-size:13px;font-family:var(--sans);cursor:pointer;transition:.12s ease;
+    font-weight:500;
+  }
+  .chip:hover,.pill:hover{border-color:var(--text-faint);color:var(--text);}
+  .chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .pill.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .chip-good.active{background:var(--long-dim);border-color:var(--long);color:var(--long);}
+  .chip-bad.active{background:var(--short-dim);border-color:var(--short);color:var(--short);}
+
+  /* ---------- score sidebar ---------- */
+  .side-sticky{position:sticky;top:88px;display:flex;flex-direction:column;gap:16px;}
+  .score-card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px;text-align:center;
+  }
+  .score-card .label{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;}
+  .gauge-wrap{position:relative;width:180px;height:180px;margin:14px auto 6px;}
+  .gauge-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
+  .gauge-bg{fill:none;stroke:var(--line);stroke-width:10;}
+  .gauge-fg{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .35s ease, stroke .35s ease;}
+  .gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge-center .pct{font-family:var(--disp);font-size:38px;font-weight:700;}
+  .gauge-center .pct-label{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+  .dir-tag{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;
+    font-family:var(--mono);font-size:12px;font-weight:600;margin-top:8px;border:1px solid var(--line);color:var(--text-dim);
+  }
+  .dir-tag.long{color:var(--long);border-color:var(--long);background:var(--long-dim);}
+  .dir-tag.short{color:var(--short);border-color:var(--short);background:var(--short-dim);}
+
+  .detail-toggle{
+    width:100%;background:var(--bg-raise);border:1px solid var(--line);color:var(--text-dim);
+    padding:10px 14px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;margin-top:14px;
+  }
+  .detail-list{display:none;margin-top:10px;max-height:260px;overflow-y:auto;}
+  .detail-list.open{display:block;}
+  .detail-row{display:flex;justify-content:space-between;gap:8px;padding:7px 4px;border-bottom:1px dashed var(--line-soft);font-size:12.5px;}
+  .detail-row span:first-child{color:var(--text-dim);}
+  .detail-row .w-pos{color:var(--long);font-family:var(--mono);}
+  .detail-row .w-neg{color:var(--short);font-family:var(--mono);}
+  .detail-empty{color:var(--text-faint);font-size:12.5px;text-align:center;padding:12px 0;}
+
+  .complete-btn{
+    width:100%;background:var(--accent);color:#062223;border:none;padding:14px;
+    border-radius:11px;font-family:var(--disp);font-weight:700;font-size:14.5px;cursor:pointer;
+    letter-spacing:.2px;transition:.15s ease;
+  }
+  .complete-btn:hover{filter:brightness(1.08);}
+  .complete-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  .tagline{
+    text-align:center;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);
+    padding:12px 8px 0;line-height:1.6;
+  }
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;
+    align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px);
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:16px;
+    max-width:420px;width:100%;padding:24px;
+  }
+  .modal h2{margin:0 0 4px;font-family:var(--disp);font-size:19px;}
+  .modal .sub{color:var(--text-dim);font-size:12.5px;margin:0 0 18px;}
+  .modal label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;}
+  .modal select,.modal textarea{
+    width:100%;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
+    padding:10px 12px;border-radius:8px;font-family:var(--sans);font-size:13.5px;
+  }
+  .modal textarea{resize:vertical;min-height:60px;}
+  .result-row{display:flex;gap:8px;}
+  .result-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);cursor:pointer;font-weight:600;font-size:13px;}
+  .result-btn.active[data-r="win"]{background:var(--long-dim);border-color:var(--long);color:var(--long);}
+  .result-btn.active[data-r="loss"]{background:var(--short-dim);border-color:var(--short);color:var(--short);}
+  .result-btn.active[data-r="be"]{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .modal-actions button{flex:1;padding:12px;border-radius:9px;font-weight:700;cursor:pointer;font-family:var(--disp);font-size:13.5px;}
+  .btn-cancel{background:transparent;border:1px solid var(--line);color:var(--text-dim);}
+  .btn-save{background:var(--accent);border:none;color:#062223;}
+
+  /* ---------- history ---------- */
+  .hist-item{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .hist-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;gap:12px;}
+  .hist-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .hist-badge{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:6px;font-weight:700;}
+  .hist-badge.win{background:var(--long-dim);color:var(--long);}
+  .hist-badge.loss{background:var(--short-dim);color:var(--short);}
+  .hist-badge.be{background:var(--accent-dim);color:var(--accent);}
+  .hist-sym{font-family:var(--disp);font-weight:700;font-size:14.5px;}
+  .hist-dir{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:5px;}
+  .hist-dir.long{color:var(--long);border:1px solid var(--long);}
+  .hist-dir.short{color:var(--short);border:1px solid var(--short);}
+  .hist-score{font-family:var(--mono);font-size:13.5px;color:var(--accent);}
+  .hist-time{color:var(--text-faint);font-size:11.5px;font-family:var(--mono);}
+  .hist-del{background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:15px;padding:4px 8px;}
+  .hist-del:hover{color:var(--short);}
+  .hist-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line-soft);}
+  .hist-body.open{display:block;}
+  .hist-note{font-size:12.5px;color:var(--text-dim);margin:12px 0;font-style:italic;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
+  .empty-state .big{font-size:34px;margin-bottom:8px;}
+
+  /* ---------- dashboard ---------- */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  @media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-box{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .stat-box .n{font-family:var(--disp);font-size:26px;font-weight:700;}
+  .stat-box .l{font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+  .stat-box.win .n{color:var(--long);}
+  .stat-box.loss .n{color:var(--short);}
+  .stat-box.acc .n{color:var(--accent);}
+
+  .hero-signal{
+    background:linear-gradient(135deg, var(--accent-dim), transparent 60%);
+    border:1px solid var(--accent);border-radius:16px;padding:22px;margin-bottom:20px;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  .hero-signal .star{font-size:32px;}
+  .hero-signal h4{margin:0 0 4px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;}
+  .hero-signal .cond{font-family:var(--disp);font-size:18px;font-weight:700;margin-bottom:4px;}
+  .hero-signal .stats{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);}
+  .hero-signal .stats b{color:var(--long);}
+
+  .rank-card{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;}
+  .rank-card h3{margin:0 0 14px;font-family:var(--disp);font-size:15.5px;}
+  .rank-row{margin-bottom:12px;}
+  .rank-row:last-child{margin-bottom:0;}
+  .rank-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+  .rank-top .rlabel{color:var(--text);}
+  .rank-top .rmeta{color:var(--text-dim);font-family:var(--mono);}
+  .rank-bar-bg{height:7px;background:var(--line-soft);border-radius:4px;overflow:hidden;}
+  .rank-bar-fg{height:100%;background:var(--accent);border-radius:4px;}
+  .rank-bar-fg.count{background:var(--text-faint);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:760px){.two-col{grid-template-columns:1fr;}}
+
+  footer{
+    text-align:center;padding:26px 20px 40px;color:var(--text-faint);font-family:var(--mono);font-size:11.5px;
+    position:relative;z-index:1;
+  }
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <div class="brand">
+    <img src="white_logo_macd.png" alt="EMER MACD" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <span class="logo-fallback">EMER</span>
+    <div class="brand-text">
+      <span class="eyebrow">Emer System</span>
+      <h1>MACD Trading Checklist</h1>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="checklist">检查清单</button>
+    <button class="tab-btn" data-view="history">历史记录</button>
+    <button class="tab-btn" data-view="dashboard">仪表盘</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ================= CHECKLIST VIEW ================= -->
+  <section class="view active" id="view-checklist">
+    <div class="direction-bar">
+      <button class="dir-btn long" id="dir-long" type="button"><span class="arrow">▲</span> LONG 做多</button>
+      <button class="dir-btn short" id="dir-short" type="button"><span class="arrow">▼</span> SHORT 做空</button>
+    </div>
+
+    <div class="layout">
+      <div class="cards-col">
+
+        <!-- entry factors -->
+        <div class="card" id="card-entry">
+          <button class="card-header" data-toggle-card="card-entry">
+            <h3 class="sub-h3">加分项 · 进场基础条件</h3>
+            <span class="chevron">▾</span>
+          </button>
+          <div class="card-body">
+            <div class="field-group">
+              <label class="field-label">支撑 / 阻力（SNR）</label>
+              <div class="chip-row">
+                <button type="button" class="chip" data-toggle-bool="snr">目前价格处于关键支撑或阻力位 (+5%)</button>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Session</label>
+              <div class="radio-row" data-single="session">
+                <button type="button" class="pill" data-value="london" data-w="2">London Session (+2%)</button>
+                <button type="button" class="pill" data-value="ny" data-w="3">New York Session (+3%)</button>
+                <button type="button" class="pill" data-value="golden" data-w="4">London &amp; New York 黄金时间 8–10PM (+4%)</button>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">新闻影响（请避开新闻）</label>
+              <div class="radio-row" data-single="news">
+                <button type="button" class="pill" data-value="none" data-w="1">无重大新闻 (+1%)</button>
+                <button type="button" class="pill" data-value="normal" data-w="0">一般新闻 (0%)</button>
+                <button type="button" class="pill" data-value="medium" data-w="-3">中影响新闻 (-3%)</button>
+                <button type="button" class="pill" data-value="high" data-w="-5">高影响新闻 CPI / NFP / FOMC (-5%)</button>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Risk Reward（RR）</label>
+              <div class="radio-row" data-single="rr">
+                <button type="button" class="pill" data-value="rr20" data-w="1">RR ≥ 2.0 (+1%)</button>
+                <button type="button" class="pill" data-value="rr25" data-w="3">RR ≥ 2.5 (+3%)</button>
+                <button type="button" class="pill" data-value="rr30" data-w="4">RR ≥ 3.0 (+4%)</button>
+                <button type="button" class="pill" data-value="rr40" data-w="5">RR ≥ 4.0 (+5%)</button>
+                <button type="button" class="pill" data-value="rrlow" data-w="-5">RR &lt; 2.0 (-5%)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tf-cards-mount"></div>
+
+      </div>
+
+      <!-- sidebar -->
+      <div class="side-sticky">
+        <div class="score-card">
+          <div class="label">预估胜率 Win Probability</div>
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 160 160">
+              <circle class="gauge-bg" cx="80" cy="80" r="70"></circle>
+              <circle class="gauge-fg" id="gauge-fg" cx="80" cy="80" r="70" stroke-dasharray="0 440"></circle>
+            </svg>
+            <div class="gauge-center">
+              <div class="pct" id="score-pct">50%</div>
+              <div class="pct-label">CONFIDENCE</div>
+            </div>
+          </div>
+          <div id="dir-tag" class="dir-tag">尚未选择方向</div>
+
+          <button class="detail-toggle" id="detail-toggle" type="button">
+            <span>查看计算明细</span><span id="detail-chevron">▾</span>
+          </button>
+          <div class="detail-list" id="detail-list"></div>
+
+          <button class="complete-btn" id="open-modal-btn" style="margin-top:16px;" type="button">✓ 完成这笔单</button>
+        </div>
+        <div class="tagline">"请认真对待每一笔交易"</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HISTORY VIEW ================= -->
+  <section class="view" id="view-history">
+    <div id="history-mount"></div>
+  </section>
+
+  <!-- ================= DASHBOARD VIEW ================= -->
+  <section class="view" id="view-dashboard">
+    <div id="dashboard-mount"></div>
+  </section>
+
+</main>
+
+<footer>EMER MACD SYSTEM — 数据仅保存在本地，用于辅助判断，不构成投资建议</footer>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2>记录这笔交易</h2>
+    <p class="sub">请认真对待每一笔交易 · 当前评分将一并保存</p>
+
+    <label>交易品种 Symbol</label>
+    <select id="modal-symbol">
+      <option value="XAUUSD">XAUUSD</option>
+      <option value="XTIUSD">XTIUSD</option>
+      <option value="BTC">BTC</option>
+      <option value="ETH">ETH</option>
+      <option value="DJ30">DJ30</option>
+      <option value="UK100">UK100</option>
+      <option value="GER40">GER40</option>
+    </select>
+
+    <label>交易结果 Result</label>
+    <div class="result-row">
+      <button type="button" class="result-btn" data-r="win">✓ 盈利 Win</button>
+      <button type="button" class="result-btn" data-r="loss">✕ 亏损 Loss</button>
+      <button type="button" class="result-btn" data-r="be">– 保本 BE</button>
+    </div>
+
+    <label>备注 Notes（选填）</label>
+    <textarea id="modal-notes" placeholder="例如：进场理由、心态、执行细节..."></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modal-cancel" type="button">取消</button>
+      <button class="btn-save" id="modal-save" type="button">保存记录</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  /* ================= CONFIG ================= */
+  const BASELINE = 50;
+
+  const TF_GROUPS = [
+    { key:'big', name:'大时间', tfs:['12H','1D','2D','3D','4D','5D','6D','7D'] },
+    { key:'medium', name:'中时间', tfs:['1H','90m','2H','3H','4H','6H','8H'] },
+    { key:'small', name:'小时间', tfs:['1-3m','5m','10m','15m','20m','30m','40m','45m'] },
+  ];
+  const TF_COUNT_THRESHOLD = 3;
+  const TF_COUNT_BONUS = 2;
+  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:3}, {id:'no', label:'没有', w:-2} ];
+  const ADV_OPTS = [
+    {id:'nearzero', label:'靠近零轴', w:1},
+    {id:'rebound', label:'已反弹', w:2},
+    {id:'bottomdiv', label:'底部背离确定', w:3},
+    {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:5},
+    {id:'ema52', label:'EMA52 支撑', w:5},
+    {id:'nopress', label:'分时没有压力', w:3},
+  ];
+  const DIS_OPTS = [
+    {id:'potentialdiv', label:'潜在背离', w:-2},
+    {id:'confirmeddiv', label:'确定背离', w:-3},
+    {id:'high', label:'高位', w:-5},
+    {id:'zerohidden', label:'零轴隐形', w:-3},
+    {id:'lowmomentum', label:'动能不足', w:-2},
+  ];
+  const TRIPLE_BONUS_WEIGHT = 8;
+  const TRIPLE_BONUS_IDS = ['zeroenergy','ema52'];
+
+  /* ================= STATE ================= */
+  let state = {
+    direction:null, // 'long' | 'short'
+    snr:false,
+    session:null, news:null, rr:null,
+    tf:{}
+  };
+  TF_GROUPS.forEach(g=>{
+    state.tf[g.key] = { tfs:new Set(), confluence:null, adv:new Set(), dis:new Set() };
+  });
+
+  /* ================= RENDER TF CARDS ================= */
+  const mount = document.getElementById('tf-cards-mount');
+  let tfHtml = '';
+  TF_GROUPS.forEach(g=>{
+    tfHtml += `
+    <div class="card tf-card" id="card-${g.key}">
+      <button class="card-header" data-toggle-card="card-${g.key}">
+        <h3>${g.name} MACD</h3>
+        <span class="chevron">▾</span>
+      </button>
+      <div class="card-body">
+        <div class="field-group">
+          <label class="field-label">目前${g.name}MACD级别 <span class="hint">选3个以上 +${TF_COUNT_BONUS}%</span></label>
+          <div class="chip-row" data-tfselect="${g.key}">
+            ${g.tfs.map(v=>`<button type="button" class="chip" data-value="${v}">${v}</button>`).join('')}
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">是否有两个${g.name}配合</label>
+          <div class="radio-row" data-confluence="${g.key}">
+            ${CONFLUENCE_OPTS.map(o=>`<button type="button" class="pill" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w>0?'+':''}${o.w}%)</button>`).join('')}
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label good">优势 Setup</label>
+          <div class="checkbox-row" data-adv="${g.key}">
+            ${ADV_OPTS.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${o.w}">${o.label} (+${o.w}%)</button>`).join('')}
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label bad">劣势 Setup</label>
+          <div class="checkbox-row" data-dis="${g.key}">
+            ${DIS_OPTS.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w}%)</button>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  mount.innerHTML = tfHtml;
+
+  /* ================= TAB NAV ================= */
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-'+btn.dataset.view).classList.add('active');
+      if(btn.dataset.view==='history') renderHistory();
+      if(btn.dataset.view==='dashboard') renderDashboard();
+    });
+  });
+
+  /* ================= COLLAPSE CARDS ================= */
+  document.addEventListener('click', (e)=>{
+    const h = e.target.closest('[data-toggle-card]');
+    if(h){
+      document.getElementById(h.dataset.toggleCard).classList.toggle('collapsed');
+    }
+  });
+
+  /* ================= DIRECTION ================= */
+  const dirLongBtn = document.getElementById('dir-long');
+  const dirShortBtn = document.getElementById('dir-short');
+  dirLongBtn.addEventListener('click', ()=>{ state.direction='long'; syncDirection(); });
+  dirShortBtn.addEventListener('click', ()=>{ state.direction='short'; syncDirection(); });
+  function syncDirection(){
+    dirLongBtn.classList.toggle('active', state.direction==='long');
+    dirShortBtn.classList.toggle('active', state.direction==='short');
+    const tag = document.getElementById('dir-tag');
+    if(state.direction==='long'){ tag.textContent='▲ 做多 LONG'; tag.className='dir-tag long'; }
+    else if(state.direction==='short'){ tag.textContent='▼ 做空 SHORT'; tag.className='dir-tag short'; }
+    else { tag.textContent='尚未选择方向'; tag.className='dir-tag'; }
+  }
+
+  /* ================= SNR toggle ================= */
+  document.querySelector('[data-toggle-bool="snr"]').addEventListener('click', function(){
+    state.snr = !state.snr;
+    this.classList.toggle('active', state.snr);
+    recalc();
+  });
+
+  /* ================= single-select rows (session/news/rr) ================= */
+  document.querySelectorAll('[data-single]').forEach(row=>{
+    const key = row.dataset.single;
+    row.querySelectorAll('.pill').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const already = state[key] === btn.dataset.value;
+        row.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+        if(already){ state[key] = null; }
+        else{ state[key] = btn.dataset.value; btn.classList.add('active'); }
+        recalc();
+      });
+    });
+  });
+
+  /* ================= TF group interactions ================= */
+  TF_GROUPS.forEach(g=>{
+    // tf level chips (multi)
+    document.querySelector(`[data-tfselect="${g.key}"]`).querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const set = state.tf[g.key].tfs;
+        const v = chip.dataset.value;
+        if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
+        else{ set.add(v); chip.classList.add('active'); }
+        recalc();
+      });
+    });
+    // confluence (single, toggle-able)
+    document.querySelector(`[data-confluence="${g.key}"]`).querySelectorAll('.pill').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const row = btn.parentElement;
+        const already = state.tf[g.key].confluence === btn.dataset.value;
+        row.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+        if(already){ state.tf[g.key].confluence = null; }
+        else{ state.tf[g.key].confluence = btn.dataset.value; btn.classList.add('active'); }
+        recalc();
+      });
+    });
+    // advantage (multi)
+    document.querySelector(`[data-adv="${g.key}"]`).querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const set = state.tf[g.key].adv;
+        const v = chip.dataset.value;
+        if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
+        else{ set.add(v); chip.classList.add('active'); }
+        recalc();
+      });
+    });
+    // disadvantage (multi)
+    document.querySelector(`[data-dis="${g.key}"]`).querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const set = state.tf[g.key].dis;
+        const v = chip.dataset.value;
+        if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
+        else{ set.add(v); chip.classList.add('active'); }
+        recalc();
+      });
+    });
+  });
+
+  /* ================= SCORE CALCULATION ================= */
+  function computeBreakdown(){
+    const rows = []; // {label, w}
+    if(state.snr) rows.push({label:'关键支撑 / 阻力位', w:5});
+
+    if(state.session){
+      const opt = {london:['London Session',2], ny:['New York Session',3], golden:['London & NY 黄金时间',4]}[state.session];
+      rows.push({label:'Session: '+opt[0], w:opt[1]});
+    }
+    if(state.news){
+      const opt = {none:['无重大新闻',1], normal:['一般新闻',0], medium:['中影响新闻',-3], high:['高影响新闻 (CPI/NFP/FOMC)',-5]}[state.news];
+      rows.push({label:'新闻: '+opt[0], w:opt[1]});
+    }
+    if(state.rr){
+      const opt = {rr20:['RR ≥ 2.0',1], rr25:['RR ≥ 2.5',3], rr30:['RR ≥ 3.0',4], rr40:['RR ≥ 4.0',5], rrlow:['RR < 2.0',-5]}[state.rr];
+      rows.push({label:opt[0], w:opt[1]});
+    }
+
+    const tripleCheck = [];
+    TF_GROUPS.forEach(g=>{
+      const t = state.tf[g.key];
+      if(t.tfs.size >= TF_COUNT_THRESHOLD) rows.push({label:`${g.name}: 已选 ${t.tfs.size} 个级别`, w:TF_COUNT_BONUS});
+      if(t.confluence){
+        const o = CONFLUENCE_OPTS.find(x=>x.id===t.confluence);
+        rows.push({label:`${g.name}两个时间配合: ${o.label}`, w:o.w});
+      }
+      let hasBonusSetup = false;
+      ADV_OPTS.forEach(o=>{
+        if(t.adv.has(o.id)){
+          rows.push({label:`${g.name}优势: ${o.label}`, w:o.w});
+          if(TRIPLE_BONUS_IDS.includes(o.id)) hasBonusSetup = true;
+        }
+      });
+      DIS_OPTS.forEach(o=>{
+        if(t.dis.has(o.id)) rows.push({label:`${g.name}劣势: ${o.label}`, w:o.w});
+      });
+      tripleCheck.push(hasBonusSetup);
+    });
+    if(tripleCheck.every(Boolean)){
+      rows.push({label:'大 + 中 + 小时间三重共振（零轴反弹+能量柱 / EMA52支撑）', w:TRIPLE_BONUS_WEIGHT});
+    }
+    return rows;
+  }
+
+  function recalc(){
+    const rows = computeBreakdown();
+    const rawSum = rows.reduce((s,r)=>s+r.w,0);
+    const score = Math.max(0, Math.min(100, BASELINE + rawSum));
+    document.getElementById('score-pct').textContent = Math.round(score)+'%';
+    const circumference = 2*Math.PI*70;
+    const dash = circumference * (score/100);
+    const fg = document.getElementById('gauge-fg');
+    fg.setAttribute('stroke-dasharray', `${dash} ${circumference}`);
+    let color = 'var(--short)';
+    if(score>=80) color='var(--long)';
+    else if(score>=60) color='var(--accent)';
+    else if(score>=40) color='var(--text-faint)';
+    fg.style.stroke = color;
+    document.getElementById('score-pct').style.color = color;
+
+    const list = document.getElementById('detail-list');
+    if(rows.length===0){
+      list.innerHTML = '<div class="detail-empty">尚未勾选任何条件，基础胜率 50%</div>';
+    } else {
+      list.innerHTML = rows.map(r=>`<div class="detail-row"><span>${r.label}</span><span class="${r.w>=0?'w-pos':'w-neg'}">${r.w>0?'+':''}${r.w}%</span></div>`).join('');
+    }
+    window.__currentScore = Math.round(score);
+    window.__currentRows = rows;
+  }
+
+  document.getElementById('detail-toggle').addEventListener('click', ()=>{
+    document.getElementById('detail-list').classList.toggle('open');
+    const c = document.getElementById('detail-chevron');
+    c.textContent = document.getElementById('detail-list').classList.contains('open') ? '▴' : '▾';
+  });
+
+  recalc();
+
+  /* ================= MODAL ================= */
+  const overlay = document.getElementById('modal-overlay');
+  let modalResult = null;
+  document.getElementById('open-modal-btn').addEventListener('click', ()=>{
+    if(!state.direction){ alert('请先选择 Long 或 Short 方向'); return; }
+    overlay.classList.add('open');
+  });
+  document.getElementById('modal-cancel').addEventListener('click', ()=> overlay.classList.remove('open'));
+  document.querySelectorAll('.result-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      modalResult = btn.dataset.r;
+    });
+  });
+
+  document.getElementById('modal-save').addEventListener('click', async ()=>{
+    if(!modalResult){ alert('请选择交易结果'); return; }
+    const trade = {
+      id: 'trade_'+Date.now(),
+      ts: Date.now(),
+      direction: state.direction,
+      symbol: document.getElementById('modal-symbol').value,
+      result: modalResult,
+      score: window.__currentScore,
+      notes: document.getElementById('modal-notes').value.trim(),
+      rows: window.__currentRows,
+      snapshot: JSON.parse(JSON.stringify(state, (k,v)=> v instanceof Set ? [...v] : v))
+    };
+    await saveTrade(trade);
+    overlay.classList.remove('open');
+    modalResult = null;
+    document.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('modal-notes').value = '';
+    resetChecklist();
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelector('[data-view="history"]').classList.add('active');
+    document.getElementById('view-history').classList.add('active');
+    renderHistory();
+  });
+
+  function resetChecklist(){
+    state = { direction:null, snr:false, session:null, news:null, rr:null, tf:{} };
+    TF_GROUPS.forEach(g=>{ state.tf[g.key] = { tfs:new Set(), confluence:null, adv:new Set(), dis:new Set() }; });
+    document.querySelectorAll('.chip.active, .pill.active').forEach(el=>el.classList.remove('active'));
+    syncDirection();
+    recalc();
+  }
+
+  /* ================= STORAGE ================= */
+  const STORE_KEY = 'trades';
+  let storageAvailable = typeof window.storage !== 'undefined';
+
+  async function loadTrades(){
+    if(!storageAvailable) return [];
+    try{
+      const res = await window.storage.get(STORE_KEY, false);
+      return res ? JSON.parse(res.value) : [];
+    }catch(e){ return []; }
+  }
+  async function saveTrade(trade){
+    if(!storageAvailable){ alert('存储功能当前不可用，本次记录不会被保存。'); return; }
+    try{
+      const trades = await loadTrades();
+      trades.unshift(trade);
+      await window.storage.set(STORE_KEY, JSON.stringify(trades), false);
+    }catch(e){ alert('保存失败，请重试。'); }
+  }
+  async function deleteTrade(id){
+    try{
+      const trades = await loadTrades();
+      const next = trades.filter(t=>t.id!==id);
+      await window.storage.set(STORE_KEY, JSON.stringify(next), false);
+    }catch(e){}
+  }
+
+  const RESULT_META = {
+    win:{label:'盈利', cls:'win'},
+    loss:{label:'亏损', cls:'loss'},
+    be:{label:'保本', cls:'be'}
+  };
+
+  function fmtTime(ts){
+    const d = new Date(ts);
+    const p = n=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  /* ================= HISTORY VIEW ================= */
+  async function renderHistory(){
+    const mount = document.getElementById('history-mount');
+    mount.innerHTML = '<div class="empty-state">加载中...</div>';
+    const trades = await loadTrades();
+    if(trades.length===0){
+      mount.innerHTML = `<div class="empty-state"><div class="big">🗂️</div>暂无交易记录<br>完成一笔交易后会显示在这里</div>`;
+      return;
+    }
+    mount.innerHTML = trades.map(t=>{
+      const rm = RESULT_META[t.result] || {label:t.result, cls:''};
+      const rowsHtml = (t.rows||[]).map(r=>`<div class="detail-row"><span>${r.label}</span><span class="${r.w>=0?'w-pos':'w-neg'}">${r.w>0?'+':''}${r.w}%</span></div>`).join('') || '<div class="detail-empty">无附加条件</div>';
+      return `
+      <div class="hist-item">
+        <div class="hist-head" data-hist-toggle="${t.id}">
+          <div class="hist-left">
+            <span class="hist-badge ${rm.cls}">${rm.label}</span>
+            <span class="hist-sym">${t.symbol}</span>
+            <span class="hist-dir ${t.direction}">${t.direction==='long'?'▲ LONG':'▼ SHORT'}</span>
+            <span class="hist-score">评分 ${t.score}%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="hist-time">${fmtTime(t.ts)}</span>
+            <button class="hist-del" data-del="${t.id}" title="删除">✕</button>
+            <span class="chevron">▾</span>
+          </div>
+        </div>
+        <div class="hist-body" id="hist-body-${t.id}">
+          ${t.notes ? `<div class="hist-note">“${escapeHtml(t.notes)}”</div>` : ''}
+          <div class="detail-list open" style="margin-top:6px;">${rowsHtml}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    mount.querySelectorAll('[data-hist-toggle]').forEach(h=>{
+      h.addEventListener('click', (e)=>{
+        if(e.target.closest('[data-del]')) return;
+        document.getElementById('hist-body-'+h.dataset.histToggle).classList.toggle('open');
+      });
+    });
+    mount.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        e.stopPropagation();
+        if(confirm('确定删除这条交易记录吗？')){
+          await deleteTrade(btn.dataset.del);
+          renderHistory();
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* ================= DASHBOARD VIEW ================= */
+  function extractConditions(t){
+    const conds = [];
+    const snap = t.snapshot || {};
+    if(snap.snr) conds.push('SNR: 关键支撑/阻力位');
+    if(snap.session) conds.push('Session: '+snap.session);
+    if(snap.news) conds.push('新闻: '+snap.news);
+    if(snap.rr) conds.push('RR: '+snap.rr);
+    if(t.direction) conds.push('方向: '+(t.direction==='long'?'LONG':'SHORT'));
+    TF_GROUPS.forEach(g=>{
+      const tf = (snap.tf||{})[g.key];
+      if(!tf) return;
+      if((tf.tfs||[]).length >= TF_COUNT_THRESHOLD) conds.push(`${g.name}: 3个以上级别共振`);
+      if(tf.confluence) conds.push(`${g.name}两个时间配合: ${tf.confluence==='yes'?'有':'没有'}`);
+      (tf.adv||[]).forEach(id=>{
+        const o = ADV_OPTS.find(x=>x.id===id);
+        if(o) conds.push(`${g.name}优势: ${o.label}`);
+      });
+      (tf.dis||[]).forEach(id=>{
+        const o = DIS_OPTS.find(x=>x.id===id);
+        if(o) conds.push(`${g.name}劣势: ${o.label}`);
+      });
+    });
+    return conds;
+  }
+
+  async function renderDashboard(){
+    const mount = document.getElementById('dashboard-mount');
+    mount.innerHTML = '<div class="empty-state">加载中...</div>';
+    const trades = await loadTrades();
+    if(trades.length===0){
+      mount.innerHTML = `<div class="empty-state"><div class="big">📊</div>暂无数据<br>完成交易并记录后，仪表盘会自动生成分析</div>`;
+      return;
+    }
+
+    const total = trades.length;
+    const wins = trades.filter(t=>t.result==='win').length;
+    const losses = trades.filter(t=>t.result==='loss').length;
+    const bes = trades.filter(t=>t.result==='be').length;
+    const decided = wins+losses;
+    const overallRate = decided>0 ? Math.round(wins/decided*100) : 0;
+
+    // aggregate conditions
+    const map = {}; // label -> {count, wins, losses}
+    trades.forEach(t=>{
+      const conds = extractConditions(t);
+      const uniq = [...new Set(conds)];
+      uniq.forEach(label=>{
+        if(!map[label]) map[label] = {count:0, wins:0, losses:0};
+        map[label].count++;
+        if(t.result==='win') map[label].wins++;
+        if(t.result==='loss') map[label].losses++;
+      });
+    });
+    const entries = Object.entries(map).map(([label,v])=>{
+      const decidedN = v.wins+v.losses;
+      const rate = decidedN>0 ? v.wins/decidedN*100 : null;
+      return {label, count:v.count, wins:v.wins, losses:v.losses, rate};
+    });
+
+    const byCount = [...entries].sort((a,b)=>b.count-a.count).slice(0,6);
+    const byRate = entries.filter(e=>e.rate!==null && e.count>=2).sort((a,b)=>b.rate-a.rate).slice(0,6);
+
+    let hero = null;
+    if(byRate.length){
+      hero = [...byRate].sort((a,b)=> (b.rate*Math.log(b.count+1)) - (a.rate*Math.log(a.count+1)))[0];
+    }
+
+    const maxCount = Math.max(...entries.map(e=>e.count),1);
+
+    mount.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-box acc"><div class="n">${total}</div><div class="l">总交易数</div></div>
+        <div class="stat-box win"><div class="n">${wins}</div><div class="l">盈利</div></div>
+        <div class="stat-box loss"><div class="n">${losses}</div><div class="l">亏损</div></div>
+        <div class="stat-box"><div class="n">${overallRate}%</div><div class="l">总体胜率（不含保本 ${bes}）</div></div>
+      </div>
+
+      ${hero ? `
+      <div class="hero-signal">
+        <div class="star">⭐</div>
+        <div>
+          <h4>最有效信号 · 出现频繁且胜率领先</h4>
+          <div class="cond">${hero.label}</div>
+          <div class="stats">出现 <b>${hero.count}</b> 次 · 胜率 <b>${Math.round(hero.rate)}%</b></div>
+        </div>
+      </div>` : ''}
+
+      <div class="two-col">
+        <div class="rank-card">
+          <h3>胜率最高的条件 Top 6</h3>
+          ${byRate.length ? byRate.map(e=>`
+            <div class="rank-row">
+              <div class="rank-top"><span class="rlabel">${e.label}</span><span class="rmeta">${Math.round(e.rate)}% · ${e.count}次</span></div>
+              <div class="rank-bar-bg"><div class="rank-bar-fg" style="width:${e.rate}%"></div></div>
+            </div>`).join('') : '<div class="detail-empty">数据不足（至少需要 2 笔含结果的记录）</div>'}
+        </div>
+        <div class="rank-card">
+          <h3>最常出现的条件 Top 6</h3>
+          ${byCount.map(e=>`
+            <div class="rank-row">
+              <div class="rank-top"><span class="rlabel">${e.label}</span><span class="rmeta">${e.count}次${e.rate!==null?(' · '+Math.round(e.rate)+'%'):''}</span></div>
+              <div class="rank-bar-bg"><div class="rank-bar-fg count" style="width:${(e.count/maxCount*100)}%"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  syncDirection();
+})();
+</script>
+</body>
+</html>
