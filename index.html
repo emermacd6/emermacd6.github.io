@@ -424,8 +424,8 @@
     <select id="modal-symbol">
       <option value="XAUUSD">XAUUSD</option>
       <option value="XTIUSD">XTIUSD</option>
-      <option value="BTC">BTC</option>
-      <option value="ETH">ETH</option>
+      <option value="BTCUSD">BTCUSD</option>
+      <option value="ETHUSD">ETHUSD</option>
       <option value="DJ30">DJ30</option>
       <option value="UK100">UK100</option>
       <option value="GER40">GER40</option>
@@ -637,7 +637,7 @@
     if(state.snr) rows.push({label:'关键支撑 / 阻力位', w:5});
 
     if(state.session){
-      const opt = {london:['London Session',2], ny:['New York Session',3], golden:['London & NY 黄金时间',4]}[state.session];
+      const opt = {london:['London Session',1], ny:['New York Session',2], golden:['London & NY 黄金时间',3]}[state.session];
       rows.push({label:'Session: '+opt[0], w:opt[1]});
     }
     if(state.news){
@@ -645,7 +645,7 @@
       rows.push({label:'新闻: '+opt[0], w:opt[1]});
     }
     if(state.rr){
-      const opt = {rr20:['RR ≥ 2.0',1], rr25:['RR ≥ 2.5',3], rr30:['RR ≥ 3.0',4], rr40:['RR ≥ 4.0',5], rrlow:['RR < 2.0',-5]}[state.rr];
+      const opt = {rr20:['RR ≥ 2.0',1], rr25:['RR ≥ 2.5',2], rr30:['RR ≥ 3.0',2], rr40:['RR ≥ 4.0',2], rrlow:['RR < 2.0',-3]}[state.rr];
       rows.push({label:opt[0], w:opt[1]});
     }
 
