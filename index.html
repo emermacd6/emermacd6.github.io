@@ -77,16 +77,18 @@
   nav.tabs button{
     appearance:none;border:none;background:transparent;color:var(--text-dim);
     font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 16px;border-radius:7px;cursor:pointer;
-    transition:.15s ease;
+    transition:.15s ease;display:inline-flex;align-items:center;gap:7px;
   }
   nav.tabs button.active{background:var(--accent);color:#062223;}
   nav.tabs button:not(.active):hover{color:var(--text);background:var(--line-soft);}
+  .tab-icon{width:15px;height:15px;flex-shrink:0;color:currentColor;}
 
   .relock-btn{
     appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);
     width:38px;height:38px;border-radius:9px;font-size:16px;cursor:pointer;margin-left:10px;
-    transition:.15s ease;flex-shrink:0;
+    transition:.15s ease;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
   }
+  .relock-btn svg{width:17px;height:17px;}
   .relock-btn:hover{border-color:var(--accent);color:var(--accent);}
 
   main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 90px;}
@@ -226,10 +228,21 @@
   .complete-btn:hover{filter:brightness(1.08);}
   .complete-btn:disabled{opacity:.4;cursor:not-allowed;}
 
-  .tagline{
-    text-align:center;font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text-dim);
-    padding:12px 8px 0;line-height:1.6;letter-spacing:.3px;
+  .tagline-banner{
+    text-align:center;font-family:var(--mono);font-size:14.5px;font-weight:700;
+    color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent);
+    border-radius:10px;padding:12px 16px;margin:14px 0 20px;letter-spacing:.3px;line-height:1.5;
   }
+  @media (max-width:520px){ .tagline-banner{font-size:13px;} }
+
+  .about-card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 26px;margin-bottom:20px;
+  }
+  .about-card h3{margin:0 0 14px;font-family:var(--disp);font-size:18px;font-weight:700;color:var(--accent);}
+  .about-card p{margin:0 0 11px;font-size:13.5px;line-height:1.8;color:var(--text-dim);}
+  .about-card p:last-child{margin-bottom:0;}
+  .about-card .about-highlight{color:var(--text);font-weight:600;}
 
   /* ---------- modal ---------- */
   .modal-overlay{
@@ -244,10 +257,11 @@
   .modal h2{margin:0 0 4px;font-family:var(--disp);font-size:19px;}
   .modal .sub{color:var(--text-dim);font-size:12.5px;margin:0 0 18px;}
   .modal label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;}
-  .modal select,.modal textarea{
+  .modal select,.modal textarea,.modal input[type="text"]{
     width:100%;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
     padding:10px 12px;border-radius:8px;font-family:var(--sans);font-size:13.5px;
   }
+  .modal input[type="text"]:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:var(--accent);}
   .modal textarea{resize:vertical;min-height:60px;}
   .result-row{display:flex;gap:8px;}
   .result-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);cursor:pointer;font-weight:600;font-size:13px;}
@@ -272,6 +286,8 @@
   .hist-dir.long{color:var(--long);border:1px solid var(--long);}
   .hist-dir.short{color:var(--short);border:1px solid var(--short);}
   .hist-score{font-family:var(--mono);font-size:13.5px;color:var(--accent);}
+  .hist-trader{display:inline-flex;align-items:center;gap:5px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--text-dim);}
+  .hist-trader svg{width:13px;height:13px;flex-shrink:0;}
   .hist-time{color:var(--text-faint);font-size:11.5px;font-family:var(--mono);}
   .hist-del{background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:15px;padding:4px 8px;}
   .hist-del:hover{color:var(--short);}
@@ -279,7 +295,8 @@
   .hist-body.open{display:block;}
   .hist-note{font-size:12.5px;color:var(--text-dim);margin:12px 0;font-style:italic;}
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
-  .empty-state .big{font-size:34px;margin-bottom:8px;}
+  .empty-state .big{width:40px;height:40px;margin:0 auto 12px;color:var(--text-faint);}
+  .empty-state .big svg{width:100%;height:100%;display:block;}
 
   /* ---------- dashboard ---------- */
   .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
@@ -368,7 +385,8 @@
     animation:vaultSpinBack 6s linear infinite;
   }
   @keyframes vaultSpinBack{to{transform:rotate(-360deg);}}
-  .vault-lock-icon{font-size:30px;filter:grayscale(0) drop-shadow(0 0 8px rgba(39,221,223,.4));}
+  .vault-lock-icon{width:30px;height:30px;color:var(--accent);filter:drop-shadow(0 0 8px rgba(39,221,223,.4));}
+  .vault-lock-icon svg{width:100%;height:100%;display:block;}
   .vault-brand{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:1px;color:var(--text);}
   .vault-sub{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);margin-top:6px;letter-spacing:.4px;}
 
@@ -409,7 +427,7 @@
   <div class="vault-card" id="vault-card">
     <div class="vault-ring">
       <div class="vault-ring-inner">
-        <span class="vault-lock-icon" id="vault-lock-icon">🔒</span>
+        <span class="vault-lock-icon" id="vault-lock-icon"></span>
       </div>
     </div>
     <div class="vault-brand">EMER MACD SYSTEM</div>
@@ -443,8 +461,12 @@
 
 <script>
 (function(){
+  /* ==========================================================
+     🔑 后台配置：要修改保险箱密码，只需改下面这一行的 4 位数字
+     ========================================================== */
   var VAULT_PASSWORD = '0624';
-  var STORAGE_KEY = 'emer_macd_vault_unlocked';
+  /* ========================================================== */
+
   var entered = '';
 
   var overlay = document.getElementById('vault-overlay');
@@ -452,6 +474,9 @@
   var dots = Array.prototype.slice.call(document.querySelectorAll('.vault-dot'));
   var errEl = document.getElementById('vault-error');
   var lockIcon = document.getElementById('vault-lock-icon');
+
+  var ICON_LOCKED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
+  var ICON_UNLOCKED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2.2"></path></svg>';
 
   function renderDots(state){
     dots.forEach(function(d, i){
@@ -461,8 +486,7 @@
   }
 
   function unlock(){
-    lockIcon.textContent = '🔓';
-    try{ localStorage.setItem(STORAGE_KEY, '1'); }catch(e){}
+    lockIcon.innerHTML = ICON_UNLOCKED;
     overlay.classList.add('unlocking');
     setTimeout(function(){ overlay.classList.add('hidden'); document.body.style.overflow=''; }, 520);
   }
@@ -511,26 +535,21 @@
     else if(e.key === 'Enter') tryUnlock();
   });
 
+  // 每次打开 / 刷新网站都重新要求输入密码（不做任何本地记忆）
   var relockBtn = document.getElementById('relock-btn');
   if(relockBtn){
     relockBtn.addEventListener('click', function(){
-      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
       entered='';
       renderDots();
-      lockIcon.textContent = '🔒';
+      errEl.classList.remove('show');
+      lockIcon.innerHTML = ICON_LOCKED;
       overlay.classList.remove('hidden','unlocking');
       document.body.style.overflow = 'hidden';
     });
   }
 
-  // already unlocked in this browser previously?
-  var already = false;
-  try{ already = localStorage.getItem(STORAGE_KEY) === '1'; }catch(e){}
-  if(already){
-    overlay.classList.add('hidden');
-  } else {
-    document.body.style.overflow = 'hidden';
-  }
+  lockIcon.innerHTML = ICON_LOCKED;
+  document.body.style.overflow = 'hidden';
 })();
 </script>
 
@@ -547,11 +566,11 @@
   </div>
   <div style="display:flex;align-items:center;">
     <nav class="tabs">
-      <button class="tab-btn active" data-view="checklist">📋 检查清单</button>
-      <button class="tab-btn" data-view="history">🕘 历史记录</button>
-      <button class="tab-btn" data-view="dashboard">📊 仪表盘</button>
+      <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
+      <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
+      <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
     </nav>
-    <button id="relock-btn" class="relock-btn" type="button" title="重新锁定">🔒</button>
+    <button id="relock-btn" class="relock-btn" type="button" title="重新锁定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></button>
   </div>
 </header>
 
@@ -567,6 +586,7 @@
       <button class="dir-btn long" id="dir-long" type="button"><span class="arrow">▲</span> LONG 做多</button>
       <button class="dir-btn short" id="dir-short" type="button"><span class="arrow">▼</span> SHORT 做空</button>
     </div>
+    <div class="tagline-banner">认真对待每一笔交易，因为每一次决定都影响长期结果</div>
 
     <div class="layout">
       <div class="cards-col">
@@ -581,34 +601,34 @@
             <div class="field-group">
               <label class="field-label">支撑 / 阻力（SNR）</label>
               <div class="chip-row">
-                <button type="button" class="chip" data-toggle-bool="snr">目前价格处于关键支撑或阻力位 (+5%)</button>
+                <button type="button" class="chip" data-toggle-bool="snr">目前价格处于关键支撑或阻力位 (+8%)</button>
               </div>
             </div>
             <div class="field-group">
               <label class="field-label">Session</label>
               <div class="radio-row" data-single="session">
-                <button type="button" class="pill" data-value="london" data-w="2">London Session (+1%)</button>
-                <button type="button" class="pill" data-value="ny" data-w="3">New York Session (+2%)</button>
-                <button type="button" class="pill" data-value="golden" data-w="4">London &amp; New York 黄金时间 8–10PM (+3%)</button>
+                <button type="button" class="pill" data-value="london" data-w="2">London Session (+2%)</button>
+                <button type="button" class="pill" data-value="ny" data-w="3">New York Session (+3%)</button>
+                <button type="button" class="pill" data-value="golden" data-w="4">London &amp; New York 黄金时间 8–10PM (+5%)</button>
               </div>
             </div>
             <div class="field-group">
               <label class="field-label">新闻影响（请避开新闻）</label>
               <div class="radio-row" data-single="news">
-                <button type="button" class="pill" data-value="none" data-w="1">无重大新闻 (+1%)</button>
+                <button type="button" class="pill" data-value="none" data-w="1">无重大新闻 (+2%)</button>
                 <button type="button" class="pill" data-value="normal" data-w="0">一般新闻 (0%)</button>
-                <button type="button" class="pill" data-value="medium" data-w="-3">中影响新闻 (-3%)</button>
-                <button type="button" class="pill" data-value="high" data-w="-5">高影响新闻 CPI / NFP / FOMC (-5%)</button>
+                <button type="button" class="pill" data-value="medium" data-w="-3">中影响新闻 (-5%)</button>
+                <button type="button" class="pill" data-value="high" data-w="-5">高影响新闻 CPI / NFP / FOMC (-8%)</button>
               </div>
             </div>
             <div class="field-group">
               <label class="field-label">Risk Reward（RR）</label>
               <div class="radio-row" data-single="rr">
-                <button type="button" class="pill" data-value="rr20" data-w="1">RR ≥ 2.0 (+1%)</button>
-                <button type="button" class="pill" data-value="rr25" data-w="3">RR ≥ 2.5 (+2%)</button>
-                <button type="button" class="pill" data-value="rr30" data-w="4">RR ≥ 3.0 (+2%)</button>
-                <button type="button" class="pill" data-value="rr40" data-w="5">RR ≥ 4.0 (+2%)</button>
-                <button type="button" class="pill" data-value="rrlow" data-w="-5">RR &lt; 2.0 (-3%)</button>
+                <button type="button" class="pill" data-value="rr20" data-w="1">RR ≥ 2.0 (+2%)</button>
+                <button type="button" class="pill" data-value="rr25" data-w="3">RR ≥ 2.5 (+3%)</button>
+                <button type="button" class="pill" data-value="rr30" data-w="4">RR ≥ 3.0 (+3%)</button>
+                <button type="button" class="pill" data-value="rr40" data-w="5">RR ≥ 4.0 (+3%)</button>
+                <button type="button" class="pill" data-value="rrlow" data-w="-5">RR &lt; 2.0 (-5%)</button>
               </div>
             </div>
           </div>
@@ -664,7 +684,6 @@
 
           <button class="complete-btn" id="open-modal-btn" style="margin-top:16px;" type="button">✓ 完成这笔单</button>
         </div>
-        <div class="tagline">"请认真对待每一笔交易"</div>
       </div>
     </div>
   </section>
@@ -681,6 +700,15 @@
 
   <!-- ================= DASHBOARD VIEW ================= -->
   <section class="view" id="view-dashboard">
+    <div class="about-card">
+      <h3>关于这个交易系统</h3>
+      <p>这个网站由 Emer 创建。</p>
+      <p>建立这个网站的初衷，是为了打造一个属于自己的交易管理系统，记录每一次交易决策、市场分析以及复盘过程。</p>
+      <p>在交易市场中，没有人能够预测每一次行情，但可以通过严格的流程、风险管理和纪律执行，提高自己的长期稳定性。</p>
+      <p>这个系统的目的，不是追求快速盈利，而是帮助自己保持理性，减少情绪影响，并持续优化交易方式。</p>
+      <p>每一笔交易都代表一次判断，每一次执行都会影响未来的成长。</p>
+      <p class="about-highlight">认真对待每一笔交易，尊重市场，遵守计划，持续进步。</p>
+    </div>
     <div id="dashboard-mount"></div>
   </section>
 
@@ -692,7 +720,10 @@
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <h2>记录这笔交易</h2>
-    <p class="sub">请认真对待每一笔交易 · 当前评分将一并保存</p>
+    <p class="sub">认真对待每一笔交易 · 当前评分将一并保存</p>
+
+    <label>你的名字 Name</label>
+    <input type="text" id="modal-trader" placeholder="例如：Emer" autocomplete="off">
 
     <label>交易品种 Symbol</label>
     <select id="modal-symbol">
@@ -734,25 +765,25 @@
     { key:'small', name:'小时间', tfs:['1-3m','5m','10m','15m','20m','30m','40m','45m'] },
   ];
   const TF_COUNT_THRESHOLD = 3;
-  const TF_COUNT_BONUS = 2;
-  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:3}, {id:'no', label:'没有', w:-2} ];
+  const TF_COUNT_BONUS = 3;
+  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:5}, {id:'no', label:'没有', w:-3} ];
   const ADV_OPTS = [
-    {id:'nearzero', label:'靠近零轴', w:1},
-    {id:'rebound', label:'已反弹', w:2},
-    {id:'bottomdiv', label:'底部背离确定', w:3},
-    {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:5},
-    {id:'ema52', label:'EMA52 支撑', w:5},
-    {id:'nearema52', label:'靠近EMA52', w:1},
-    {id:'nopress', label:'分时没有压力', w:3},
+    {id:'nearzero', label:'靠近零轴', w:2},
+    {id:'rebound', label:'已反弹', w:3},
+    {id:'bottomdiv', label:'底部背离确定', w:5},
+    {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:8},
+    {id:'ema52', label:'EMA52 支撑', w:8},
+    {id:'nearema52', label:'靠近EMA52', w:2},
+    {id:'nopress', label:'分时没有压力', w:5},
   ];
   const DIS_OPTS = [
-    {id:'potentialdiv', label:'潜在背离', w:-2},
-    {id:'confirmeddiv', label:'确定背离', w:-3},
-    {id:'high', label:'高位', w:-5},
-    {id:'zerohidden', label:'零轴隐形', w:-3},
-    {id:'lowmomentum', label:'动能不足', w:-2},
+    {id:'potentialdiv', label:'潜在背离', w:-3},
+    {id:'confirmeddiv', label:'确定背离', w:-5},
+    {id:'high', label:'高位', w:-8},
+    {id:'zerohidden', label:'零轴隐形', w:-5},
+    {id:'lowmomentum', label:'动能不足', w:-3},
   ];
-  const TRIPLE_BONUS_WEIGHT = 8;
+  const TRIPLE_BONUS_WEIGHT = 12;
   const TRIPLE_BONUS_IDS = ['zeroenergy','ema52'];
 
   /* ================= STATE ================= */
@@ -909,18 +940,18 @@
   /* ================= SCORE CALCULATION ================= */
   function computeBreakdown(){
     const rows = []; // {label, w}
-    if(state.snr) rows.push({label:'关键支撑 / 阻力位', w:5});
+    if(state.snr) rows.push({label:'关键支撑 / 阻力位', w:8});
 
     if(state.session){
-      const opt = {london:['London Session',1], ny:['New York Session',2], golden:['London & NY 黄金时间',3]}[state.session];
+      const opt = {london:['London Session',2], ny:['New York Session',3], golden:['London & NY 黄金时间',5]}[state.session];
       rows.push({label:'Session: '+opt[0], w:opt[1]});
     }
     if(state.news){
-      const opt = {none:['无重大新闻',1], normal:['一般新闻',0], medium:['中影响新闻',-3], high:['高影响新闻 (CPI/NFP/FOMC)',-5]}[state.news];
+      const opt = {none:['无重大新闻',2], normal:['一般新闻',0], medium:['中影响新闻',-5], high:['高影响新闻 (CPI/NFP/FOMC)',-8]}[state.news];
       rows.push({label:'新闻: '+opt[0], w:opt[1]});
     }
     if(state.rr){
-      const opt = {rr20:['RR ≥ 2.0',1], rr25:['RR ≥ 2.5',2], rr30:['RR ≥ 3.0',2], rr40:['RR ≥ 4.0',2], rrlow:['RR < 2.0',-3]}[state.rr];
+      const opt = {rr20:['RR ≥ 2.0',2], rr25:['RR ≥ 2.5',3], rr30:['RR ≥ 3.0',3], rr40:['RR ≥ 4.0',3], rrlow:['RR < 2.0',-5]}[state.rr];
       rows.push({label:opt[0], w:opt[1]});
     }
 
@@ -1026,6 +1057,10 @@
   document.getElementById('open-modal-btn').addEventListener('click', ()=>{
     if(!state.direction){ alert('请先选择 Long 或 Short 方向'); return; }
     overlay.classList.add('open');
+    try{
+      const lastName = localStorage.getItem('emer_macd_trader_name');
+      if(lastName) document.getElementById('modal-trader').value = lastName;
+    }catch(e){}
   });
   document.getElementById('modal-cancel').addEventListener('click', ()=> overlay.classList.remove('open'));
   document.querySelectorAll('.result-btn').forEach(btn=>{
@@ -1037,6 +1072,8 @@
   });
 
   document.getElementById('modal-save').addEventListener('click', async ()=>{
+    const traderName = document.getElementById('modal-trader').value.trim();
+    if(!traderName){ alert('请输入你的名字'); return; }
     if(!modalResult){ alert('请选择交易结果'); return; }
     const trade = {
       id: 'trade_'+Date.now(),
@@ -1045,10 +1082,12 @@
       symbol: document.getElementById('modal-symbol').value,
       result: modalResult,
       score: window.__currentScore,
+      trader: traderName,
       notes: document.getElementById('modal-notes').value.trim(),
       rows: window.__currentRows,
       snapshot: JSON.parse(JSON.stringify(state, (k,v)=> v instanceof Set ? [...v] : v))
     };
+    try{ localStorage.setItem('emer_macd_trader_name', traderName); }catch(e){}
     await saveTrade(trade);
     overlay.classList.remove('open');
     modalResult = null;
@@ -1089,14 +1128,14 @@
   function rowToTrade(r){
     return {
       id:r.id, ts:Number(r.ts), direction:r.direction, symbol:r.symbol,
-      result:r.result, score:r.score, notes:r.notes||'',
+      result:r.result, score:r.score, trader:r.trader||'', notes:r.notes||'',
       rows:r.rows||[], snapshot:r.snapshot||{}
     };
   }
   function tradeToRow(t){
     return {
       id:t.id, ts:t.ts, direction:t.direction, symbol:t.symbol,
-      result:t.result, score:t.score, notes:t.notes||'',
+      result:t.result, score:t.score, trader:t.trader||'', notes:t.notes||'',
       rows:t.rows||[], snapshot:t.snapshot||{}
     };
   }
@@ -1151,7 +1190,7 @@
     mount.innerHTML = '<div class="empty-state">加载中...</div>';
     const trades = await loadTrades();
     if(trades.length===0){
-      mount.innerHTML = `<div class="empty-state"><div class="big">🗂️</div>暂无交易记录<br>完成一笔交易后会显示在这里</div>`;
+      mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"></path><path d="M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg></div>暂无交易记录<br>完成一笔交易后会显示在这里</div>`;
       return;
     }
     mount.innerHTML = trades.map(t=>{
@@ -1165,6 +1204,7 @@
             <span class="hist-sym">${t.symbol}</span>
             <span class="hist-dir ${t.direction}">${t.direction==='long'?'▲ LONG':'▼ SHORT'}</span>
             <span class="hist-score">评分 ${t.score}%</span>
+            ${t.trader ? `<span class="hist-trader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"></path></svg>${escapeHtml(t.trader)}</span>` : ''}
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
             <span class="hist-time">${fmtTime(t.ts)}</span>
@@ -1231,7 +1271,7 @@
     mount.innerHTML = '<div class="empty-state">加载中...</div>';
     const trades = await loadTrades();
     if(trades.length===0){
-      mount.innerHTML = `<div class="empty-state"><div class="big">📊</div>暂无数据<br>完成交易并记录后，仪表盘会自动生成分析</div>`;
+      mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg></div>暂无数据<br>完成交易并记录后，仪表盘会自动生成分析</div>`;
       return;
     }
 
