@@ -73,7 +73,7 @@
   .brand-text .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
   .brand-text h1{margin:0;font-family:var(--disp);font-size:17px;font-weight:600;letter-spacing:.2px;}
 
-  nav.tabs{display:flex;gap:4px;background:var(--bg-raise);padding:4px;border-radius:10px;border:1px solid var(--line);}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--bg-raise);padding:4px;border-radius:10px;border:1px solid var(--line);}
   nav.tabs button{
     appearance:none;border:none;background:transparent;color:var(--text-dim);
     font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 16px;border-radius:7px;cursor:pointer;
@@ -83,13 +83,17 @@
   nav.tabs button:not(.active):hover{color:var(--text);background:var(--line-soft);}
   .tab-icon{width:15px;height:15px;flex-shrink:0;color:currentColor;}
 
-  .relock-btn{
-    appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);
-    width:38px;height:38px;border-radius:9px;font-size:16px;cursor:pointer;margin-left:10px;
-    transition:.15s ease;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  .fab-reset{
+    position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:40;
+    width:54px;height:54px;border-radius:50%;
+    appearance:none;border:1px solid var(--line);background:var(--bg-card);color:var(--text-dim);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.45);transition:.15s ease;
   }
-  .relock-btn svg{width:17px;height:17px;}
-  .relock-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .fab-reset svg{width:22px;height:22px;}
+  .fab-reset:hover{border-color:var(--short);color:var(--short);background:var(--short-dim);transform:translateY(-50%) scale(1.06);}
+  .fab-reset:active{transform:translateY(-50%) scale(.96);}
+  @media (max-width:640px){ .fab-reset{right:14px;width:46px;height:46px;} .fab-reset svg{width:19px;height:19px;} }
 
   main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 90px;}
   .view{display:none;animation:fade .25s ease;}
@@ -536,24 +540,14 @@
   });
 
   // 每次打开 / 刷新网站都重新要求输入密码（不做任何本地记忆）
-  var relockBtn = document.getElementById('relock-btn');
-  if(relockBtn){
-    relockBtn.addEventListener('click', function(){
-      entered='';
-      renderDots();
-      errEl.classList.remove('show');
-      lockIcon.innerHTML = ICON_LOCKED;
-      overlay.classList.remove('hidden','unlocking');
-      document.body.style.overflow = 'hidden';
-    });
-  }
-
   lockIcon.innerHTML = ICON_LOCKED;
   document.body.style.overflow = 'hidden';
 })();
 </script>
 
 <div class="bg-grid"></div>
+
+<button id="fab-reset-btn" class="fab-reset" type="button" title="重置检查清单"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"></path><path d="M3 12V6"></path><path d="M3 12h6"></path></svg></button>
 
 <header>
   <div class="brand">
@@ -569,8 +563,8 @@
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
+      <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
     </nav>
-    <button id="relock-btn" class="relock-btn" type="button" title="重新锁定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></button>
   </div>
 </header>
 
@@ -594,14 +588,15 @@
         <!-- entry factors -->
         <div class="card" id="card-entry">
           <button class="card-header" data-toggle-card="card-entry">
-            <h3 class="sub-h3">加分项 · 进场基础条件</h3>
+            <h3 class="sub-h3">进场基础条件</h3>
             <span class="chevron">▾</span>
           </button>
           <div class="card-body">
             <div class="field-group">
               <label class="field-label">支撑 / 阻力（SNR）</label>
-              <div class="chip-row">
-                <button type="button" class="chip" data-toggle-bool="snr">目前价格处于关键支撑或阻力位 (+8%)</button>
+              <div class="radio-row" data-single="snr">
+                <button type="button" class="pill" data-value="4h" data-w="5">4H支撑或阻力位 (+5%)</button>
+                <button type="button" class="pill" data-value="1d" data-w="10">1D支撑或阻力位 (+10%)</button>
               </div>
             </div>
             <div class="field-group">
@@ -615,7 +610,7 @@
             <div class="field-group">
               <label class="field-label">新闻影响（请避开新闻）</label>
               <div class="radio-row" data-single="news">
-                <button type="button" class="pill" data-value="none" data-w="1">无重大新闻 (+2%)</button>
+                <button type="button" class="pill" data-value="none" data-w="3">无重大新闻 (+3%)</button>
                 <button type="button" class="pill" data-value="normal" data-w="0">一般新闻 (0%)</button>
                 <button type="button" class="pill" data-value="medium" data-w="-3">中影响新闻 (-5%)</button>
                 <button type="button" class="pill" data-value="high" data-w="-5">高影响新闻 CPI / NFP / FOMC (-8%)</button>
@@ -700,6 +695,11 @@
 
   <!-- ================= DASHBOARD VIEW ================= -->
   <section class="view" id="view-dashboard">
+    <div id="dashboard-mount"></div>
+  </section>
+
+  <!-- ================= ABOUT VIEW ================= -->
+  <section class="view" id="view-about">
     <div class="about-card">
       <h3>关于这个交易系统</h3>
       <p>这个网站由 Emer 创建。</p>
@@ -709,7 +709,6 @@
       <p>每一笔交易都代表一次判断，每一次执行都会影响未来的成长。</p>
       <p class="about-highlight">认真对待每一笔交易，尊重市场，遵守计划，持续进步。</p>
     </div>
-    <div id="dashboard-mount"></div>
   </section>
 
 </main>
@@ -753,6 +752,18 @@
   </div>
 </div>
 
+<!-- ================= RESET CONFIRM MODAL ================= -->
+<div class="modal-overlay" id="reset-confirm-overlay">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <h2 style="margin-bottom:8px;">重置检查清单？</h2>
+    <p class="sub" style="margin-bottom:0;">方向与所有已勾选条件都会被清空，此操作无法撤销。</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="reset-confirm-cancel" type="button">取消</button>
+      <button class="btn-save" id="reset-confirm-ok" type="button" style="background:var(--short);">确定重置</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 
@@ -766,15 +777,16 @@
   ];
   const TF_COUNT_THRESHOLD = 3;
   const TF_COUNT_BONUS = 3;
-  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:5}, {id:'no', label:'没有', w:-3} ];
+  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:5}, {id:'no', label:'没有', w:-5} ];
   const ADV_OPTS = [
     {id:'nearzero', label:'靠近零轴', w:2},
     {id:'rebound', label:'已反弹', w:3},
-    {id:'bottomdiv', label:'底部背离确定', w:5},
+    {id:'bottomdiv', label:'底部背离确定', w:6},
     {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:8},
     {id:'ema52', label:'EMA52 支撑', w:8},
     {id:'nearema52', label:'靠近EMA52', w:2},
     {id:'nopress', label:'分时没有压力', w:5},
+    {id:'zerohiddenconfirm', label:'零轴隐形确定', w:5},
   ];
   const DIS_OPTS = [
     {id:'potentialdiv', label:'潜在背离', w:-3},
@@ -789,7 +801,7 @@
   /* ================= STATE ================= */
   let state = {
     direction:null, // 'long' | 'short'
-    snr:false,
+    snr:null,
     session:null, news:null, rr:null,
     tf:{}
   };
@@ -871,14 +883,7 @@
     else { tag.textContent='尚未选择方向'; tag.className='dir-tag'; }
   }
 
-  /* ================= SNR toggle ================= */
-  document.querySelector('[data-toggle-bool="snr"]').addEventListener('click', function(){
-    state.snr = !state.snr;
-    this.classList.toggle('active', state.snr);
-    recalc();
-  });
-
-  /* ================= single-select rows (session/news/rr) ================= */
+  /* ================= single-select rows (snr/session/news/rr) ================= */
   document.querySelectorAll('[data-single]').forEach(row=>{
     const key = row.dataset.single;
     row.querySelectorAll('.pill').forEach(btn=>{
@@ -940,14 +945,17 @@
   /* ================= SCORE CALCULATION ================= */
   function computeBreakdown(){
     const rows = []; // {label, w}
-    if(state.snr) rows.push({label:'关键支撑 / 阻力位', w:8});
+    if(state.snr){
+      const opt = {'4h':['4H支撑或阻力位',5], '1d':['1D支撑或阻力位',10]}[state.snr];
+      rows.push({label:opt[0], w:opt[1]});
+    }
 
     if(state.session){
       const opt = {london:['London Session',2], ny:['New York Session',3], golden:['London & NY 黄金时间',5]}[state.session];
       rows.push({label:'Session: '+opt[0], w:opt[1]});
     }
     if(state.news){
-      const opt = {none:['无重大新闻',2], normal:['一般新闻',0], medium:['中影响新闻',-5], high:['高影响新闻 (CPI/NFP/FOMC)',-8]}[state.news];
+      const opt = {none:['无重大新闻',3], normal:['一般新闻',0], medium:['中影响新闻',-5], high:['高影响新闻 (CPI/NFP/FOMC)',-8]}[state.news];
       rows.push({label:'新闻: '+opt[0], w:opt[1]});
     }
     if(state.rr){
@@ -1102,11 +1110,27 @@
   });
 
   function resetChecklist(){
-    state = { direction:null, snr:false, session:null, news:null, rr:null, tf:{} };
+    state = { direction:null, snr:null, session:null, news:null, rr:null, tf:{} };
     TF_GROUPS.forEach(g=>{ state.tf[g.key] = { tfs:new Set(), confluence:null, adv:new Set(), dis:new Set() }; });
     document.querySelectorAll('.chip.active, .pill.active').forEach(el=>el.classList.remove('active'));
     syncDirection();
     recalc();
+  }
+
+  /* ================= FLOATING RESET BUTTON ================= */
+  const fabResetBtn = document.getElementById('fab-reset-btn');
+  const resetConfirmOverlay = document.getElementById('reset-confirm-overlay');
+  if(fabResetBtn && resetConfirmOverlay){
+    fabResetBtn.addEventListener('click', ()=>{
+      resetConfirmOverlay.classList.add('open');
+    });
+    document.getElementById('reset-confirm-cancel').addEventListener('click', ()=>{
+      resetConfirmOverlay.classList.remove('open');
+    });
+    document.getElementById('reset-confirm-ok').addEventListener('click', ()=>{
+      resetChecklist();
+      resetConfirmOverlay.classList.remove('open');
+    });
   }
 
   /* ================= SUPABASE STORAGE ================= */
@@ -1178,10 +1202,11 @@
     be:{label:'保本', cls:'be'}
   };
 
+  const WEEKDAY_ZH = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
   function fmtTime(ts){
     const d = new Date(ts);
     const p = n=>String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${WEEKDAY_ZH[d.getDay()]} ${p(d.getHours())}:${p(d.getMinutes())}`;
   }
 
   /* ================= HISTORY VIEW ================= */
@@ -1244,7 +1269,7 @@
   function extractConditions(t){
     const conds = [];
     const snap = t.snapshot || {};
-    if(snap.snr) conds.push('SNR: 关键支撑/阻力位');
+    if(snap.snr) conds.push('SNR: '+(snap.snr==='4h'?'4H支撑或阻力位':'1D支撑或阻力位'));
     if(snap.session) conds.push('Session: '+snap.session);
     if(snap.news) conds.push('新闻: '+snap.news);
     if(snap.rr) conds.push('RR: '+snap.rr);
