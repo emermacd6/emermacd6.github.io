@@ -152,6 +152,38 @@
   .field-label .hint{color:var(--text-faint);text-transform:none;font-weight:500;letter-spacing:0;font-family:var(--mono);font-size:11.5px;}
 
   .chip-row,.radio-row,.checkbox-row{display:flex;flex-wrap:wrap;gap:8px;}
+
+  /* ---------- 优势/劣势 setup 左右对照表 ---------- */
+  .setup-table{display:flex;flex-direction:column;gap:8px;}
+  .setup-row{
+    display:grid;grid-template-columns:78px 1fr 1fr;gap:10px;align-items:center;
+    padding:9px;border-radius:10px;border:1px solid var(--line-soft);background:var(--bg-raise);
+  }
+  .setup-row-hi{
+    border:1.5px solid var(--accent);background:linear-gradient(90deg, rgba(39,221,223,.10), rgba(246,79,79,.06));
+    box-shadow:0 0 0 1px rgba(39,221,223,.25) inset;
+  }
+  .setup-dim{
+    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.4px;
+    line-height:1.3;text-transform:uppercase;
+  }
+  .setup-row-hi .setup-dim{color:var(--accent);font-weight:700;}
+  .setup-cell-adv,.setup-cell-dis{display:flex;}
+  .setup-cell-adv .chip,.setup-cell-dis .chip{width:100%;text-align:center;justify-content:center;}
+  @media (max-width:560px){
+    .setup-row{grid-template-columns:1fr;gap:6px;}
+    .setup-dim{padding-left:2px;}
+  }
+  .setup-aux{
+    margin-top:6px;padding-top:12px;border-top:1px dashed var(--line-soft);
+  }
+  .setup-aux-title{
+    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.6px;
+    text-transform:uppercase;margin-bottom:8px;
+  }
+  .setup-aux-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
+  .setup-aux-cols .setup-cell-adv,.setup-aux-cols .setup-cell-dis{flex-wrap:wrap;gap:8px;}
+  @media (max-width:560px){ .setup-aux-cols{grid-template-columns:1fr;} }
   .chip,.pill{
     appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
     padding:8px 13px;border-radius:8px;font-size:14px;font-family:var(--sans);cursor:pointer;transition:.12s ease;
@@ -211,6 +243,23 @@
   .as-row .as-bar-bg{flex:1;height:7px;border-radius:4px;background:var(--line-soft);overflow:hidden;}
   .as-row .as-bar-fg{height:100%;border-radius:4px;background:var(--accent);transition:width .3s ease;}
   .as-row .as-val{width:42px;flex-shrink:0;text-align:right;font-family:var(--mono);font-size:13.5px;color:var(--text);}
+  .as-triple{
+    margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-soft);text-align:left;
+  }
+  .as-triple-title{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;color:var(--text-dim);
+    text-transform:uppercase;margin-bottom:8px;text-align:center;
+  }
+  .as-triple-body{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+  .as-triple-empty{color:var(--text-faint);font-size:12.5px;}
+  .as-triple-chip{
+    font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;
+    border:1px solid var(--line);color:var(--text-dim);background:var(--bg-chip);
+  }
+  .as-triple-chip.good{border-color:var(--long);color:var(--long);background:var(--long-dim);}
+  .as-triple-chip.bad{border-color:var(--short);color:var(--short);background:var(--short-dim);}
+  .as-triple-chip.bonus{box-shadow:0 0 0 1px var(--accent) inset;}
+
   .as-overall{
     display:flex;align-items:center;justify-content:center;gap:8px;
     margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-soft);
@@ -666,6 +715,11 @@
               <div class="as-bar-bg"><div class="as-bar-fg" id="as-small-bar" style="width:0%"></div></div>
               <span class="as-val" id="as-small-val">0%</span>
             </div>
+            <div class="as-triple" id="as-triple">
+              <div class="as-triple-title">大 / 中 / 小时间共同 Setup</div>
+              <div class="as-triple-body" id="as-triple-body">暂无三时间共同 Setup</div>
+            </div>
+
             <div class="as-overall">
               <span class="as-overall-label">整体信号</span>
               <span class="as-badge weak" id="as-overall-badge">WEAK</span>
@@ -779,24 +833,34 @@
   const TF_COUNT_BONUS = 3;
   const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:10}, {id:'uncertain', label:'不确定', w:0}, {id:'no', label:'没有', w:-10} ];
   const ADV_OPTS = [
+    {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:10},
+    {id:'zerohiddenconfirm', label:'零轴隐形确定', w:5},
+    {id:'bottomdiv', label:'底部背离确定', w:6},
+    {id:'ema52', label:'EMA52 支撑', w:8},
     {id:'nearzero', label:'靠近零轴', w:2},
     {id:'rebound', label:'已反弹', w:3},
-    {id:'bottomdiv', label:'底部背离确定', w:6},
-    {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:10},
-    {id:'ema52', label:'EMA52 支撑', w:8},
     {id:'nearema52', label:'靠近EMA52', w:2},
     {id:'nopress', label:'分时没有压力', w:5},
-    {id:'zerohiddenconfirm', label:'零轴隐形确定', w:5},
   ];
   const DIS_OPTS = [
-    {id:'potentialdiv', label:'潜在背离', w:-3},
+    {id:'zerohidden', label:'零轴隐形', w:-5},
     {id:'confirmeddiv', label:'确定背离', w:-5},
     {id:'high', label:'高位', w:-10},
-    {id:'zerohidden', label:'零轴隐形', w:-5},
     {id:'lowmomentum', label:'动能不足', w:-3},
+    {id:'potentialdiv', label:'潜在背离', w:-3},
   ];
   const TRIPLE_BONUS_WEIGHT = 20;
-  const TRIPLE_BONUS_IDS = ['zeroenergy','ema52'];
+  const TRIPLE_BONUS_IDS = ['zeroenergy'];
+
+  /* 优势/劣势 Setup 权重顺序 + 左右对照维度分组（按核心权重从强到弱排列） */
+  const SETUP_DIMENSIONS = [
+    { name:'能量维度', adv:'zeroenergy', dis:'zerohidden', highlight:true },
+    { name:'零轴维度', adv:'zerohiddenconfirm', dis:'confirmeddiv' },
+    { name:'价格位置维度', adv:'bottomdiv', dis:'high' },
+    { name:'均线动能维度', adv:'ema52', dis:'lowmomentum' },
+  ];
+  const SETUP_AUX_ADV = ['nearzero','rebound','nearema52','nopress'];
+  const SETUP_AUX_DIS = ['potentialdiv'];
 
   /* ================= STATE ================= */
   let state = {
@@ -833,15 +897,33 @@
           </div>
         </div>
         <div class="field-group">
-          <label class="field-label good">优势 Setup</label>
-          <div class="checkbox-row" data-adv="${g.key}">
-            ${ADV_OPTS.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${o.w}">${o.label} (+${o.w}%)</button>`).join('')}
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label bad">劣势 Setup</label>
-          <div class="checkbox-row" data-dis="${g.key}">
-            ${DIS_OPTS.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w}%)</button>`).join('')}
+          <label class="field-label">优势 / 劣势 Setup <span class="hint">左：优势 · 右：劣势 · 按权重从强到弱</span></label>
+          <div class="setup-table" data-setup="${g.key}">
+            ${SETUP_DIMENSIONS.map(d=>{
+              const a = ADV_OPTS.find(x=>x.id===d.adv);
+              const b = DIS_OPTS.find(x=>x.id===d.dis);
+              return `
+              <div class="setup-row${d.highlight?' setup-row-hi':''}">
+                <div class="setup-dim">${d.name}</div>
+                <div class="setup-cell-adv">
+                  <button type="button" class="chip chip-good" data-value="${a.id}" data-w="${a.w}">${a.label} (+${a.w}%)</button>
+                </div>
+                <div class="setup-cell-dis">
+                  <button type="button" class="chip chip-bad" data-value="${b.id}" data-w="${b.w}">${b.label} (${b.w}%)</button>
+                </div>
+              </div>`;
+            }).join('')}
+            <div class="setup-aux">
+              <div class="setup-aux-title">辅助指标（不参与核心权重排序）</div>
+              <div class="setup-aux-cols">
+                <div class="setup-cell-adv">
+                  ${SETUP_AUX_ADV.map(id=>{ const o=ADV_OPTS.find(x=>x.id===id); return `<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${o.w}">${o.label} (+${o.w}%)</button>`; }).join('')}
+                </div>
+                <div class="setup-cell-dis">
+                  ${SETUP_AUX_DIS.map(id=>{ const o=DIS_OPTS.find(x=>x.id===id); return `<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w}%)</button>`; }).join('')}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -921,7 +1003,7 @@
       });
     });
     // advantage (multi)
-    document.querySelector(`[data-adv="${g.key}"]`).querySelectorAll('.chip').forEach(chip=>{
+    document.querySelectorAll(`[data-setup="${g.key}"] .chip-good`).forEach(chip=>{
       chip.addEventListener('click', ()=>{
         const set = state.tf[g.key].adv;
         const v = chip.dataset.value;
@@ -931,7 +1013,7 @@
       });
     });
     // disadvantage (multi)
-    document.querySelector(`[data-dis="${g.key}"]`).querySelectorAll('.chip').forEach(chip=>{
+    document.querySelectorAll(`[data-setup="${g.key}"] .chip-bad`).forEach(chip=>{
       chip.addEventListener('click', ()=>{
         const set = state.tf[g.key].dis;
         const v = chip.dataset.value;
@@ -989,10 +1071,26 @@
       tfGroupSums[g.key] = gSum;
     });
     if(tripleCheck.every(Boolean)){
-      rows.push({label:'大 + 中 + 小时间三重共振（零轴反弹+能量柱 / EMA52支撑）', w:TRIPLE_BONUS_WEIGHT});
+      rows.push({label:'大 + 中 + 小时间三重共振（零轴反弹 + 能量柱）', w:TRIPLE_BONUS_WEIGHT});
       TF_GROUPS.forEach(g=>{ tfGroupSums[g.key] += TRIPLE_BONUS_WEIGHT/TF_GROUPS.length; });
     }
     return {rows, tfGroupSums};
+  }
+
+  // 找出「大时间 + 中时间 + 小时间」都选中同一个 setup 的项目
+  function computeTripleMatches(){
+    const matches = [];
+    ADV_OPTS.forEach(o=>{
+      if(TF_GROUPS.every(g=> state.tf[g.key].adv.has(o.id))){
+        matches.push({label:o.label, type:'good', bonus:TRIPLE_BONUS_IDS.includes(o.id)});
+      }
+    });
+    DIS_OPTS.forEach(o=>{
+      if(TF_GROUPS.every(g=> state.tf[g.key].dis.has(o.id))){
+        matches.push({label:o.label, type:'bad', bonus:false});
+      }
+    });
+    return matches;
   }
 
   function recalc(){
@@ -1045,6 +1143,19 @@
     if(badge){
       badge.textContent = overallLabel;
       badge.className = 'as-badge '+overallCls;
+    }
+
+    // ---- 三时间（大/中/小）共同选中的 setup ----
+    const tripleBody = document.getElementById('as-triple-body');
+    if(tripleBody){
+      const matches = computeTripleMatches();
+      if(matches.length===0){
+        tripleBody.innerHTML = '<span class="as-triple-empty">暂无三时间共同 Setup</span>';
+      } else {
+        tripleBody.innerHTML = matches.map(m=>
+          `<span class="as-triple-chip ${m.type}${m.bonus?' bonus':''}">${m.bonus?'⭐ ':''}${m.label}</span>`
+        ).join('');
+      }
     }
 
     window.__currentScore = Math.round(score);
