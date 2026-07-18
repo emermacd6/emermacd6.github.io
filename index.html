@@ -84,21 +84,58 @@
   .tab-icon{width:15px;height:15px;flex-shrink:0;color:currentColor;}
 
   .fab-reset{
-    position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:40;
-    width:54px;height:54px;border-radius:50%;
+    position:fixed;left:22px;bottom:22px;z-index:40;
+    width:auto;height:48px;border-radius:24px;padding:0 18px 0 15px;
     appearance:none;border:1px solid var(--line);background:var(--bg-card);color:var(--text-dim);
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;display:flex;align-items:center;gap:8px;
     box-shadow:0 8px 24px rgba(0,0,0,.45);transition:.15s ease;
+    font-family:var(--sans);font-weight:600;font-size:13px;white-space:nowrap;
   }
-  .fab-reset svg{width:22px;height:22px;}
-  .fab-reset:hover{border-color:var(--short);color:var(--short);background:var(--short-dim);transform:translateY(-50%) scale(1.06);}
-  .fab-reset:active{transform:translateY(-50%) scale(.96);}
-  @media (max-width:640px){ .fab-reset{right:14px;width:46px;height:46px;} .fab-reset svg{width:19px;height:19px;} }
+  .fab-reset svg{width:20px;height:20px;flex-shrink:0;}
+  .fab-reset:hover{border-color:var(--short);color:var(--short);background:var(--short-dim);transform:scale(1.05);}
+  .fab-reset:active{transform:scale(.95);}
+  @media (max-width:640px){ .fab-reset{left:14px;bottom:14px;height:42px;padding:0 14px 0 11px;font-size:12px;} .fab-reset svg{width:17px;height:17px;} }
+
+  /* ---------- left side progress bar ---------- */
+  .side-progress{
+    position:fixed;left:20px;top:50%;transform:translateY(-50%);z-index:30;
+    display:flex;flex-direction:column;align-items:center;gap:9px;
+  }
+  .side-progress-track{
+    width:8px;height:220px;border-radius:5px;background:var(--bg-chip);border:1px solid var(--line);
+    overflow:hidden;display:flex;align-items:flex-end;
+  }
+  .side-progress-fill{
+    width:100%;height:0%;background:var(--short);
+    border-radius:5px;transition:height .3s ease, background .3s ease;
+  }
+  .side-progress-label{
+    font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.5px;
+  }
+  @media (max-width:1180px){ .side-progress{display:none;} }
+
+  .settings-gear-btn{
+    width:38px;height:38px;border-radius:9px;flex-shrink:0;
+    appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s ease;
+  }
+  .settings-gear-btn svg{width:19px;height:19px;}
+  .settings-gear-btn:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);transform:rotate(35deg);}
 
   main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 90px;}
   .view{display:none;animation:fade .25s ease;}
   .view.active{display:block;}
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- site entrance animation (播放于保险箱解锁时) ---------- */
+  header, main, .fab-reset{
+    transition:opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1);
+  }
+  body.pre-entrance header{opacity:0;transform:translateY(-14px);}
+  body.pre-entrance main{opacity:0;transform:translateY(22px);}
+  body.pre-entrance .fab-reset{opacity:0;transform:translateY(14px) scale(.7);}
+  body.pre-entrance .side-progress{opacity:0;}
+  .side-progress{transition:opacity .75s cubic-bezier(.16,1,.3,1);}
 
   /* ---------- layout ---------- */
   .layout{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start;}
@@ -155,8 +192,17 @@
 
   /* ---------- 优势/劣势 setup 左右对照表 ---------- */
   .setup-table{display:flex;flex-direction:column;gap:8px;}
+  .setup-head{
+    display:grid;grid-template-columns:78px 1fr 1fr;gap:10px;padding:0 9px;
+  }
+  .setup-head-label{
+    font-family:var(--disp);font-size:12.5px;font-weight:700;letter-spacing:.4px;
+    padding-bottom:2px;
+  }
+  .setup-head-label.good{color:var(--long);}
+  .setup-head-label.bad{color:var(--short);}
   .setup-row{
-    display:grid;grid-template-columns:78px 1fr 1fr;gap:10px;align-items:center;
+    display:grid;grid-template-columns:78px 1fr 1fr;gap:10px;align-items:start;
     padding:9px;border-radius:10px;border:1px solid var(--line-soft);background:var(--bg-raise);
   }
   .setup-row-hi{
@@ -165,25 +211,29 @@
   }
   .setup-dim{
     font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.4px;
-    line-height:1.3;text-transform:uppercase;
+    line-height:1.3;text-transform:uppercase;padding-top:6px;
   }
   .setup-row-hi .setup-dim{color:var(--accent);font-weight:700;}
-  .setup-cell-adv,.setup-cell-dis{display:flex;}
-  .setup-cell-adv .chip,.setup-cell-dis .chip{width:100%;text-align:center;justify-content:center;}
+  .setup-cell-adv,.setup-cell-dis{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
   @media (max-width:560px){
-    .setup-row{grid-template-columns:1fr;gap:6px;}
-    .setup-dim{padding-left:2px;}
+    .setup-row,.setup-head{grid-template-columns:1fr;gap:6px;}
+    .setup-dim{padding-left:2px;padding-top:0;}
+    .setup-head-label{padding-top:6px;}
   }
-  .setup-aux{
-    margin-top:6px;padding-top:12px;border-top:1px dashed var(--line-soft);
+
+  /* ---------- weight-based click gradient flash (强弱按权重区分) ---------- */
+  .chip,.pill{position:relative;overflow:hidden;}
+  .chip.flash::after,.pill.flash::after{
+    content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:linear-gradient(120deg, transparent 15%, var(--flash-c, var(--accent)) 50%, transparent 85%);
+    background-size:260% 100%;background-position:180% 0;
+    animation:chipSweep var(--flash-dur, .4s) ease-out forwards;
+    mix-blend-mode:screen;
   }
-  .setup-aux-title{
-    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.6px;
-    text-transform:uppercase;margin-bottom:8px;
+  @keyframes chipSweep{
+    0%{background-position:180% 0;opacity:.95;}
+    100%{background-position:-90% 0;opacity:0;}
   }
-  .setup-aux-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
-  .setup-aux-cols .setup-cell-adv,.setup-aux-cols .setup-cell-dis{flex-wrap:wrap;gap:8px;}
-  @media (max-width:560px){ .setup-aux-cols{grid-template-columns:1fr;} }
   .chip,.pill{
     appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
     padding:8px 13px;border-radius:8px;font-size:14px;font-family:var(--sans);cursor:pointer;transition:.12s ease;
@@ -202,6 +252,24 @@
     padding:22px;text-align:center;
   }
   .score-card .label{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;}
+
+  /* ---------- malaysia time + session status ---------- */
+  .myt-clock{
+    text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px dashed var(--line-soft);
+  }
+  .myt-time{font-family:var(--disp);font-size:27px;font-weight:700;letter-spacing:.4px;color:var(--text);}
+  .myt-day{
+    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:1.6px;
+    text-transform:uppercase;margin-top:3px;
+  }
+  .myt-session{
+    display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 13px;border-radius:20px;
+    font-family:var(--mono);font-size:11.5px;font-weight:700;border:1px solid var(--line);color:var(--text-faint);
+    background:var(--bg-chip);
+  }
+  .myt-session.ready{color:var(--text);border-color:var(--text-faint);background:var(--bg-chip);}
+  .myt-session.active{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 10px rgba(39,221,223,.25);}
+
   .gauge-wrap{position:relative;width:180px;height:180px;margin:14px auto 6px;}
   .gauge-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
   .gauge-bg{fill:none;stroke:var(--line);stroke-width:10;}
@@ -240,9 +308,47 @@
   .as-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
   .as-row:last-of-type{margin-bottom:0;}
   .as-row .as-label{width:56px;flex-shrink:0;font-size:13.5px;color:var(--text-dim);font-weight:600;}
-  .as-row .as-bar-bg{flex:1;height:7px;border-radius:4px;background:var(--line-soft);overflow:hidden;}
-  .as-row .as-bar-fg{height:100%;border-radius:4px;background:var(--accent);transition:width .3s ease;}
   .as-row .as-val{width:42px;flex-shrink:0;text-align:right;font-family:var(--mono);font-size:13.5px;color:var(--text);}
+
+  /* ---------- design switch icon ---------- */
+  .as-title-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;position:relative;}
+  .as-title-row .as-title{margin-bottom:0;}
+  .as-design-switch{
+    position:absolute;right:0;width:22px;height:22px;border-radius:50%;
+    appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:.15s ease;
+  }
+  .as-design-switch:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);transform:rotate(180deg);}
+
+  /* ---------- design 1: energy bar (no fixed 100% max) ---------- */
+  .as-bar-track{flex:1;height:9px;border-radius:5px;background:var(--line-soft);overflow:hidden;}
+  .as-bar-fill{height:100%;width:0%;border-radius:5px;background:var(--accent);box-shadow:0 0 6px rgba(39,221,223,.45);transition:width .3s ease, background .3s ease;}
+  .as-bar-fill.strong{background:var(--long);box-shadow:0 0 6px rgba(55,223,142,.5);}
+  .as-bar-fill.neg{background:var(--short);box-shadow:0 0 6px rgba(246,79,79,.45);}
+
+  /* ---------- design 2: big/medium/small proportion donut ---------- */
+  .as-donut-wrap{position:relative;width:118px;height:118px;margin:2px auto 12px;}
+  .as-donut-svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .as-donut-bg{fill:none;stroke:var(--line-soft);stroke-width:14;}
+  .as-donut-seg{fill:none;stroke-width:14;stroke-linecap:butt;transition:stroke-dasharray .3s ease, stroke-dashoffset .3s ease;}
+  .as-donut-seg[data-seg="big"]{stroke:var(--accent);}
+  .as-donut-seg[data-seg="medium"]{stroke:var(--long);}
+  .as-donut-seg[data-seg="small"]{stroke:#f0b93a;}
+  .as-donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);text-align:center;}
+  .as-donut-legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text-dim);}
+  .as-legend-item{display:flex;align-items:center;gap:5px;}
+  .as-legend-item i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .as-legend-item.big i{background:var(--accent);}
+  .as-legend-item.medium i{background:var(--long);}
+  .as-legend-item.small i{background:#f0b93a;}
+  .as-legend-item b{color:var(--text);}
+
+  /* ---------- design 3: selected MACD tf levels per group ---------- */
+  .as-tflevel-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .as-tflevel-row:last-child{margin-bottom:0;}
+  .as-tflevel-chips{flex:1;display:flex;flex-wrap:wrap;gap:5px;}
+  .as-tflevel-chips .as-tf-chip{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:6px;border:1px solid var(--accent);color:var(--accent);background:var(--accent-dim);}
+  .as-tflevel-empty{color:var(--text-faint);font-size:12px;}
   .as-triple{
     margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-soft);text-align:left;
   }
@@ -321,10 +427,60 @@
   .result-btn.active[data-r="win"]{background:var(--long-dim);border-color:var(--long);color:var(--long);}
   .result-btn.active[data-r="loss"]{background:var(--short-dim);border-color:var(--short);color:var(--short);}
   .result-btn.active[data-r="be"]{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .result-btn.active[data-r="open"]{background:rgba(240,185,58,.14);border-color:#f0b93a;color:#f0b93a;}
+  .result-btn.active[data-edir="long"]{background:var(--long-dim);border-color:var(--long);color:var(--long);}
+  .result-btn.active[data-edir="short"]{background:var(--short-dim);border-color:var(--short);color:var(--short);}
+  .result-btn.active[data-er="win"]{background:var(--long-dim);border-color:var(--long);color:var(--long);}
+  .result-btn.active[data-er="loss"]{background:var(--short-dim);border-color:var(--short);color:var(--short);}
+  .result-btn.active[data-er="be"]{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .result-btn.active[data-er="open"]{background:rgba(240,185,58,.14);border-color:#f0b93a;color:#f0b93a;}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
   .modal-actions button{flex:1;padding:12px;border-radius:9px;font-weight:700;cursor:pointer;font-family:var(--disp);font-size:13.5px;}
   .btn-cancel{background:transparent;border:1px solid var(--line);color:var(--text-dim);}
   .btn-save{background:var(--accent);border:none;color:#062223;}
+
+  /* ---------- settings editor panel ---------- */
+  .settings-modal{max-width:680px;max-height:82vh;display:flex;flex-direction:column;}
+  .settings-dims-scroll{overflow-y:auto;padding-right:4px;flex:1;}
+  .settings-dim-block{
+    background:var(--bg-raise);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:14px;
+  }
+  .settings-dim-title{font-family:var(--disp);font-weight:700;font-size:14.5px;margin-bottom:10px;color:var(--text);}
+  .settings-dim-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){ .settings-dim-cols{grid-template-columns:1fr;} }
+  .settings-col-label{font-size:12px;font-weight:700;letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase;}
+  .settings-col-label.good{color:var(--long);}
+  .settings-col-label.bad{color:var(--short);}
+  .settings-opt-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+  .settings-opt-label{
+    flex:1;min-width:0;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
+    padding:7px 9px;border-radius:7px;font-size:12.5px;font-family:var(--sans);
+  }
+  .settings-opt-w{
+    width:54px;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
+    padding:7px 6px;border-radius:7px;font-size:12.5px;font-family:var(--mono);text-align:right;
+  }
+  .settings-opt-pct{font-family:var(--mono);font-size:12px;color:var(--text-faint);}
+  .settings-opt-del{
+    background:transparent;border:none;color:var(--text-faint);cursor:pointer;
+    font-size:14px;padding:4px 6px;flex-shrink:0;
+  }
+  .settings-opt-del:hover{color:var(--short);}
+  .settings-add-btn{
+    width:100%;margin-top:2px;background:transparent;border:1px dashed var(--line);
+    color:var(--text-dim);padding:8px;border-radius:7px;font-size:12.5px;cursor:pointer;font-weight:600;
+  }
+  .settings-add-btn.good:hover{border-color:var(--long);color:var(--long);background:var(--long-dim);}
+  .settings-add-btn.bad:hover{border-color:var(--short);color:var(--short);background:var(--short-dim);}
+  .settings-pw-input{
+    width:100%;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
+    padding:12px;border-radius:8px;font-size:22px;letter-spacing:10px;text-align:center;
+    font-family:var(--mono);
+  }
+  .settings-pw-input:focus{outline:none;border-color:var(--accent);}
+  .settings-pw-error{color:var(--short);font-size:12.5px;margin-top:8px;text-align:center;display:none;}
+  .settings-pw-error.show{display:block;}
 
   /* ---------- history ---------- */
   .hist-item{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
@@ -344,6 +500,17 @@
   .hist-time{color:var(--text-faint);font-size:11.5px;font-family:var(--mono);}
   .hist-del{background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:15px;padding:4px 8px;}
   .hist-del:hover{color:var(--short);}
+  .hist-edit{background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:14px;padding:4px 8px;}
+  .hist-edit:hover{color:var(--accent);}
+  .hist-badge.open{background:rgba(240,185,58,.14);color:#f0b93a;}
+
+  .settings-tf-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .settings-tf-row{display:flex;align-items:center;gap:4px;background:var(--bg-chip);border:1px solid var(--line);border-radius:7px;padding:6px 6px 6px 10px;}
+  .settings-tf-row input{
+    width:56px;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:12.5px;padding:0;
+  }
+  .settings-tf-row input:focus{outline:none;}
+  .settings-tf-row .settings-opt-del{padding:2px 4px;font-size:13px;}
   .hist-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line-soft);}
   .hist-body.open{display:block;}
   .hist-note{font-size:12.5px;color:var(--text-dim);margin:12px 0;font-style:italic;}
@@ -438,8 +605,11 @@
     animation:vaultSpinBack 6s linear infinite;
   }
   @keyframes vaultSpinBack{to{transform:rotate(-360deg);}}
-  .vault-lock-icon{width:30px;height:30px;color:var(--accent);filter:drop-shadow(0 0 8px rgba(39,221,223,.4));}
+  .vault-lock-icon{width:46px;height:46px;color:var(--accent);filter:drop-shadow(0 0 8px rgba(39,221,223,.4));display:flex;align-items:center;justify-content:center;}
   .vault-lock-icon svg{width:100%;height:100%;display:block;}
+  .vault-lock-icon img{width:100%;height:100%;object-fit:contain;display:block;}
+  .vault-lock-icon.pulse{animation:vaultLogoPulse .6s ease;}
+  @keyframes vaultLogoPulse{0%{transform:scale(1);}45%{transform:scale(1.18);filter:drop-shadow(0 0 16px rgba(39,221,223,.8));}100%{transform:scale(1);}}
   .vault-brand{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:1px;color:var(--text);}
   .vault-sub{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);margin-top:6px;letter-spacing:.4px;}
 
@@ -472,7 +642,7 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="pre-entrance">
 
 <!-- ================= VAULT LOCK SCREEN ================= -->
 <div class="vault-overlay" id="vault-overlay">
@@ -480,7 +650,10 @@
   <div class="vault-card" id="vault-card">
     <div class="vault-ring">
       <div class="vault-ring-inner">
-        <span class="vault-lock-icon" id="vault-lock-icon"></span>
+        <span class="vault-lock-icon" id="vault-lock-icon">
+          <img src="white_logo_macd.png" alt="EMER" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <span class="logo-fallback" style="display:none;height:auto;padding:0;border:none;">EMER</span>
+        </span>
       </div>
     </div>
     <div class="vault-brand">EMER MACD SYSTEM</div>
@@ -528,9 +701,6 @@
   var errEl = document.getElementById('vault-error');
   var lockIcon = document.getElementById('vault-lock-icon');
 
-  var ICON_LOCKED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
-  var ICON_UNLOCKED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2.2"></path></svg>';
-
   function renderDots(state){
     dots.forEach(function(d, i){
       d.classList.remove('filled','wrong');
@@ -539,8 +709,10 @@
   }
 
   function unlock(){
-    lockIcon.innerHTML = ICON_UNLOCKED;
+    lockIcon.classList.add('pulse');
     overlay.classList.add('unlocking');
+    // 解锁瞬间同步触发主站进场动画
+    document.body.classList.remove('pre-entrance');
     setTimeout(function(){ overlay.classList.add('hidden'); document.body.style.overflow=''; }, 520);
   }
 
@@ -589,14 +761,20 @@
   });
 
   // 每次打开 / 刷新网站都重新要求输入密码（不做任何本地记忆）
-  lockIcon.innerHTML = ICON_LOCKED;
   document.body.style.overflow = 'hidden';
 })();
 </script>
 
 <div class="bg-grid"></div>
 
-<button id="fab-reset-btn" class="fab-reset" type="button" title="重置检查清单"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"></path><path d="M3 12V6"></path><path d="M3 12h6"></path></svg></button>
+<button id="fab-reset-btn" class="fab-reset" type="button" title="重置检查清单"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"></path><path d="M3 12V6"></path><path d="M3 12h6"></path></svg><span>重置选择</span></button>
+
+<div class="side-progress" id="side-progress" title="预估胜率进度">
+  <div class="side-progress-track">
+    <div class="side-progress-fill" id="side-progress-fill"></div>
+  </div>
+  <div class="side-progress-label" id="side-progress-label">0%</div>
+</div>
 
 <header>
   <div class="brand">
@@ -607,13 +785,16 @@
       <h1>MACD Trading Checklist</h1>
     </div>
   </div>
-  <div style="display:flex;align-items:center;">
+  <div style="display:flex;align-items:center;gap:10px;">
     <nav class="tabs">
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
       <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
     </nav>
+    <button id="settings-open-btn" class="settings-gear-btn" type="button" title="Setup 设置（需要密码）">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
   </div>
 </header>
 
@@ -646,13 +827,14 @@
               <div class="radio-row" data-single="snr">
                 <button type="button" class="pill" data-value="4h" data-w="5">4H支撑或阻力位 (+5%)</button>
                 <button type="button" class="pill" data-value="1d" data-w="10">1D支撑或阻力位 (+10%)</button>
+                <button type="button" class="pill" data-value="none" data-w="-3">无支撑或阻力位 (-3%)</button>
               </div>
             </div>
             <div class="field-group">
               <label class="field-label">Session</label>
               <div class="radio-row" data-single="session">
-                <button type="button" class="pill" data-value="london" data-w="2">London Session (+2%)</button>
-                <button type="button" class="pill" data-value="ny" data-w="3">New York Session (+3%)</button>
+                <button type="button" class="pill" data-value="london" data-w="2.5">London Session (+2.5%)</button>
+                <button type="button" class="pill" data-value="ny" data-w="5">New York Session (+5%)</button>
                 <button type="button" class="pill" data-value="golden" data-w="4">London &amp; New York 黄金时间 8–10PM (+5%)</button>
               </div>
             </div>
@@ -685,6 +867,11 @@
       <!-- sidebar -->
       <div class="side-sticky">
         <div class="score-card">
+          <div class="myt-clock" id="myt-clock">
+            <div class="myt-time" id="myt-time-val">--:-- --</div>
+            <div class="myt-day" id="myt-day-val">MALAYSIA TIME</div>
+            <div class="myt-session off" id="myt-session-val">—</div>
+          </div>
           <div class="label">预估胜率 Win Probability</div>
           <div class="gauge-wrap">
             <svg viewBox="0 0 160 160">
@@ -699,22 +886,64 @@
           <div id="dir-tag" class="dir-tag">尚未选择方向</div>
 
           <div class="analysis-summary" id="analysis-summary">
-            <div class="as-title">分析总结 · Summary</div>
-            <div class="as-row">
-              <span class="as-label">大时间</span>
-              <div class="as-bar-bg"><div class="as-bar-fg" id="as-big-bar" style="width:0%"></div></div>
-              <span class="as-val" id="as-big-val">0%</span>
+            <div class="as-title-row">
+              <div class="as-title">分析总结 · Summary</div>
+              <button class="as-design-switch" id="as-design-switch" type="button" title="切换视图设计">⇄</button>
             </div>
-            <div class="as-row">
-              <span class="as-label">中时间</span>
-              <div class="as-bar-bg"><div class="as-bar-fg" id="as-medium-bar" style="width:0%"></div></div>
-              <span class="as-val" id="as-medium-val">0%</span>
+
+            <!-- 设计 1：能量条（无固定满分 100%，按累积分数显示） -->
+            <div class="as-design" id="as-design-1">
+              <div class="as-row">
+                <span class="as-label">大时间</span>
+                <div class="as-bar-track"><div class="as-bar-fill" id="as-big-fill"></div></div>
+                <span class="as-val" id="as-big-val">0%</span>
+              </div>
+              <div class="as-row">
+                <span class="as-label">中时间</span>
+                <div class="as-bar-track"><div class="as-bar-fill" id="as-medium-fill"></div></div>
+                <span class="as-val" id="as-medium-val">0%</span>
+              </div>
+              <div class="as-row">
+                <span class="as-label">小时间</span>
+                <div class="as-bar-track"><div class="as-bar-fill" id="as-small-fill"></div></div>
+                <span class="as-val" id="as-small-val">0%</span>
+              </div>
             </div>
-            <div class="as-row">
-              <span class="as-label">小时间</span>
-              <div class="as-bar-bg"><div class="as-bar-fg" id="as-small-bar" style="width:0%"></div></div>
-              <span class="as-val" id="as-small-val">0%</span>
+
+            <!-- 设计 2：大/中/小时间占比圆环 -->
+            <div class="as-design" id="as-design-2" style="display:none;">
+              <div class="as-donut-wrap">
+                <svg viewBox="0 0 120 120" class="as-donut-svg">
+                  <circle class="as-donut-bg" cx="60" cy="60" r="50"></circle>
+                  <circle class="as-donut-seg" data-seg="big" cx="60" cy="60" r="50" stroke-dasharray="0 400"></circle>
+                  <circle class="as-donut-seg" data-seg="medium" cx="60" cy="60" r="50" stroke-dasharray="0 400"></circle>
+                  <circle class="as-donut-seg" data-seg="small" cx="60" cy="60" r="50" stroke-dasharray="0 400"></circle>
+                </svg>
+                <div class="as-donut-center">占比</div>
+              </div>
+              <div class="as-donut-legend">
+                <span class="as-legend-item big"><i></i>大时间 <b id="as-donut-big-pct">0%</b></span>
+                <span class="as-legend-item medium"><i></i>中时间 <b id="as-donut-medium-pct">0%</b></span>
+                <span class="as-legend-item small"><i></i>小时间 <b id="as-donut-small-pct">0%</b></span>
+              </div>
             </div>
+
+            <!-- 设计 3：三个时间目前选择的 MACD 级别 -->
+            <div class="as-design" id="as-design-3" style="display:none;">
+              <div class="as-tflevel-row">
+                <span class="as-label">大时间</span>
+                <div class="as-tflevel-chips" id="as-tf-big"></div>
+              </div>
+              <div class="as-tflevel-row">
+                <span class="as-label">中时间</span>
+                <div class="as-tflevel-chips" id="as-tf-medium"></div>
+              </div>
+              <div class="as-tflevel-row">
+                <span class="as-label">小时间</span>
+                <div class="as-tflevel-chips" id="as-tf-small"></div>
+              </div>
+            </div>
+
             <div class="as-triple" id="as-triple">
               <div class="as-triple-title">大 / 中 / 小时间共同 Setup</div>
               <div class="as-triple-body" id="as-triple-body">暂无三时间共同 Setup</div>
@@ -794,6 +1023,7 @@
       <button type="button" class="result-btn" data-r="win">✓ 盈利 Win</button>
       <button type="button" class="result-btn" data-r="loss">✕ 亏损 Loss</button>
       <button type="button" class="result-btn" data-r="be">– 保本 BE</button>
+      <button type="button" class="result-btn" data-r="open">◐ 开单中</button>
     </div>
 
     <label>备注 Notes（选填）</label>
@@ -818,6 +1048,82 @@
   </div>
 </div>
 
+<!-- ================= EDIT TRADE MODAL ================= -->
+<div class="modal-overlay" id="edit-modal-overlay">
+  <div class="modal">
+    <h2>编辑交易记录</h2>
+    <p class="sub">随时修改历史记录中的信息，保存后立即生效</p>
+
+    <label>你的名字 Name</label>
+    <input type="text" id="edit-trader" placeholder="例如：Emer" autocomplete="off">
+
+    <label>交易品种 Symbol</label>
+    <select id="edit-symbol">
+      <option value="XAUUSD">XAUUSD</option>
+      <option value="XTIUSD">XTIUSD</option>
+      <option value="BTCUSD">BTCUSD</option>
+      <option value="ETHUSD">ETHUSD</option>
+      <option value="DJ30">DJ30</option>
+      <option value="UK100">UK100</option>
+      <option value="GER40">GER40</option>
+    </select>
+
+    <label>方向 Direction</label>
+    <div class="result-row">
+      <button type="button" class="result-btn" data-edir="long">▲ LONG</button>
+      <button type="button" class="result-btn" data-edir="short">▼ SHORT</button>
+    </div>
+
+    <label>交易结果 Result</label>
+    <div class="result-row">
+      <button type="button" class="result-btn" data-er="win">✓ 盈利</button>
+      <button type="button" class="result-btn" data-er="loss">✕ 亏损</button>
+      <button type="button" class="result-btn" data-er="be">– 保本</button>
+      <button type="button" class="result-btn" data-er="open">◐ 开单中</button>
+    </div>
+
+    <label>评分 Score（%）</label>
+    <input type="text" id="edit-score" placeholder="0-100" autocomplete="off">
+
+    <label>备注 Notes</label>
+    <textarea id="edit-notes" placeholder="例如：进场理由、心态、执行细节..."></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" id="edit-cancel" type="button">取消</button>
+      <button class="btn-save" id="edit-save" type="button">保存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS: PASSWORD GATE ================= -->
+<div class="modal-overlay" id="settings-pw-overlay">
+  <div class="modal" style="max-width:340px;text-align:center;">
+    <h2 style="margin-bottom:4px;">⚙️ Setup 设置</h2>
+    <p class="sub">请输入 6 位密码解锁</p>
+    <input type="password" inputmode="numeric" maxlength="6" id="settings-pw-input" class="settings-pw-input" placeholder="••••••" autocomplete="off">
+    <div class="settings-pw-error" id="settings-pw-error">密码错误，请重试</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="settings-pw-cancel" type="button">取消</button>
+      <button class="btn-save" id="settings-pw-ok" type="button">解锁</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS: EDITOR PANEL ================= -->
+<div class="modal-overlay" id="settings-panel-overlay">
+  <div class="modal settings-modal">
+    <h2 style="margin-bottom:4px;">⚙️ 检查清单设置</h2>
+    <p class="sub">调整大/中/小时间 MACD 级别，以及优势 / 劣势 Setup 的选项与权重（%）</p>
+    <div class="settings-dims-scroll">
+      <div id="settings-tf-mount"></div>
+      <div id="settings-dims-mount"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="settings-panel-close" type="button">完成</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 
@@ -832,35 +1138,66 @@
   const TF_COUNT_THRESHOLD = 3;
   const TF_COUNT_BONUS = 3;
   const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:10}, {id:'uncertain', label:'不确定', w:0}, {id:'no', label:'没有', w:-10} ];
-  const ADV_OPTS = [
-    {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:10},
-    {id:'zerohiddenconfirm', label:'零轴隐形确定', w:5},
-    {id:'bottomdiv', label:'底部背离确定', w:6},
-    {id:'ema52', label:'EMA52 支撑', w:8},
-    {id:'nearzero', label:'靠近零轴', w:2},
-    {id:'rebound', label:'已反弹', w:3},
-    {id:'nearema52', label:'靠近EMA52', w:2},
-    {id:'nopress', label:'分时没有压力', w:5},
-  ];
-  const DIS_OPTS = [
-    {id:'zerohidden', label:'零轴隐形', w:-5},
-    {id:'confirmeddiv', label:'确定背离', w:-5},
-    {id:'high', label:'高位', w:-10},
-    {id:'lowmomentum', label:'动能不足', w:-3},
-    {id:'potentialdiv', label:'潜在背离', w:-3},
-  ];
-  const TRIPLE_BONUS_WEIGHT = 20;
+  const TRIPLE_BONUS_WEIGHT = 10;
   const TRIPLE_BONUS_IDS = ['zeroenergy'];
+  const FLASH_MAX_ABS_W = 12; // 用于按权重强弱缩放点击渐变动画强度
 
-  /* 优势/劣势 Setup 权重顺序 + 左右对照维度分组（按核心权重从强到弱排列） */
-  const SETUP_DIMENSIONS = [
-    { name:'能量维度', adv:'zeroenergy', dis:'zerohidden', highlight:true },
-    { name:'零轴维度', adv:'zerohiddenconfirm', dis:'confirmeddiv' },
-    { name:'价格位置维度', adv:'bottomdiv', dis:'high' },
-    { name:'均线动能维度', adv:'ema52', dis:'lowmomentum' },
+  /* 优势/劣势 Setup：按维度分组，每个维度可有多个优势/劣势选项，按权重从强到弱排列
+     可通过右上角「设置」（密码 112233）增删选项或调整权重，修改后自动应用到大/中/小时间 */
+  let SETUP_DIMENSIONS = [
+    { name:'零轴状态', highlight:true,
+      adv:[
+        {id:'nearzero', label:'靠近零轴', w:3},
+        {id:'zerosupport', label:'零轴有效支撑', w:6},
+        {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:10},
+      ],
+      dis:[
+        {id:'zerodistance', label:'零轴有距离', w:-6},
+      ]
+    },
+    { name:'EMA52状态',
+      adv:[
+        {id:'nearema52', label:'靠近EMA52', w:3},
+        {id:'ema52support', label:'EMA52有效支撑', w:6},
+      ],
+      dis:[
+        {id:'ema52distance', label:'EMA52有距离', w:-6},
+      ]
+    },
+    { name:'背离状态',
+      adv:[
+        {id:'nodiv', label:'无背离', w:3},
+        {id:'potentialdiv', label:'潜在背离', w:4},
+        {id:'bottomdiv', label:'底部背离', w:6},
+        {id:'confirmeddivplayout', label:'确定背离Playout', w:10},
+      ],
+      dis:[
+        {id:'minorharmdiv', label:'分时间级别有害背离', w:-6},
+        {id:'majorharmdiv', label:'主时间级别有害背离', w:-12},
+      ]
+    },
+    { name:'零轴隐形',
+      adv:[
+        {id:'zerohiddenno', label:'无', w:5},
+      ],
+      dis:[
+        {id:'zerohiddenyes', label:'有', w:-5},
+      ]
+    },
   ];
-  const SETUP_AUX_ADV = ['nearzero','rebound','nearema52','nopress'];
-  const SETUP_AUX_DIS = ['potentialdiv'];
+
+  // 展平为 ADV_OPTS / DIS_OPTS 供计分逻辑使用；设置面板增删改后需重新调用
+  let ADV_OPTS = [];
+  let DIS_OPTS = [];
+  function rebuildFlatOpts(){
+    ADV_OPTS = [];
+    DIS_OPTS = [];
+    SETUP_DIMENSIONS.forEach(d=>{
+      d.adv.forEach(o=>ADV_OPTS.push(o));
+      d.dis.forEach(o=>DIS_OPTS.push(o));
+    });
+  }
+  rebuildFlatOpts();
 
   /* ================= STATE ================= */
   let state = {
@@ -873,63 +1210,159 @@
     state.tf[g.key] = { tfs:new Set(), confluence:null, adv:new Set(), dis:new Set() };
   });
 
-  /* ================= RENDER TF CARDS ================= */
-  const mount = document.getElementById('tf-cards-mount');
-  let tfHtml = '';
-  TF_GROUPS.forEach(g=>{
-    tfHtml += `
-    <div class="card tf-card" id="card-${g.key}">
-      <button class="card-header" data-toggle-card="card-${g.key}">
-        <h3>${g.name} MACD</h3>
-        <span class="chevron">▾</span>
-      </button>
-      <div class="card-body">
-        <div class="field-group">
-          <label class="field-label">目前${g.name}MACD级别 <span class="hint">选3个以上 +${TF_COUNT_BONUS}%</span></label>
-          <div class="chip-row" data-tfselect="${g.key}">
-            ${g.tfs.map(v=>`<button type="button" class="chip" data-value="${v}">${v}</button>`).join('')}
-          </div>
+  /* ================= RENDER TF CARDS (可重复调用，设置修改后会重新渲染) ================= */
+  function buildSetupTableHtml(g){
+    return `
+      <div class="setup-table" data-setup="${g.key}">
+        <div class="setup-head">
+          <div class="setup-dim"></div>
+          <div class="setup-head-label good">优势</div>
+          <div class="setup-head-label bad">劣势</div>
         </div>
-        <div class="field-group">
-          <label class="field-label">是否有两个${g.name}配合</label>
-          <div class="radio-row" data-confluence="${g.key}">
-            ${CONFLUENCE_OPTS.map(o=>`<button type="button" class="pill" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w>0?'+':''}${o.w}%)</button>`).join('')}
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">优势 / 劣势 Setup <span class="hint">左：优势 · 右：劣势 · 按权重从强到弱</span></label>
-          <div class="setup-table" data-setup="${g.key}">
-            ${SETUP_DIMENSIONS.map(d=>{
-              const a = ADV_OPTS.find(x=>x.id===d.adv);
-              const b = DIS_OPTS.find(x=>x.id===d.dis);
-              return `
-              <div class="setup-row${d.highlight?' setup-row-hi':''}">
-                <div class="setup-dim">${d.name}</div>
-                <div class="setup-cell-adv">
-                  <button type="button" class="chip chip-good" data-value="${a.id}" data-w="${a.w}">${a.label} (+${a.w}%)</button>
-                </div>
-                <div class="setup-cell-dis">
-                  <button type="button" class="chip chip-bad" data-value="${b.id}" data-w="${b.w}">${b.label} (${b.w}%)</button>
-                </div>
-              </div>`;
-            }).join('')}
-            <div class="setup-aux">
-              <div class="setup-aux-title">辅助指标（不参与核心权重排序）</div>
-              <div class="setup-aux-cols">
-                <div class="setup-cell-adv">
-                  ${SETUP_AUX_ADV.map(id=>{ const o=ADV_OPTS.find(x=>x.id===id); return `<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${o.w}">${o.label} (+${o.w}%)</button>`; }).join('')}
-                </div>
-                <div class="setup-cell-dis">
-                  ${SETUP_AUX_DIS.map(id=>{ const o=DIS_OPTS.find(x=>x.id===id); return `<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w}%)</button>`; }).join('')}
-                </div>
-              </div>
+        ${SETUP_DIMENSIONS.map(d=>`
+          <div class="setup-row${d.highlight?' setup-row-hi':''}">
+            <div class="setup-dim">${d.name}</div>
+            <div class="setup-cell-adv">
+              ${d.adv.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${o.w}">${o.label} (+${o.w}%)</button>`).join('')}
+            </div>
+            <div class="setup-cell-dis">
+              ${d.dis.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w}%)</button>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function renderTFCards(){
+    const mount = document.getElementById('tf-cards-mount');
+    let tfHtml = '';
+    TF_GROUPS.forEach(g=>{
+      tfHtml += `
+      <div class="card tf-card" id="card-${g.key}">
+        <button class="card-header" data-toggle-card="card-${g.key}">
+          <h3>${g.name} MACD</h3>
+          <span class="chevron">▾</span>
+        </button>
+        <div class="card-body">
+          <div class="field-group">
+            <label class="field-label">目前${g.name}MACD级别 <span class="hint">选3个以上 +${TF_COUNT_BONUS}%</span></label>
+            <div class="chip-row" data-tfselect="${g.key}">
+              ${g.tfs.map(v=>`<button type="button" class="chip" data-value="${v}">${v}</button>`).join('')}
             </div>
           </div>
+          <div class="field-group">
+            <label class="field-label">是否有两个${g.name}配合</label>
+            <div class="radio-row" data-confluence="${g.key}">
+              ${CONFLUENCE_OPTS.map(o=>`<button type="button" class="pill" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w>0?'+':''}${o.w}%)</button>`).join('')}
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">优势 / 劣势 Setup <span class="hint">按权重从强到弱排列</span></label>
+            ${buildSetupTableHtml(g)}
+          </div>
         </div>
-      </div>
-    </div>`;
+      </div>`;
+    });
+    mount.innerHTML = tfHtml;
+    bindTFCardEvents();
+    syncActiveChipsFromState();
+  }
+
+  function bindTFCardEvents(){
+    TF_GROUPS.forEach(g=>{
+      // tf level chips (multi)
+      document.querySelectorAll(`[data-tfselect="${g.key}"] .chip`).forEach(chip=>{
+        chip.addEventListener('click', ()=>{
+          const set = state.tf[g.key].tfs;
+          const v = chip.dataset.value;
+          if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
+          else{ set.add(v); chip.classList.add('active'); }
+          recalc();
+        });
+      });
+      // confluence (single, toggle-able)
+      document.querySelectorAll(`[data-confluence="${g.key}"] .pill`).forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const row = btn.parentElement;
+          const already = state.tf[g.key].confluence === btn.dataset.value;
+          row.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+          if(already){ state.tf[g.key].confluence = null; }
+          else{ state.tf[g.key].confluence = btn.dataset.value; btn.classList.add('active'); }
+          recalc();
+        });
+      });
+      // advantage (multi)
+      document.querySelectorAll(`[data-setup="${g.key}"] .chip-good`).forEach(chip=>{
+        chip.addEventListener('click', ()=>{
+          const set = state.tf[g.key].adv;
+          const v = chip.dataset.value;
+          if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
+          else{ set.add(v); chip.classList.add('active'); }
+          recalc();
+        });
+      });
+      // disadvantage (multi)
+      document.querySelectorAll(`[data-setup="${g.key}"] .chip-bad`).forEach(chip=>{
+        chip.addEventListener('click', ()=>{
+          const set = state.tf[g.key].dis;
+          const v = chip.dataset.value;
+          if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
+          else{ set.add(v); chip.classList.add('active'); }
+          recalc();
+        });
+      });
+    });
+  }
+
+  // 设置面板增删改选项后，把 DOM 上仍然存在的已选状态重新同步为 active 样式
+  function syncActiveChipsFromState(){
+    TF_GROUPS.forEach(g=>{
+      const t = state.tf[g.key];
+      document.querySelectorAll(`[data-tfselect="${g.key}"] .chip`).forEach(c=>{
+        c.classList.toggle('active', t.tfs.has(c.dataset.value));
+      });
+      document.querySelectorAll(`[data-confluence="${g.key}"] .pill`).forEach(c=>{
+        c.classList.toggle('active', t.confluence===c.dataset.value);
+      });
+      document.querySelectorAll(`[data-setup="${g.key}"] .chip-good`).forEach(c=>{
+        c.classList.toggle('active', t.adv.has(c.dataset.value));
+      });
+      document.querySelectorAll(`[data-setup="${g.key}"] .chip-bad`).forEach(c=>{
+        c.classList.toggle('active', t.dis.has(c.dataset.value));
+      });
+    });
+  }
+
+  // 清理设置面板中被删除的选项 id，避免 state 里残留已不存在的 setup
+  function pruneStateForRemovedOptions(){
+    const advIds = new Set(ADV_OPTS.map(o=>o.id));
+    const disIds = new Set(DIS_OPTS.map(o=>o.id));
+    TF_GROUPS.forEach(g=>{
+      const t = state.tf[g.key];
+      [...t.adv].forEach(id=>{ if(!advIds.has(id)) t.adv.delete(id); });
+      [...t.dis].forEach(id=>{ if(!disIds.has(id)) t.dis.delete(id); });
+    });
+  }
+
+  renderTFCards();
+
+  /* ================= 按权重强弱区分的点击渐变动画（全局事件委托，重渲染后依旧生效） ================= */
+  function triggerWeightFlash(btn){
+    const w = parseFloat(btn.dataset.w||'0');
+    const intensity = Math.max(0.18, Math.min(1, Math.abs(w)/FLASH_MAX_ABS_W));
+    const color = w > 0 ? 'var(--long)' : (w < 0 ? 'var(--short)' : 'var(--accent)');
+    btn.style.setProperty('--flash-c', color);
+    btn.style.setProperty('--flash-dur', (0.28 + intensity*0.55).toFixed(2)+'s');
+    btn.classList.remove('flash');
+    void btn.offsetWidth; // 强制 reflow，允许连续点击重复触发动画
+    btn.classList.add('flash');
+  }
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.chip[data-w], .pill[data-w]');
+    if(btn) triggerWeightFlash(btn);
   });
-  mount.innerHTML = tfHtml;
+  document.addEventListener('animationend', (e)=>{
+    if(e.animationName==='chipSweep'){ e.target.classList.remove('flash'); }
+  });
 
   /* ================= TAB NAV ================= */
   document.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -979,61 +1412,17 @@
     });
   });
 
-  /* ================= TF group interactions ================= */
-  TF_GROUPS.forEach(g=>{
-    // tf level chips (multi)
-    document.querySelector(`[data-tfselect="${g.key}"]`).querySelectorAll('.chip').forEach(chip=>{
-      chip.addEventListener('click', ()=>{
-        const set = state.tf[g.key].tfs;
-        const v = chip.dataset.value;
-        if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
-        else{ set.add(v); chip.classList.add('active'); }
-        recalc();
-      });
-    });
-    // confluence (single, toggle-able)
-    document.querySelector(`[data-confluence="${g.key}"]`).querySelectorAll('.pill').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const row = btn.parentElement;
-        const already = state.tf[g.key].confluence === btn.dataset.value;
-        row.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
-        if(already){ state.tf[g.key].confluence = null; }
-        else{ state.tf[g.key].confluence = btn.dataset.value; btn.classList.add('active'); }
-        recalc();
-      });
-    });
-    // advantage (multi)
-    document.querySelectorAll(`[data-setup="${g.key}"] .chip-good`).forEach(chip=>{
-      chip.addEventListener('click', ()=>{
-        const set = state.tf[g.key].adv;
-        const v = chip.dataset.value;
-        if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
-        else{ set.add(v); chip.classList.add('active'); }
-        recalc();
-      });
-    });
-    // disadvantage (multi)
-    document.querySelectorAll(`[data-setup="${g.key}"] .chip-bad`).forEach(chip=>{
-      chip.addEventListener('click', ()=>{
-        const set = state.tf[g.key].dis;
-        const v = chip.dataset.value;
-        if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
-        else{ set.add(v); chip.classList.add('active'); }
-        recalc();
-      });
-    });
-  });
 
   /* ================= SCORE CALCULATION ================= */
   function computeBreakdown(){
     const rows = []; // {label, w}
     if(state.snr){
-      const opt = {'4h':['4H支撑或阻力位',5], '1d':['1D支撑或阻力位',10]}[state.snr];
+      const opt = {'4h':['4H支撑或阻力位',5], '1d':['1D支撑或阻力位',10], 'none':['无支撑或阻力位',-3]}[state.snr];
       rows.push({label:opt[0], w:opt[1]});
     }
 
     if(state.session){
-      const opt = {london:['London Session',2], ny:['New York Session',3], golden:['London & NY 黄金时间',5]}[state.session];
+      const opt = {london:['London Session',2.5], ny:['New York Session',5], golden:['London & NY 黄金时间',5]}[state.session];
       rows.push({label:'Session: '+opt[0], w:opt[1]});
     }
     if(state.news){
@@ -1123,19 +1512,68 @@
       list.innerHTML = rows.map(r=>`<div class="detail-row"><span>${r.label}</span><span class="${r.w>=0?'w-pos':'w-neg'}">${r.w>0?'+':''}${r.w}%</span></div>`).join('');
     }
 
-    // ---- analysis summary: per-timeframe percentage + overall strength ----
+    // ---- analysis summary：三种设计共用的数据（不设固定 100% 满分，按实际累积分数计算） ----
+    const groupMax = {};
     TF_GROUPS.forEach(g=>{
-      const gScore = Math.max(0, Math.min(100, BASELINE + (tfGroupSums[g.key]||0)));
-      const bar = document.getElementById(`as-${g.key}-bar`);
-      const val = document.getElementById(`as-${g.key}-val`);
-      if(bar) bar.style.width = gScore+'%';
-      if(val) val.textContent = Math.round(gScore)+'%';
-      let barColor = 'var(--short)';
-      if(gScore>=80) barColor='var(--long)';
-      else if(gScore>=60) barColor='var(--accent)';
-      else if(gScore>=40) barColor='var(--text-faint)';
-      if(bar) bar.style.background = barColor;
+      let m = TF_COUNT_BONUS + 10; // 3个以上级别的加成 + 两个时间配合(有)的加成，作为该维度参考上限
+      ADV_OPTS.forEach(o=>{ if(o.w>0) m += o.w; });
+      groupMax[g.key] = m || 1;
     });
+    const rawGroupVals = {};
+    TF_GROUPS.forEach(g=>{ rawGroupVals[g.key] = tfGroupSums[g.key] || 0; });
+
+    // 设计 1：能量条（宽度按该维度可能达到的分数区间缩放，数值直接显示累积分数，不强制为 100%）
+    TF_GROUPS.forEach(g=>{
+      const raw = rawGroupVals[g.key];
+      const val = document.getElementById(`as-${g.key}-val`);
+      if(val) val.textContent = Math.round(raw)+'%';
+      const fill = document.getElementById(`as-${g.key}-fill`);
+      if(fill){
+        const pct = Math.max(0, Math.min(100, (raw/groupMax[g.key])*100));
+        fill.style.width = pct+'%';
+        fill.classList.toggle('neg', raw<0);
+        fill.classList.toggle('strong', raw>0 && raw>=groupMax[g.key]*0.7);
+      }
+    });
+
+    // 设计 2：大 / 中 / 小时间相对占比圆环
+    (function(){
+      const vals = TF_GROUPS.map(g=>Math.max(0, rawGroupVals[g.key]));
+      const sum = vals.reduce((a,b)=>a+b,0);
+      const circumference = 2*Math.PI*50;
+      let offsetAcc = 0;
+      TF_GROUPS.forEach((g,i)=>{
+        const frac = sum>0 ? vals[i]/sum : 0;
+        const seg = document.querySelector(`.as-donut-seg[data-seg="${g.key}"]`);
+        if(seg){
+          const len = circumference*frac;
+          seg.setAttribute('stroke-dasharray', `${len} ${circumference-len}`);
+          seg.setAttribute('stroke-dashoffset', String(-offsetAcc));
+        }
+        offsetAcc += circumference*frac;
+        const pctEl = document.getElementById(`as-donut-${g.key}-pct`);
+        if(pctEl) pctEl.textContent = Math.round(frac*100)+'%';
+      });
+    })();
+
+    // 设计 3：三个时间目前选择的 MACD 级别
+    TF_GROUPS.forEach(g=>{
+      const mount = document.getElementById(`as-tf-${g.key}`);
+      if(!mount) return;
+      const sel = [...state.tf[g.key].tfs];
+      mount.innerHTML = sel.length
+        ? sel.map(v=>`<span class="as-tf-chip">${v}</span>`).join('')
+        : '<span class="as-tflevel-empty">未选择</span>';
+    });
+
+    // ---- 左侧进度条：反映当前预估胜率 ----
+    const spFill = document.getElementById('side-progress-fill');
+    const spLabel = document.getElementById('side-progress-label');
+    if(spFill){
+      spFill.style.height = Math.max(0, Math.min(100, score))+'%';
+      spFill.style.background = score>=70 ? 'var(--long)' : (score>=45 ? 'var(--accent)' : 'var(--short)');
+    }
+    if(spLabel) spLabel.textContent = Math.round(score)+'%';
     const badge = document.getElementById('as-overall-badge');
     let overallLabel = 'WEAK', overallCls = 'weak';
     if(score>=70){ overallLabel='STRONG'; overallCls='strong'; }
@@ -1162,6 +1600,18 @@
     window.__currentRows = rows;
   }
 
+  let asDesign = 1;
+  const asDesignSwitch = document.getElementById('as-design-switch');
+  if(asDesignSwitch){
+    asDesignSwitch.addEventListener('click', ()=>{
+      asDesign = asDesign>=3 ? 1 : asDesign+1;
+      [1,2,3].forEach(n=>{
+        const el = document.getElementById('as-design-'+n);
+        if(el) el.style.display = (n===asDesign) ? '' : 'none';
+      });
+    });
+  }
+
   document.getElementById('detail-toggle').addEventListener('click', ()=>{
     document.getElementById('detail-list').classList.toggle('open');
     const c = document.getElementById('detail-chevron');
@@ -1182,9 +1632,9 @@
     }catch(e){}
   });
   document.getElementById('modal-cancel').addEventListener('click', ()=> overlay.classList.remove('open'));
-  document.querySelectorAll('.result-btn').forEach(btn=>{
+  overlay.querySelectorAll('.result-btn[data-r]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
+      overlay.querySelectorAll('.result-btn[data-r]').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       modalResult = btn.dataset.r;
     });
@@ -1210,7 +1660,7 @@
     await saveTrade(trade);
     overlay.classList.remove('open');
     modalResult = null;
-    document.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
+    overlay.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById('modal-notes').value = '';
     resetChecklist();
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1243,6 +1693,219 @@
       resetConfirmOverlay.classList.remove('open');
     });
   }
+
+  /* ================= SETTINGS: 密码解锁 + 增删改选项 ================= */
+  const SETTINGS_PASSWORD = '112233';
+  const settingsOpenBtn = document.getElementById('settings-open-btn');
+  const settingsPwOverlay = document.getElementById('settings-pw-overlay');
+  const settingsPwInput = document.getElementById('settings-pw-input');
+  const settingsPwError = document.getElementById('settings-pw-error');
+  const settingsPanelOverlay = document.getElementById('settings-panel-overlay');
+  const settingsDimsMount = document.getElementById('settings-dims-mount');
+
+  function escapeAttr(s){
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function openSettingsPw(onSuccess){
+    settingsPwPendingAction = typeof onSuccess === 'function' ? onSuccess : openSettingsPanel;
+    settingsPwInput.value = '';
+    settingsPwError.classList.remove('show');
+    settingsPwOverlay.classList.add('open');
+    setTimeout(()=>settingsPwInput.focus(), 50);
+  }
+  let settingsPwPendingAction = null;
+  function tryUnlockSettings(){
+    if(settingsPwInput.value === SETTINGS_PASSWORD){
+      settingsPwOverlay.classList.remove('open');
+      const action = settingsPwPendingAction || openSettingsPanel;
+      settingsPwPendingAction = null;
+      action();
+    } else {
+      settingsPwError.classList.add('show');
+      settingsPwInput.value = '';
+      settingsPwInput.focus();
+    }
+  }
+  settingsOpenBtn.addEventListener('click', ()=>openSettingsPw(openSettingsPanel));
+  document.getElementById('settings-pw-cancel').addEventListener('click', ()=>{
+    settingsPwOverlay.classList.remove('open');
+    settingsPwPendingAction = null;
+  });
+  document.getElementById('settings-pw-ok').addEventListener('click', tryUnlockSettings);
+  settingsPwInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryUnlockSettings(); });
+  settingsPwInput.addEventListener('input', ()=>{
+    settingsPwInput.value = settingsPwInput.value.replace(/\D/g,'').slice(0,6);
+  });
+
+  function openSettingsPanel(){
+    renderSettingsTF();
+    renderSettingsPanel();
+    settingsPanelOverlay.classList.add('open');
+  }
+
+  const settingsTFMount = document.getElementById('settings-tf-mount');
+  function renderSettingsTF(){
+    settingsTFMount.innerHTML = TF_GROUPS.map((g, gi)=>`
+      <div class="settings-dim-block">
+        <div class="settings-dim-title">${g.name} MACD 级别</div>
+        <div class="settings-tf-list" data-tf-gi="${gi}">
+          ${g.tfs.map((v,vi)=>`
+            <div class="settings-tf-row">
+              <input type="text" value="${escapeAttr(v)}" data-gi="${gi}" data-vi="${vi}">
+              <button type="button" class="settings-opt-del" data-tf-del-gi="${gi}" data-tf-del-vi="${vi}" title="删除">✕</button>
+            </div>`).join('')}
+        </div>
+        <button type="button" class="settings-add-btn" data-tf-add-gi="${gi}">+ 添加级别</button>
+      </div>
+    `).join('');
+
+    settingsTFMount.querySelectorAll('.settings-tf-row input').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const gi = +inp.dataset.gi, vi = +inp.dataset.vi;
+        const val = inp.value.trim();
+        if(!val) { inp.value = TF_GROUPS[gi].tfs[vi]; return; }
+        const oldVal = TF_GROUPS[gi].tfs[vi];
+        TF_GROUPS[gi].tfs[vi] = val;
+        // 同步已选中状态里的旧值到新值
+        TF_GROUPS.forEach((g,i)=>{
+          if(i!==gi) return;
+          const set = state.tf[g.key].tfs;
+          if(set.has(oldVal)){ set.delete(oldVal); set.add(val); }
+        });
+      });
+    });
+    settingsTFMount.querySelectorAll('[data-tf-del-gi]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const gi = +btn.dataset.tfDelGi, vi = +btn.dataset.tfDelVi;
+        const removed = TF_GROUPS[gi].tfs[vi];
+        TF_GROUPS[gi].tfs.splice(vi, 1);
+        state.tf[TF_GROUPS[gi].key].tfs.delete(removed);
+        renderSettingsTF();
+      });
+    });
+    settingsTFMount.querySelectorAll('[data-tf-add-gi]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const gi = +btn.dataset.tfAddGi;
+        const label = prompt('新的 MACD 级别名称（例如 6H、90m）：');
+        if(!label || !label.trim()) return;
+        TF_GROUPS[gi].tfs.push(label.trim());
+        renderSettingsTF();
+      });
+    });
+  }
+  document.getElementById('settings-panel-close').addEventListener('click', ()=>{
+    settingsPanelOverlay.classList.remove('open');
+    // 关闭时把最新的选项配置应用到检查清单
+    pruneStateForRemovedOptions();
+    renderTFCards();
+    recalc();
+  });
+
+  function settingsOptRowHtml(di, side, oi, o){
+    return `
+      <div class="settings-opt-row">
+        <input type="text" class="settings-opt-label" value="${escapeAttr(o.label)}" data-dim="${di}" data-side="${side}" data-idx="${oi}" data-field="label">
+        <input type="number" class="settings-opt-w" value="${o.w}" step="1" data-dim="${di}" data-side="${side}" data-idx="${oi}" data-field="w">
+        <span class="settings-opt-pct">%</span>
+        <button type="button" class="settings-opt-del" title="删除" data-del-dim="${di}" data-del-side="${side}" data-del-idx="${oi}">✕</button>
+      </div>`;
+  }
+
+  function renderSettingsPanel(){
+    settingsDimsMount.innerHTML = SETUP_DIMENSIONS.map((dim, di)=>`
+      <div class="settings-dim-block">
+        <div class="settings-dim-title">${dim.name}${dim.highlight?' ⭐ 核心权重最高':''}</div>
+        <div class="settings-dim-cols">
+          <div class="settings-col">
+            <div class="settings-col-label good">优势</div>
+            ${dim.adv.map((o,oi)=>settingsOptRowHtml(di,'adv',oi,o)).join('')}
+            <button type="button" class="settings-add-btn good" data-add-dim="${di}" data-add-side="adv">+ 添加优势选项</button>
+          </div>
+          <div class="settings-col">
+            <div class="settings-col-label bad">劣势</div>
+            ${dim.dis.map((o,oi)=>settingsOptRowHtml(di,'dis',oi,o)).join('')}
+            <button type="button" class="settings-add-btn bad" data-add-dim="${di}" data-add-side="dis">+ 添加劣势选项</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // 编辑名称 / 权重
+    settingsDimsMount.querySelectorAll('.settings-opt-label, .settings-opt-w').forEach(inp=>{
+      inp.addEventListener('change', ()=>{
+        const di = +inp.dataset.dim, side = inp.dataset.side, oi = +inp.dataset.idx, field = inp.dataset.field;
+        const opt = SETUP_DIMENSIONS[di][side][oi];
+        if(!opt) return;
+        if(field==='label'){ opt.label = inp.value.trim() || opt.label; }
+        else{ opt.w = parseFloat(inp.value) || 0; }
+        rebuildFlatOpts();
+      });
+    });
+    // 删除选项
+    settingsDimsMount.querySelectorAll('.settings-opt-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const di = +btn.dataset.delDim, side = btn.dataset.delSide, oi = +btn.dataset.delIdx;
+        SETUP_DIMENSIONS[di][side].splice(oi, 1);
+        rebuildFlatOpts();
+        renderSettingsPanel();
+      });
+    });
+    // 添加选项
+    settingsDimsMount.querySelectorAll('.settings-add-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const di = +btn.dataset.addDim, side = btn.dataset.addSide;
+        const label = prompt('新选项名称：');
+        if(!label || !label.trim()) return;
+        const wRaw = prompt('权重 %（优势填正数如 5，劣势填负数如 -5）：', side==='adv' ? '5' : '-5');
+        const w = parseFloat(wRaw);
+        if(isNaN(w)) { alert('权重必须是数字'); return; }
+        const id = 'custom_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        SETUP_DIMENSIONS[di][side].push({ id, label: label.trim(), w });
+        rebuildFlatOpts();
+        renderSettingsPanel();
+      });
+    });
+  }
+
+  /* ================= 马来西亚时间 + Session 状态 ================= */
+  function updateMalaysiaClock(){
+    const now = new Date();
+    // 12小时制时间 + 星期几（不需要日期）
+    const fmt12 = new Intl.DateTimeFormat('en-US', {
+      timeZone:'Asia/Kuala_Lumpur', hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true
+    });
+    const fmtDay = new Intl.DateTimeFormat('zh-Hans', {
+      timeZone:'Asia/Kuala_Lumpur', weekday:'long'
+    });
+    const timeEl = document.getElementById('myt-time-val');
+    const dayEl = document.getElementById('myt-day-val');
+    const sessEl = document.getElementById('myt-session-val');
+    if(timeEl) timeEl.textContent = fmt12.format(now);
+    if(dayEl) dayEl.textContent = fmtDay.format(now) + ' · MALAYSIA';
+
+    // 24小时制用于计算 session 时间段（避免 AM/PM 换算出错）
+    const fmt24 = new Intl.DateTimeFormat('en-GB', {
+      timeZone:'Asia/Kuala_Lumpur', hour:'2-digit', minute:'2-digit', hour12:false
+    });
+    const parts24 = fmt24.formatToParts(now);
+    let h24=0, m24=0;
+    parts24.forEach(p=>{ if(p.type==='hour') h24=+p.value; if(p.type==='minute') m24=+p.value; });
+    const mins = h24*60 + m24;
+
+    const T1430 = 14*60+30, T1500 = 15*60, T1930 = 19*60+30, T2000 = 20*60, T0330 = 3*60+30;
+    let label = '暂无 Session', cls = '';
+    if(mins>=T1430 && mins<T1500){ label = 'London Session Ready...'; cls = 'ready'; }
+    else if(mins>=T1500 && mins<T1930){ label = 'London Session Open'; cls = 'active'; }
+    else if(mins>=T1930 && mins<T2000){ label = 'New York Session Ready...'; cls = 'ready'; }
+    else if(mins>=T2000 || mins<T0330){ label = 'New York Session Open'; cls = 'active'; }
+    if(sessEl){
+      sessEl.textContent = label;
+      sessEl.className = 'myt-session' + (cls ? ' '+cls : '');
+    }
+  }
+  updateMalaysiaClock();
+  setInterval(updateMalaysiaClock, 1000);
 
   /* ================= SUPABASE STORAGE ================= */
   /* 把下面两个值换成你自己 Supabase 项目 Settings → API 里的 Project URL 和 anon public key */
@@ -1297,6 +1960,14 @@
       if(error) throw error;
     }catch(e){ alert('删除失败：'+e.message); }
   }
+  async function updateTrade(id, patch){
+    if(!storageAvailable) return false;
+    try{
+      const {error} = await supabaseClient.from('trades').update(patch).eq('id', id);
+      if(error) throw error;
+      return true;
+    }catch(e){ alert('更新失败：'+e.message); return false; }
+  }
   async function importTrades(newTrades){
     if(!storageAvailable) return false;
     try{
@@ -1310,7 +1981,8 @@
   const RESULT_META = {
     win:{label:'盈利', cls:'win'},
     loss:{label:'亏损', cls:'loss'},
-    be:{label:'保本', cls:'be'}
+    be:{label:'保本', cls:'be'},
+    open:{label:'开单中', cls:'open'}
   };
 
   const WEEKDAY_ZH = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
@@ -1344,6 +2016,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
             <span class="hist-time">${fmtTime(t.ts)}</span>
+            <button class="hist-edit" data-edit="${t.id}" title="编辑">✎</button>
             <button class="hist-del" data-del="${t.id}" title="删除">✕</button>
             <span class="chevron">▾</span>
           </div>
@@ -1362,15 +2035,80 @@
       });
     });
     mount.querySelectorAll('[data-del]').forEach(btn=>{
-      btn.addEventListener('click', async (e)=>{
+      btn.addEventListener('click', (e)=>{
         e.stopPropagation();
-        if(confirm('确定删除这条交易记录吗？')){
-          await deleteTrade(btn.dataset.del);
-          renderHistory();
-        }
+        openSettingsPw(async ()=>{
+          if(confirm('确定删除这条交易记录吗？')){
+            await deleteTrade(btn.dataset.del);
+            renderHistory();
+          }
+        });
+      });
+    });
+    mount.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const t = trades.find(x=>x.id===btn.dataset.edit);
+        if(!t) return;
+        openSettingsPw(()=> openEditModal(t));
       });
     });
   }
+
+  /* ================= EDIT TRADE MODAL ================= */
+  const editOverlay = document.getElementById('edit-modal-overlay');
+  let editingTradeId = null, editDirection = null, editResult = null;
+  function openEditModal(t){
+    editingTradeId = t.id;
+    editDirection = t.direction;
+    editResult = t.result;
+    document.getElementById('edit-trader').value = t.trader || '';
+    document.getElementById('edit-symbol').value = t.symbol;
+    document.getElementById('edit-score').value = t.score;
+    document.getElementById('edit-notes').value = t.notes || '';
+    editOverlay.querySelectorAll('[data-edir]').forEach(b=>b.classList.toggle('active', b.dataset.edir===editDirection));
+    editOverlay.querySelectorAll('[data-er]').forEach(b=>b.classList.toggle('active', b.dataset.er===editResult));
+    editOverlay.classList.add('open');
+  }
+  editOverlay.querySelectorAll('[data-edir]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      editOverlay.querySelectorAll('[data-edir]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      editDirection = btn.dataset.edir;
+    });
+  });
+  editOverlay.querySelectorAll('[data-er]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      editOverlay.querySelectorAll('[data-er]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      editResult = btn.dataset.er;
+    });
+  });
+  document.getElementById('edit-cancel').addEventListener('click', ()=>{
+    editOverlay.classList.remove('open');
+    editingTradeId = null;
+  });
+  document.getElementById('edit-save').addEventListener('click', async ()=>{
+    if(!editingTradeId) return;
+    const traderName = document.getElementById('edit-trader').value.trim();
+    if(!traderName){ alert('请输入你的名字'); return; }
+    if(!editResult){ alert('请选择交易结果'); return; }
+    const scoreRaw = parseFloat(document.getElementById('edit-score').value);
+    const patch = {
+      trader: traderName,
+      symbol: document.getElementById('edit-symbol').value,
+      direction: editDirection,
+      result: editResult,
+      score: isNaN(scoreRaw) ? 0 : scoreRaw,
+      notes: document.getElementById('edit-notes').value.trim()
+    };
+    const ok = await updateTrade(editingTradeId, patch);
+    if(ok){
+      editOverlay.classList.remove('open');
+      editingTradeId = null;
+      renderHistory();
+    }
+  });
 
   function escapeHtml(s){
     return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1415,6 +2153,7 @@
     const wins = trades.filter(t=>t.result==='win').length;
     const losses = trades.filter(t=>t.result==='loss').length;
     const bes = trades.filter(t=>t.result==='be').length;
+    const opens = trades.filter(t=>t.result==='open').length;
     const decided = wins+losses;
     const overallRate = decided>0 ? Math.round(wins/decided*100) : 0;
 
@@ -1451,7 +2190,7 @@
         <div class="stat-box acc"><div class="n">${total}</div><div class="l">总交易数</div></div>
         <div class="stat-box win"><div class="n">${wins}</div><div class="l">盈利</div></div>
         <div class="stat-box loss"><div class="n">${losses}</div><div class="l">亏损</div></div>
-        <div class="stat-box"><div class="n">${overallRate}%</div><div class="l">总体胜率（不含保本 ${bes}）</div></div>
+        <div class="stat-box"><div class="n">${overallRate}%</div><div class="l">总体胜率（不含保本 ${bes}、开单中 ${opens}）</div></div>
       </div>
 
       ${hero ? `
