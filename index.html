@@ -243,9 +243,17 @@
   .setup-row-hi .setup-dim{color:var(--accent);font-weight:700;}
   .setup-cell-adv,.setup-cell-dis{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
   @media (max-width:560px){
-    .setup-row,.setup-head{grid-template-columns:1fr;gap:6px;}
-    .setup-dim{padding-left:2px;padding-top:0;}
-    .setup-head-label{padding-top:6px;}
+    .setup-head{display:none;}
+    .setup-row{grid-template-columns:1fr;gap:10px;padding:11px;}
+    .setup-dim{padding-left:2px;padding-top:0;font-size:11px;}
+    .setup-cell-adv,.setup-cell-dis{position:relative;padding-top:19px;}
+    .setup-cell-adv::before,.setup-cell-dis::before{
+      content:'优势';position:absolute;top:0;left:0;
+      font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.4px;
+    }
+    .setup-cell-adv::before{color:var(--long);}
+    .setup-cell-dis::before{content:'劣势';color:var(--short);}
+    .setup-cell-adv .chip,.setup-cell-dis .chip{padding:7px 11px;font-size:13px;}
   }
 
   /* ---------- weight-based click gradient flash (强弱按权重区分) ---------- */
@@ -286,9 +294,11 @@
   }
   .myt-time{font-family:var(--disp);font-size:27px;font-weight:700;letter-spacing:.4px;color:var(--text);}
   .myt-day{
-    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:1.6px;
+    font-family:var(--mono);color:var(--text-faint);
     text-transform:uppercase;margin-top:3px;
   }
+  .myt-day .myt-weekday{font-size:13px;font-weight:700;letter-spacing:.8px;color:var(--text-dim);}
+  .myt-day .myt-tz{font-size:9px;letter-spacing:1.4px;color:var(--text-faint);}
   .myt-session{
     display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 13px;border-radius:20px;
     font-family:var(--mono);font-size:11.5px;font-weight:700;border:1px solid var(--line);color:var(--text-faint);
@@ -296,6 +306,14 @@
   }
   .myt-session.ready{color:var(--text);border-color:var(--text-faint);background:var(--bg-chip);}
   .myt-session.active{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 10px rgba(39,221,223,.25);}
+  .myt-session.closed{color:var(--text-faint);border-style:dashed;opacity:.8;}
+  .myt-countdown{
+    display:none;align-items:center;gap:6px;margin-top:8px;padding:5px 13px;border-radius:20px;
+    font-family:var(--mono);font-size:11.5px;font-weight:700;border:1px solid var(--accent);color:var(--accent);
+    background:var(--accent-dim);
+  }
+  .myt-countdown.show{display:inline-flex;animation:countdownBlink 1s ease-in-out infinite;}
+  @keyframes countdownBlink{0%,100%{opacity:1;}50%{opacity:.55;}}
   @keyframes sessionPulseLondon{
     0%,100%{box-shadow:0 0 8px rgba(39,221,223,.22);background:var(--accent-dim);}
     50%{box-shadow:0 0 15px rgba(39,221,223,.42);background:rgba(39,221,223,.22);}
@@ -428,8 +446,15 @@
     text-align:center;font-family:var(--mono);font-size:15.5px;font-weight:700;
     color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent);
     border-radius:10px;padding:12px 16px;margin:14px 0 20px;letter-spacing:.3px;line-height:1.5;
+    perspective:800px;
   }
   @media (max-width:520px){ .tagline-banner{font-size:14px;} }
+  .tagline-text{
+    display:inline-block;transform-style:preserve-3d;backface-visibility:hidden;
+    transition:transform .34s cubic-bezier(.4,0,.2,1), opacity .34s ease;
+  }
+  .tagline-text.flip-out{transform:rotateX(-90deg);opacity:0;}
+  .tagline-text.flip-in{transform:rotateX(90deg);opacity:0;}
 
   .about-card{
     background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
@@ -518,6 +543,11 @@
   .settings-pw-input:focus{outline:none;border-color:var(--accent);}
   .settings-pw-error{color:var(--short);font-size:12.5px;margin-top:8px;text-align:center;display:none;}
   .settings-pw-error.show{display:block;}
+  .greet-forget-btn{
+    margin-top:16px;background:transparent;border:none;color:var(--text-faint);
+    font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:var(--sans);
+  }
+  .greet-forget-btn:hover{color:var(--text-dim);}
 
   /* ---------- history ---------- */
   .hist-item{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
@@ -676,6 +706,32 @@
   .vault-key:active{transform:scale(.94);}
   .vault-key-fn{font-size:14px;color:var(--text-dim);}
   .vault-hint{margin-top:16px;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.3px;}
+
+  /* ---------- 记住此设备：欢迎回来 视图（保险箱 + 设置面板共用）---------- */
+  .welcome-view{padding-top:2px;}
+  .welcome-icon{
+    width:52px;height:52px;margin:0 auto 14px;color:var(--accent);
+    filter:drop-shadow(0 0 10px rgba(39,221,223,.45));
+    opacity:0;animation:welcomeIconIn .6s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  .welcome-icon svg{width:100%;height:100%;display:block;}
+  @keyframes welcomeIconIn{
+    0%{opacity:0;transform:scale(.35) rotate(-10deg);}
+    60%{opacity:1;transform:scale(1.1) rotate(3deg);}
+    100%{opacity:1;transform:scale(1) rotate(0deg);}
+  }
+  .welcome-text{
+    font-family:var(--disp);font-weight:700;font-size:16.5px;color:var(--text);letter-spacing:.2px;
+    opacity:0;animation:welcomeRise .5s cubic-bezier(.16,1,.3,1) .16s forwards;
+  }
+  .welcome-sub{
+    font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.4px;margin-top:8px;
+    opacity:0;animation:welcomeRise .5s cubic-bezier(.16,1,.3,1) .3s forwards;
+  }
+  @keyframes welcomeRise{
+    from{opacity:0;transform:translateY(9px);}
+    to{opacity:1;transform:translateY(0);}
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -694,31 +750,42 @@
       </div>
     </div>
     <div class="vault-brand">EMER MACD SYSTEM</div>
-    <div class="vault-sub">私人交易保险箱 · 请输入密码解锁</div>
 
-    <div class="vault-dots" id="vault-dots">
-      <span class="vault-dot" data-i="0"></span>
-      <span class="vault-dot" data-i="1"></span>
-      <span class="vault-dot" data-i="2"></span>
-      <span class="vault-dot" data-i="3"></span>
-    </div>
-    <div class="vault-error" id="vault-error">密码错误，请重新输入</div>
+    <div id="vault-lock-view">
+      <div class="vault-sub">私人交易保险箱 · 请输入密码解锁</div>
 
-    <div class="vault-keypad" id="vault-keypad">
-      <button type="button" class="vault-key" data-k="1">1</button>
-      <button type="button" class="vault-key" data-k="2">2</button>
-      <button type="button" class="vault-key" data-k="3">3</button>
-      <button type="button" class="vault-key" data-k="4">4</button>
-      <button type="button" class="vault-key" data-k="5">5</button>
-      <button type="button" class="vault-key" data-k="6">6</button>
-      <button type="button" class="vault-key" data-k="7">7</button>
-      <button type="button" class="vault-key" data-k="8">8</button>
-      <button type="button" class="vault-key" data-k="9">9</button>
-      <button type="button" class="vault-key vault-key-fn" data-k="clear">C</button>
-      <button type="button" class="vault-key" data-k="0">0</button>
-      <button type="button" class="vault-key vault-key-fn" data-k="del">⌫</button>
+      <div class="vault-dots" id="vault-dots">
+        <span class="vault-dot" data-i="0"></span>
+        <span class="vault-dot" data-i="1"></span>
+        <span class="vault-dot" data-i="2"></span>
+        <span class="vault-dot" data-i="3"></span>
+      </div>
+      <div class="vault-error" id="vault-error">密码错误，请重新输入</div>
+
+      <div class="vault-keypad" id="vault-keypad">
+        <button type="button" class="vault-key" data-k="1">1</button>
+        <button type="button" class="vault-key" data-k="2">2</button>
+        <button type="button" class="vault-key" data-k="3">3</button>
+        <button type="button" class="vault-key" data-k="4">4</button>
+        <button type="button" class="vault-key" data-k="5">5</button>
+        <button type="button" class="vault-key" data-k="6">6</button>
+        <button type="button" class="vault-key" data-k="7">7</button>
+        <button type="button" class="vault-key" data-k="8">8</button>
+        <button type="button" class="vault-key" data-k="9">9</button>
+        <button type="button" class="vault-key vault-key-fn" data-k="clear">C</button>
+        <button type="button" class="vault-key" data-k="0">0</button>
+        <button type="button" class="vault-key vault-key-fn" data-k="del">⌫</button>
+      </div>
+      <div class="vault-hint">数字键盘或键盘直接输入 4 位密码</div>
     </div>
-    <div class="vault-hint">数字键盘或键盘直接输入 4 位密码</div>
+
+    <div id="vault-welcome-view" class="welcome-view" style="display:none;">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 5-5"></path></svg>
+      </div>
+      <div class="welcome-text">你好 Emer，欢迎回来</div>
+      <div class="welcome-sub">已识别此设备 · 正在为你自动解锁</div>
+    </div>
   </div>
 </div>
 
@@ -730,10 +797,40 @@
   var VAULT_PASSWORD = '0624';
   /* ========================================================== */
 
+  /* -------- 记住此设备（Remember Me）：保险箱密码 0624 与设置密码 112233 共用同一个信任状态 --------
+     在设置面板成功输入密码 112233 后，会调用 EmerRemember.save() 记住此设备（有效期 1 年，不绑定 IP）。
+     此后打开 / 刷新网站，只要 Token 未过期，保险箱会自动跳过 0624 密码框，直接问候并进入。 */
+  var REMEMBER_KEY = 'emer_macd_device_trust_v1';
+  var REMEMBER_MS = 365*24*60*60*1000;
+  function getRememberToken(){
+    try{
+      var raw = localStorage.getItem(REMEMBER_KEY);
+      if(!raw) return null;
+      var data = JSON.parse(raw);
+      if(!data || !data.token || !data.expiry || Date.now() > data.expiry){
+        localStorage.removeItem(REMEMBER_KEY);
+        return null;
+      }
+      return data;
+    }catch(e){ return null; }
+  }
+  function saveRememberToken(){
+    try{
+      var token = 'emer_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+      localStorage.setItem(REMEMBER_KEY, JSON.stringify({token:token, expiry:Date.now()+REMEMBER_MS}));
+    }catch(e){}
+  }
+  function clearRememberToken(){
+    try{ localStorage.removeItem(REMEMBER_KEY); }catch(e){}
+  }
+  window.EmerRemember = { get:getRememberToken, save:saveRememberToken, clear:clearRememberToken };
+
   var entered = '';
 
   var overlay = document.getElementById('vault-overlay');
   var card = document.getElementById('vault-card');
+  var lockView = document.getElementById('vault-lock-view');
+  var welcomeView = document.getElementById('vault-welcome-view');
   var dots = Array.prototype.slice.call(document.querySelectorAll('.vault-dot'));
   var errEl = document.getElementById('vault-error');
   var lockIcon = document.getElementById('vault-lock-icon');
@@ -797,8 +894,14 @@
     else if(e.key === 'Enter') tryUnlock();
   });
 
-  // 每次打开 / 刷新网站都重新要求输入密码（不做任何本地记忆）
   document.body.style.overflow = 'hidden';
+
+  // 此设备已被记住：跳过密码框，展示欢迎回来动画后自动解锁
+  if(getRememberToken()){
+    lockView.style.display = 'none';
+    welcomeView.style.display = '';
+    setTimeout(unlock, 1150);
+  }
 })();
 </script>
 
@@ -847,7 +950,7 @@
       <button class="dir-btn long" id="dir-long" type="button"><span class="arrow">▲</span> LONG 做多</button>
       <button class="dir-btn short" id="dir-short" type="button"><span class="arrow">▼</span> SHORT 做空</button>
     </div>
-    <div class="tagline-banner">认真对待每一笔交易，因为每一次决定都影响长期结果</div>
+    <div class="tagline-banner"><span class="tagline-text" id="tagline-text">认真对待每一笔交易，因为每一次决定都影响长期结果</span></div>
 
     <div class="layout">
       <div class="cards-col">
@@ -906,8 +1009,9 @@
         <div class="score-card">
           <div class="myt-clock" id="myt-clock">
             <div class="myt-time" id="myt-time-val">--:-- --</div>
-            <div class="myt-day" id="myt-day-val">MALAYSIA TIME</div>
+            <div class="myt-day" id="myt-day-val"><span class="myt-weekday"></span><span class="myt-tz"> · MALAYSIA</span></div>
             <div class="myt-session off" id="myt-session-val">—</div>
+            <div class="myt-countdown" id="myt-countdown-val"></div>
           </div>
           <div class="label">预估胜率 Win Probability</div>
           <div class="gauge-wrap">
@@ -1135,13 +1239,22 @@
 <!-- ================= SETTINGS: PASSWORD GATE ================= -->
 <div class="modal-overlay" id="settings-pw-overlay">
   <div class="modal" style="max-width:340px;text-align:center;">
-    <h2 style="margin-bottom:4px;">⚙️ Setup 设置</h2>
-    <p class="sub">请输入 6 位密码解锁</p>
-    <input type="password" inputmode="numeric" maxlength="6" id="settings-pw-input" class="settings-pw-input" placeholder="••••••" autocomplete="off">
-    <div class="settings-pw-error" id="settings-pw-error">密码错误，请重试</div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="settings-pw-cancel" type="button">取消</button>
-      <button class="btn-save" id="settings-pw-ok" type="button">解锁</button>
+    <div id="settings-pw-form">
+      <h2 style="margin-bottom:4px;">⚙️ Setup 设置</h2>
+      <p class="sub">请输入 6 位密码解锁</p>
+      <input type="password" inputmode="numeric" maxlength="6" id="settings-pw-input" class="settings-pw-input" placeholder="••••••" autocomplete="off">
+      <div class="settings-pw-error" id="settings-pw-error">密码错误，请重试</div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="settings-pw-cancel" type="button">取消</button>
+        <button class="btn-save" id="settings-pw-ok" type="button">解锁</button>
+      </div>
+    </div>
+    <div id="settings-pw-greet" class="welcome-view" style="display:none;">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 5-5"></path></svg>
+      </div>
+      <div class="welcome-text">你好 Emer，欢迎回来</div>
+      <button class="greet-forget-btn" id="settings-pw-forget" type="button">不是这台设备？点此重新输入密码</button>
     </div>
   </div>
 </div>
@@ -1735,6 +1848,8 @@
   const SETTINGS_PASSWORD = '112233';
   const settingsOpenBtn = document.getElementById('settings-open-btn');
   const settingsPwOverlay = document.getElementById('settings-pw-overlay');
+  const settingsPwForm = document.getElementById('settings-pw-form');
+  const settingsPwGreet = document.getElementById('settings-pw-greet');
   const settingsPwInput = document.getElementById('settings-pw-input');
   const settingsPwError = document.getElementById('settings-pw-error');
   const settingsPanelOverlay = document.getElementById('settings-panel-overlay');
@@ -1744,20 +1859,49 @@
     return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function openSettingsPw(onSuccess){
-    settingsPwPendingAction = typeof onSuccess === 'function' ? onSuccess : openSettingsPanel;
+  /* -------- 记住我（Remember Me）：与保险箱 0624 共用同一个「已信任设备」Token（见 vault 脚本），有效期 1 年，不绑定 IP -------- */
+
+  let settingsPwPendingAction = null;
+
+  function runPendingAction(){
+    const action = settingsPwPendingAction || openSettingsPanel;
+    settingsPwPendingAction = null;
+    action();
+  }
+
+  function showPasswordForm(){
+    settingsPwGreet.style.display = 'none';
+    settingsPwForm.style.display = '';
     settingsPwInput.value = '';
     settingsPwError.classList.remove('show');
     settingsPwOverlay.classList.add('open');
     setTimeout(()=>settingsPwInput.focus(), 50);
   }
-  let settingsPwPendingAction = null;
+
+  function openSettingsPw(onSuccess){
+    settingsPwPendingAction = typeof onSuccess === 'function' ? onSuccess : openSettingsPanel;
+
+    // 已记住此设备（此前在保险箱或设置里验证过）：跳过密码框，直接问候并进入
+    if(window.EmerRemember && window.EmerRemember.get()){
+      settingsPwForm.style.display = 'none';
+      settingsPwGreet.style.display = 'none';
+      void settingsPwGreet.offsetWidth; // 强制重排，确保欢迎动画每次都能重新播放
+      settingsPwGreet.style.display = '';
+      settingsPwOverlay.classList.add('open');
+      setTimeout(()=>{
+        settingsPwOverlay.classList.remove('open');
+        runPendingAction();
+      }, 850);
+      return;
+    }
+
+    showPasswordForm();
+  }
   function tryUnlockSettings(){
     if(settingsPwInput.value === SETTINGS_PASSWORD){
+      if(window.EmerRemember) window.EmerRemember.save();
       settingsPwOverlay.classList.remove('open');
-      const action = settingsPwPendingAction || openSettingsPanel;
-      settingsPwPendingAction = null;
-      action();
+      runPendingAction();
     } else {
       settingsPwError.classList.add('show');
       settingsPwInput.value = '';
@@ -1770,6 +1914,10 @@
     settingsPwPendingAction = null;
   });
   document.getElementById('settings-pw-ok').addEventListener('click', tryUnlockSettings);
+  document.getElementById('settings-pw-forget').addEventListener('click', ()=>{
+    if(window.EmerRemember) window.EmerRemember.clear();
+    showPasswordForm();
+  });
   settingsPwInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryUnlockSettings(); });
   settingsPwInput.addEventListener('input', ()=>{
     settingsPwInput.value = settingsPwInput.value.replace(/\D/g,'').slice(0,6);
@@ -1915,34 +2063,99 @@
     const fmtDay = new Intl.DateTimeFormat('zh-Hans', {
       timeZone:'Asia/Kuala_Lumpur', weekday:'long'
     });
+    const fmtWeekdayEn = new Intl.DateTimeFormat('en-US', {
+      timeZone:'Asia/Kuala_Lumpur', weekday:'short'
+    });
     const timeEl = document.getElementById('myt-time-val');
-    const dayEl = document.getElementById('myt-day-val');
+    const dayWeekdayEl = document.querySelector('#myt-day-val .myt-weekday');
     const sessEl = document.getElementById('myt-session-val');
+    const cdEl = document.getElementById('myt-countdown-val');
     if(timeEl) timeEl.textContent = fmt12.format(now);
-    if(dayEl) dayEl.textContent = fmtDay.format(now) + ' · MALAYSIA';
+    if(dayWeekdayEl) dayWeekdayEl.textContent = fmtDay.format(now);
 
-    // 24小时制用于计算 session 时间段（避免 AM/PM 换算出错）
+    // 24小时制（含秒）用于计算 session 时间段与倒计时（避免 AM/PM 换算出错）
     const fmt24 = new Intl.DateTimeFormat('en-GB', {
-      timeZone:'Asia/Kuala_Lumpur', hour:'2-digit', minute:'2-digit', hour12:false
+      timeZone:'Asia/Kuala_Lumpur', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
     });
     const parts24 = fmt24.formatToParts(now);
-    let h24=0, m24=0;
-    parts24.forEach(p=>{ if(p.type==='hour') h24=+p.value; if(p.type==='minute') m24=+p.value; });
+    let h24=0, m24=0, s24=0;
+    parts24.forEach(p=>{ if(p.type==='hour') h24=+p.value; if(p.type==='minute') m24=+p.value; if(p.type==='second') s24=+p.value; });
     const mins = h24*60 + m24;
+    const totalSec = h24*3600 + m24*60 + s24;
+
+    // 周末休市：星期六 / 星期日（马来西亚时间）不显示任何 London / New York Session
+    const wdEn = fmtWeekdayEn.format(now);
+    const isWeekend = (wdEn === 'Sat' || wdEn === 'Sun');
 
     const T1430 = 14*60+30, T1500 = 15*60, T1930 = 19*60+30, T2000 = 20*60, T0330 = 3*60+30;
+    const T1500sec = T1500*60, T2000sec = T2000*60;
+    const COUNTDOWN_WINDOW = 180; // 开盘前 3 分钟
+
     let label = '暂无 Session', cls = '';
-    if(mins>=T1430 && mins<T1500){ label = 'London Session Ready...'; cls = 'ready'; }
-    else if(mins>=T1500 && mins<T1930){ label = 'London Session Open'; cls = 'active active-london'; }
-    else if(mins>=T1930 && mins<T2000){ label = 'New York Session Ready...'; cls = 'ready'; }
-    else if(mins>=T2000 || mins<T0330){ label = 'New York Session Open'; cls = 'active active-ny'; }
+    let cdLabel = '', cdShow = false;
+
+    if(isWeekend){
+      label = 'Market Closed · 休市';
+      cls = 'closed';
+    } else {
+      if(mins>=T1430 && mins<T1500){ label = 'London Session Ready...'; cls = 'ready'; }
+      else if(mins>=T1500 && mins<T1930){ label = 'London Session Open'; cls = 'active active-london'; }
+      else if(mins>=T1930 && mins<T2000){ label = 'New York Session Ready...'; cls = 'ready'; }
+      else if(mins>=T2000 || mins<T0330){ label = 'New York Session Open'; cls = 'active active-ny'; }
+
+      // 开盘前 3 分钟倒计时
+      let remain = -1;
+      if(totalSec >= T1500sec-COUNTDOWN_WINDOW && totalSec < T1500sec){
+        remain = T1500sec - totalSec;
+        cdLabel = '⏳ London Session 开盘倒计时 ';
+      } else if(totalSec >= T2000sec-COUNTDOWN_WINDOW && totalSec < T2000sec){
+        remain = T2000sec - totalSec;
+        cdLabel = '⏳ New York Session 开盘倒计时 ';
+      }
+      if(remain >= 0){
+        const rm = Math.floor(remain/60), rs = remain%60;
+        cdLabel += rm+':'+String(rs).padStart(2,'0');
+        cdShow = true;
+      }
+    }
+
     if(sessEl){
       sessEl.textContent = label;
       sessEl.className = 'myt-session' + (cls ? ' '+cls : '');
     }
+    if(cdEl){
+      cdEl.textContent = cdLabel;
+      cdEl.className = 'myt-countdown' + (cdShow ? ' show' : '');
+    }
   }
   updateMalaysiaClock();
   setInterval(updateMalaysiaClock, 1000);
+
+  /* ================= 顶部标语轮播（每 20 秒切换一次，带 3D 翻转动画） ================= */
+  const TAGLINE_QUOTES = [
+    '认真对待每一笔交易，因为每一次决定都影响长期结果',
+    '本该害怕的时候却满怀希望，本该有希望的时候却惊恐不宁',
+    '计划你的交易，交易你的计划',
+    '如果你不能接受小额亏损，你迟早会迎来一次毁灭性的爆仓',
+    '当天的利润应当天锁定，日内交易者的底线是带着盈利安全睡觉'
+  ];
+  (function initTaglineRotator(){
+    const el = document.getElementById('tagline-text');
+    if(!el) return;
+    let idx = 0;
+    function rotateTagline(){
+      el.classList.add('flip-out');
+      setTimeout(()=>{
+        idx = (idx+1) % TAGLINE_QUOTES.length;
+        el.textContent = TAGLINE_QUOTES[idx];
+        el.classList.remove('flip-out');
+        el.classList.add('flip-in');
+        void el.offsetWidth; // 强制重排，确保翻入动画生效
+        el.classList.remove('flip-in');
+      }, 340);
+    }
+    setInterval(rotateTagline, 20000);
+  })();
 
   /* ================= SUPABASE STORAGE ================= */
   /* 把下面两个值换成你自己 Supabase 项目 Settings → API 里的 Project URL 和 anon public key */
