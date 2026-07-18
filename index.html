@@ -83,6 +83,33 @@
   nav.tabs button:not(.active):hover{color:var(--text);background:var(--line-soft);}
   .tab-icon{width:15px;height:15px;flex-shrink:0;color:currentColor;}
 
+  /* ---------- mobile header / nav: 避免检查清单/历史记录/仪表盘/介绍挤在一起 ---------- */
+  @media (max-width:760px){
+    header{
+      flex-direction:column;align-items:stretch;gap:12px;padding:14px 16px;
+    }
+    .brand{gap:9px;}
+    .brand img{height:40px;}
+    .brand .logo-fallback{height:40px;font-size:14px;}
+    .brand-text h1{font-size:14.5px;}
+    .brand-text .eyebrow{font-size:9px;}
+    .header-actions{width:100%;justify-content:space-between;gap:8px;}
+    nav.tabs{
+      flex:1;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    }
+    nav.tabs::-webkit-scrollbar{display:none;}
+    nav.tabs button{
+      flex-shrink:0;padding:8px 12px;font-size:12px;gap:5px;white-space:nowrap;
+    }
+    .tab-icon{width:13px;height:13px;}
+    .settings-gear-btn{flex-shrink:0;}
+  }
+  @media (max-width:420px){
+    nav.tabs button{padding:7px 10px;font-size:11.5px;}
+    .brand-text h1{font-size:13px;}
+  }
+
   .fab-reset{
     position:fixed;left:22px;bottom:22px;z-index:40;
     width:auto;height:48px;border-radius:24px;padding:0 18px 0 15px;
@@ -269,6 +296,16 @@
   }
   .myt-session.ready{color:var(--text);border-color:var(--text-faint);background:var(--bg-chip);}
   .myt-session.active{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 10px rgba(39,221,223,.25);}
+  @keyframes sessionPulseLondon{
+    0%,100%{box-shadow:0 0 8px rgba(39,221,223,.22);background:var(--accent-dim);}
+    50%{box-shadow:0 0 15px rgba(39,221,223,.42);background:rgba(39,221,223,.22);}
+  }
+  @keyframes sessionPulseNY{
+    0%,100%{box-shadow:0 0 10px rgba(39,221,223,.3);background:var(--accent-dim);border-color:var(--accent);}
+    50%{box-shadow:0 0 24px rgba(39,221,223,.7);background:rgba(39,221,223,.32);border-color:#6ff4f6;}
+  }
+  .myt-session.active-london{animation:sessionPulseLondon 3.4s ease-in-out infinite;}
+  .myt-session.active-ny{animation:sessionPulseNY 2.2s ease-in-out infinite;}
 
   .gauge-wrap{position:relative;width:180px;height:180px;margin:14px auto 6px;}
   .gauge-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
@@ -785,7 +822,7 @@
       <h1>MACD Trading Checklist</h1>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;">
+  <div class="header-actions" style="display:flex;align-items:center;gap:10px;">
     <nav class="tabs">
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
@@ -1896,9 +1933,9 @@
     const T1430 = 14*60+30, T1500 = 15*60, T1930 = 19*60+30, T2000 = 20*60, T0330 = 3*60+30;
     let label = '暂无 Session', cls = '';
     if(mins>=T1430 && mins<T1500){ label = 'London Session Ready...'; cls = 'ready'; }
-    else if(mins>=T1500 && mins<T1930){ label = 'London Session Open'; cls = 'active'; }
+    else if(mins>=T1500 && mins<T1930){ label = 'London Session Open'; cls = 'active active-london'; }
     else if(mins>=T1930 && mins<T2000){ label = 'New York Session Ready...'; cls = 'ready'; }
-    else if(mins>=T2000 || mins<T0330){ label = 'New York Session Open'; cls = 'active'; }
+    else if(mins>=T2000 || mins<T0330){ label = 'New York Session Open'; cls = 'active active-ny'; }
     if(sessEl){
       sessEl.textContent = label;
       sessEl.className = 'myt-session' + (cls ? ' '+cls : '');
