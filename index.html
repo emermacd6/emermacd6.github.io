@@ -495,6 +495,24 @@
   .macd-error{color:var(--short);font-size:12.5px;margin-bottom:14px;}
   .macd-error:empty{display:none;}
 
+  .macd-sym-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .macd-sym-btn{
+    background:var(--bg-chip);border:1px solid var(--line);color:var(--text-dim);
+    font-family:var(--mono);font-size:12.5px;font-weight:700;padding:8px 14px;
+    border-radius:20px;cursor:pointer;transition:.15s ease;
+  }
+  .macd-sym-btn:hover{border-color:var(--text-dim);color:var(--text);}
+  .macd-sym-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .macd-sym-custom-btn{border-style:dashed;}
+  .macd-sym-custom{
+    display:flex;gap:8px;margin-bottom:16px;max-width:420px;
+  }
+  .macd-sym-custom input{
+    flex:1;background:var(--bg-raise);border:1px solid var(--line);border-radius:8px;
+    padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;
+  }
+  .macd-sym-custom input:focus{outline:none;border-color:var(--accent);}
+
   .macd-group{margin-bottom:22px;}
   .macd-group-title{
     font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-faint);
@@ -2229,21 +2247,48 @@
   ================================================================================= */
   (function(){
     const TD_KEY_STORAGE = 'emer_macd_td_apikey_v1';
-    const SYMBOL = 'XAU/USD';
+    const TD_SYMBOL_STORAGE = 'emer_macd_td_symbol_v1';
     const MACD_FAST = 12, MACD_SLOW = 26;
-    const AUTO_REFRESH_MS = 10*60*1000; // 10 分钟
+    const AUTO_REFRESH_MS = 15*60*1000; // 15 分钟（免费额度是 8 credits/分钟，刷新一次用 3 个请求，节奏放慢一些更安全）
+    const MIN_REFRESH_GAP_MS = 25*1000; // 任意两次刷新（不管是自动/手动/切换品种触发）之间至少间隔 25 秒
+    const RATE_LIMIT_COOLDOWN_MS = 65*1000; // 遇到「超出每分钟额度」时，等 65 秒再自动重试
+
+    // 品种预设：query 是实际传给 Twelve Data 的 symbol 参数。
+    // 部分指数代码（DJI / UKX）在不同数据商之间命名不完全统一，如果按钮切换后报错，
+    // 可以用下方的「自定义代码」输入框，去 twelvedata.com 的 Symbol Search 查到准确代码后手动填入。
+    const SYMBOL_PRESETS = [
+      {key:'XAUUSD', label:'XAUUSD', query:'XAU/USD', icon:'🥇'},
+      {key:'DJ30',   label:'DJ30',   query:'DJI',     icon:'🇺🇸'},
+      {key:'UK100',  label:'UK100',  query:'UKX',     icon:'🇬🇧'},
+      {key:'BTCUSD', label:'BTCUSD', query:'BTC/USD', icon:'₿'},
+      {key:'ETHUSD', label:'ETHUSD', query:'ETH/USD', icon:'Ξ'},
+    ];
+
+    function getSavedSymbol(){
+      try{
+        const raw = localStorage.getItem(TD_SYMBOL_STORAGE);
+        if(!raw) return SYMBOL_PRESETS[0];
+        const data = JSON.parse(raw);
+        if(data && data.query) return data;
+      }catch(e){}
+      return SYMBOL_PRESETS[0];
+    }
+    function saveSymbol(sym){
+      try{ localStorage.setItem(TD_SYMBOL_STORAGE, JSON.stringify(sym)); }catch(e){}
+    }
+    let activeSymbol = getSavedSymbol();
 
     const TF_GROUPS = [
-      { title:'分钟级别', base:'1min', outputsize:5000, items:[
+      { title:'分钟级别', base:'1min', outputsize:2000, items:[
         {label:'2m',mult:2},{label:'4m',mult:4},{label:'5m',mult:5},{label:'7m',mult:7},
         {label:'10m',mult:10},{label:'12m',mult:12},{label:'15m',mult:15},{label:'20m',mult:20},
         {label:'23m',mult:23},{label:'30m',mult:30},{label:'35m',mult:35},{label:'40m',mult:40},{label:'45m',mult:45},
       ]},
-      { title:'小时级别', base:'30min', outputsize:5000, items:[
+      { title:'小时级别', base:'30min', outputsize:1500, items:[
         {label:'1h',mult:2},{label:'90m',mult:3},{label:'2h',mult:4},{label:'3h',mult:6},
         {label:'4h',mult:8},{label:'6h',mult:12},{label:'8h',mult:16},{label:'12h',mult:24},
       ]},
-      { title:'日线级别', base:'1day', outputsize:1000, items:[
+      { title:'日线级别', base:'1day', outputsize:600, items:[
         {label:'1D',mult:1},{label:'2D',mult:2},{label:'3D',mult:3},{label:'4D',mult:4},
         {label:'6D',mult:6},{label:'7D',mult:7},{label:'14D',mult:14},
       ]},
@@ -2255,7 +2300,7 @@
 
     async function fetchSeries(interval, outputsize){
       const key = getApiKey();
-      const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(SYMBOL) +
+      const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(activeSymbol.query) +
         '&interval=' + interval + '&outputsize=' + outputsize + '&apikey=' + encodeURIComponent(key);
       const res = await fetch(url);
       const data = await res.json();
@@ -2301,6 +2346,8 @@
 
     let refreshTimer = null;
     let isLoading = false;
+    let lastRefreshAt = 0;
+    let autoRetryTimer = null;
 
     function renderKeyForm(){
       const mount = document.getElementById('macd-scan-mount');
@@ -2338,10 +2385,13 @@
           '</div>' +
         '</div>'
       ).join('');
+      const symBtnsHtml = SYMBOL_PRESETS.map(s=>
+        '<button type="button" class="macd-sym-btn'+(s.key===activeSymbol.key?' active':'')+'" data-sym-key="'+s.key+'">'+s.icon+' '+s.label+'</button>'
+      ).join('');
       mount.innerHTML =
         '<div class="macd-scan-head">' +
           '<div>' +
-            '<h3 style="margin:0;font-family:var(--disp);font-size:18px;font-weight:700;">🥇 XAUUSD MACD 多周期扫描</h3>' +
+            '<h3 style="margin:0;font-family:var(--disp);font-size:18px;font-weight:700;" id="macd-title">'+activeSymbol.icon+' '+activeSymbol.label+' MACD 多周期扫描</h3>' +
             '<p class="sub" style="margin:4px 0 0;">标准参数 12/26/9 · 零轴以上 = LONG，零轴以下 = SHORT</p>' +
           '</div>' +
           '<div class="macd-scan-actions">' +
@@ -2350,14 +2400,45 @@
             '<button type="button" class="btn-cancel" id="macd-key-change-btn" style="padding:9px 16px;border-radius:8px;cursor:pointer;">更改 Key</button>' +
           '</div>' +
         '</div>' +
+        '<div class="macd-sym-row">' +
+          symBtnsHtml +
+          '<button type="button" class="macd-sym-btn macd-sym-custom-btn" id="macd-sym-custom-btn">✎ 自定义代码</button>' +
+        '</div>' +
+        '<div class="macd-sym-custom" id="macd-sym-custom" style="display:none;">' +
+          '<input type="text" id="macd-sym-custom-input" placeholder="例如 DE30 / US500，需与 Twelve Data 上的代码一致">' +
+          '<button type="button" class="btn-save" id="macd-sym-custom-save" style="padding:9px 16px;border-radius:8px;cursor:pointer;">使用</button>' +
+        '</div>' +
         '<div class="macd-error" id="macd-error"></div>' +
         groupsHtml;
       document.getElementById('macd-refresh-btn').addEventListener('click', ()=>refreshMacdScanner());
       document.getElementById('macd-key-change-btn').addEventListener('click', ()=>{
         if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+        if(autoRetryTimer){ clearTimeout(autoRetryTimer); autoRetryTimer = null; }
         clearApiKey();
         renderKeyForm();
       });
+      document.querySelectorAll('.macd-sym-btn[data-sym-key]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const preset = SYMBOL_PRESETS.find(s=>s.key===btn.dataset.symKey);
+          if(preset) switchSymbol(preset);
+        });
+      });
+      document.getElementById('macd-sym-custom-btn').addEventListener('click', ()=>{
+        const box = document.getElementById('macd-sym-custom');
+        box.style.display = box.style.display==='none' ? 'flex' : 'none';
+      });
+      document.getElementById('macd-sym-custom-save').addEventListener('click', ()=>{
+        const v = document.getElementById('macd-sym-custom-input').value.trim();
+        if(!v) return;
+        switchSymbol({ key:'CUSTOM', label:v.toUpperCase(), query:v, icon:'✎' });
+      });
+    }
+
+    function switchSymbol(sym){
+      activeSymbol = sym;
+      saveSymbol(sym);
+      renderGrid(); // 重新渲染，所有徽章回到「加载中」状态
+      refreshMacdScanner();
     }
 
     function setBadge(label, val){
@@ -2382,17 +2463,24 @@
     }
 
     async function refreshMacdScanner(){
+      const now = Date.now();
       if(isLoading) return;
+      if(now - lastRefreshAt < MIN_REFRESH_GAP_MS){
+        scheduleAutoRetry(MIN_REFRESH_GAP_MS - (now - lastRefreshAt));
+        return;
+      }
       isLoading = true;
+      lastRefreshAt = now;
       const errEl = document.getElementById('macd-error');
       const refreshBtn = document.getElementById('macd-refresh-btn');
+      setSymBtnsDisabled(true);
       if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.style.opacity='.6'; refreshBtn.textContent = '⟳ 更新中...'; }
       if(errEl) errEl.textContent = '';
       try{
         const [m1, m30, d1] = await Promise.all([
-          fetchSeries('1min', 5000),
-          fetchSeries('30min', 5000),
-          fetchSeries('1day', 1000),
+          fetchSeries('1min', 2000),
+          fetchSeries('30min', 1500),
+          fetchSeries('1day', 600),
         ]);
         const cachedBase = { '1min':m1, '30min':m30, '1day':d1 };
         TF_GROUPS.forEach(g=>{
@@ -2406,11 +2494,27 @@
         const upEl = document.getElementById('macd-updated');
         if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false});
       }catch(e){
-        if(errEl) errEl.textContent = '获取数据失败：' + e.message + '（可能是 Key 无效、超出免费额度，或网络问题）';
+        const isRateLimit = /credit|429/i.test(e.message);
+        if(errEl){
+          errEl.textContent = isRateLimit
+            ? '获取「'+activeSymbol.label+'」数据失败：超出 Twelve Data 每分钟额度限制，65 秒后会自动重试一次。'
+            : '获取「'+activeSymbol.label+'」数据失败：' + e.message + '（可能是该代码在 Twelve Data 上不叫这个名字、Key 无效，或网络问题——可以试试上面的「自定义代码」输入准确代码）';
+        }
+        if(isRateLimit) scheduleAutoRetry(RATE_LIMIT_COOLDOWN_MS);
       }finally{
         isLoading = false;
+        setSymBtnsDisabled(false);
         if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.style.opacity=''; refreshBtn.textContent = '⟳ 刷新'; }
       }
+    }
+
+    function setSymBtnsDisabled(disabled){
+      document.querySelectorAll('.macd-sym-btn').forEach(b=>{ b.disabled = disabled; b.style.opacity = disabled ? '.5' : ''; });
+    }
+
+    function scheduleAutoRetry(delayMs){
+      if(autoRetryTimer) clearTimeout(autoRetryTimer);
+      autoRetryTimer = setTimeout(()=>{ autoRetryTimer = null; refreshMacdScanner(); }, Math.max(delayMs, 1000));
     }
 
     function startMacdScanner(){
