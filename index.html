@@ -471,6 +471,54 @@
   .about-card p:last-child{margin-bottom:0;}
   .about-card .about-highlight{color:var(--text);font-weight:600;}
 
+  /* ---------- MACD 多周期扫描 ---------- */
+  .macd-key-card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 26px;max-width:480px;
+  }
+  .macd-key-card h3{margin:0 0 8px;font-family:var(--disp);font-size:18px;font-weight:700;color:var(--accent);}
+  .macd-key-card .sub{margin:0 0 16px;color:var(--text-dim);font-size:13px;line-height:1.7;}
+  .macd-key-card input{
+    width:100%;background:var(--bg-raise);border:1px solid var(--line);border-radius:8px;
+    padding:11px 13px;color:var(--text);font-family:var(--mono);font-size:13.5px;margin-bottom:12px;
+  }
+  .macd-key-card input:focus{outline:none;border-color:var(--accent);}
+  .macd-key-hint{margin:14px 0 0 !important;font-size:11px !important;color:var(--text-faint) !important;line-height:1.7 !important;}
+
+  .macd-scan-head{
+    display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    margin-bottom:18px;
+  }
+  .macd-scan-head .sub{color:var(--text-dim);font-size:13px;}
+  .macd-scan-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .macd-updated{font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+  .macd-error{color:var(--short);font-size:12.5px;margin-bottom:14px;}
+  .macd-error:empty{display:none;}
+
+  .macd-group{margin-bottom:22px;}
+  .macd-group-title{
+    font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-faint);
+    text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;
+  }
+  .macd-badge-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;
+  }
+  .macd-badge{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:10px;
+    padding:11px 8px;text-align:center;transition:.2s ease;
+  }
+  .macd-badge-tf{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);letter-spacing:.3px;}
+  .macd-badge-signal{font-family:var(--disp);font-size:14.5px;font-weight:700;margin:5px 0 2px;color:var(--text-faint);}
+  .macd-badge-val{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+  .macd-badge.long{border-color:var(--long);background:var(--long-dim);}
+  .macd-badge.long .macd-badge-signal{color:var(--long);}
+  .macd-badge.short{border-color:var(--short);background:var(--short-dim);}
+  .macd-badge.short .macd-badge-signal{color:var(--short);}
+  .macd-badge.pending{opacity:.55;}
+  @media (max-width:560px){
+    .macd-badge-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));}
+  }
+
   /* ---------- modal ---------- */
   .modal-overlay{
     position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;
@@ -937,6 +985,7 @@
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
       <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
+      <button class="tab-btn" data-view="macd"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> MACD 扫描</button>
     </nav>
     <button id="settings-open-btn" class="settings-gear-btn" type="button" title="Setup 设置（需要密码）">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -1139,6 +1188,11 @@
       <p>每一笔交易都代表一次判断，每一次执行都会影响未来的成长。</p>
       <p class="about-highlight">认真对待每一笔交易，尊重市场，遵守计划，持续进步。</p>
     </div>
+  </section>
+
+  <!-- ================= MACD 多周期扫描 VIEW ================= -->
+  <section class="view" id="view-macd">
+    <div id="macd-scan-mount"></div>
   </section>
 
 </main>
@@ -1529,6 +1583,7 @@
       document.getElementById('view-'+btn.dataset.view).classList.add('active');
       if(btn.dataset.view==='history') renderHistory();
       if(btn.dataset.view==='dashboard') renderDashboard();
+      if(btn.dataset.view==='macd' && window.initMacdScanner) window.initMacdScanner();
     });
   });
 
@@ -2161,6 +2216,214 @@
       }, 340);
     }
     setInterval(rotateTagline, 20000);
+  })();
+
+  /* ================= MACD 多周期扫描（XAUUSD，数据来自 Twelve Data） =================
+     说明：
+     - 免费额度：800 次/天，8 次/分钟；这里每次刷新用 3 次调用（1min / 30min / 1day 三种基础周期），
+       默认每 10 分钟自动刷新一次（≈432 次/天），留有余量。
+     - 非标准周期（如 7m/23m/35m/90m/4D/6D/14D）通过对基础周期数据做「等份合并」得到，
+       并非交易所原生周期，属于近似聚合，仅供参考。
+     - Key 只存在本机浏览器 localStorage，不会上传到任何服务器；但因为这是纯前端网页，
+       Key 会出现在页面源码里、任何看到这台设备页面的人都可能看到它 —— 请只用免费额度的 Key。
+  ================================================================================= */
+  (function(){
+    const TD_KEY_STORAGE = 'emer_macd_td_apikey_v1';
+    const SYMBOL = 'XAU/USD';
+    const MACD_FAST = 12, MACD_SLOW = 26;
+    const AUTO_REFRESH_MS = 10*60*1000; // 10 分钟
+
+    const TF_GROUPS = [
+      { title:'分钟级别', base:'1min', outputsize:5000, items:[
+        {label:'2m',mult:2},{label:'4m',mult:4},{label:'5m',mult:5},{label:'7m',mult:7},
+        {label:'10m',mult:10},{label:'12m',mult:12},{label:'15m',mult:15},{label:'20m',mult:20},
+        {label:'23m',mult:23},{label:'30m',mult:30},{label:'35m',mult:35},{label:'40m',mult:40},{label:'45m',mult:45},
+      ]},
+      { title:'小时级别', base:'30min', outputsize:5000, items:[
+        {label:'1h',mult:2},{label:'90m',mult:3},{label:'2h',mult:4},{label:'3h',mult:6},
+        {label:'4h',mult:8},{label:'6h',mult:12},{label:'8h',mult:16},{label:'12h',mult:24},
+      ]},
+      { title:'日线级别', base:'1day', outputsize:1000, items:[
+        {label:'1D',mult:1},{label:'2D',mult:2},{label:'3D',mult:3},{label:'4D',mult:4},
+        {label:'6D',mult:6},{label:'7D',mult:7},{label:'14D',mult:14},
+      ]},
+    ];
+
+    function getApiKey(){ try{ return localStorage.getItem(TD_KEY_STORAGE) || ''; }catch(e){ return ''; } }
+    function saveApiKey(k){ try{ localStorage.setItem(TD_KEY_STORAGE, k.trim()); }catch(e){} }
+    function clearApiKey(){ try{ localStorage.removeItem(TD_KEY_STORAGE); }catch(e){} }
+
+    async function fetchSeries(interval, outputsize){
+      const key = getApiKey();
+      const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(SYMBOL) +
+        '&interval=' + interval + '&outputsize=' + outputsize + '&apikey=' + encodeURIComponent(key);
+      const res = await fetch(url);
+      const data = await res.json();
+      if(data.status === 'error' || !data.values){
+        throw new Error(data.message || 'Twelve Data 请求失败');
+      }
+      // API 返回的是「最新在前」，反转成按时间正序（旧→新），方便算 EMA
+      return data.values.map(v=>parseFloat(v.close)).reverse();
+    }
+
+    function resample(closes, mult){
+      const out = [];
+      for(let i=0; i+mult<=closes.length; i+=mult){
+        out.push(closes[i+mult-1]); // 取每组最后一根的收盘价
+      }
+      return out;
+    }
+
+    function emaSeries(values, period){
+      if(values.length < period) return [];
+      const k = 2/(period+1);
+      const out = new Array(values.length).fill(null);
+      let sum = 0;
+      for(let i=0;i<period;i++) sum += values[i];
+      let prev = sum/period;
+      out[period-1] = prev;
+      for(let i=period;i<values.length;i++){
+        prev = values[i]*k + prev*(1-k);
+        out[i] = prev;
+      }
+      return out;
+    }
+
+    function macdLineLatest(closes){
+      if(closes.length < MACD_SLOW + 5) return null;
+      const fastE = emaSeries(closes, MACD_FAST);
+      const slowE = emaSeries(closes, MACD_SLOW);
+      for(let i=closes.length-1;i>=0;i--){
+        if(fastE[i]!=null && slowE[i]!=null) return fastE[i]-slowE[i];
+      }
+      return null;
+    }
+
+    let refreshTimer = null;
+    let isLoading = false;
+
+    function renderKeyForm(){
+      const mount = document.getElementById('macd-scan-mount');
+      if(!mount) return;
+      mount.innerHTML =
+        '<div class="macd-key-card">' +
+          '<h3>🥇 连接 Twelve Data</h3>' +
+          '<p class="sub">需要一个免费的 Twelve Data API Key 才能拉取 XAUUSD 行情，用来实时计算各周期的 MACD。前往 <a href="https://twelvedata.com/pricing" target="_blank" rel="noopener">twelvedata.com</a> 免费注册获取 Key。</p>' +
+          '<input type="text" id="macd-key-input" placeholder="粘贴你的 API Key" autocomplete="off">' +
+          '<button type="button" class="btn-save" id="macd-key-save" style="padding:10px 18px;border-radius:8px;cursor:pointer;width:100%;">保存并连接</button>' +
+          '<p class="macd-key-hint">Key 只保存在这台设备浏览器的本地存储里，不会上传到任何服务器；但因为是纯前端网页，Key 会出现在页面源码中——请只使用免费额度的 Key，不要绑定支付方式。</p>' +
+        '</div>';
+      document.getElementById('macd-key-save').addEventListener('click', ()=>{
+        const v = document.getElementById('macd-key-input').value.trim();
+        if(!v) return;
+        saveApiKey(v);
+        startMacdScanner();
+      });
+    }
+
+    function renderGrid(){
+      const mount = document.getElementById('macd-scan-mount');
+      if(!mount) return;
+      const groupsHtml = TF_GROUPS.map(g=>
+        '<div class="macd-group">' +
+          '<div class="macd-group-title">'+g.title+'</div>' +
+          '<div class="macd-badge-grid">' +
+            g.items.map(it=>
+              '<div class="macd-badge pending" id="macd-badge-'+it.label+'">' +
+                '<div class="macd-badge-tf">'+it.label+'</div>' +
+                '<div class="macd-badge-signal">…</div>' +
+                '<div class="macd-badge-val"></div>' +
+              '</div>'
+            ).join('') +
+          '</div>' +
+        '</div>'
+      ).join('');
+      mount.innerHTML =
+        '<div class="macd-scan-head">' +
+          '<div>' +
+            '<h3 style="margin:0;font-family:var(--disp);font-size:18px;font-weight:700;">🥇 XAUUSD MACD 多周期扫描</h3>' +
+            '<p class="sub" style="margin:4px 0 0;">标准参数 12/26/9 · 零轴以上 = LONG，零轴以下 = SHORT</p>' +
+          '</div>' +
+          '<div class="macd-scan-actions">' +
+            '<span class="macd-updated" id="macd-updated">尚未更新</span>' +
+            '<button type="button" class="btn-cancel" id="macd-refresh-btn" style="padding:9px 16px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>' +
+            '<button type="button" class="btn-cancel" id="macd-key-change-btn" style="padding:9px 16px;border-radius:8px;cursor:pointer;">更改 Key</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="macd-error" id="macd-error"></div>' +
+        groupsHtml;
+      document.getElementById('macd-refresh-btn').addEventListener('click', ()=>refreshMacdScanner());
+      document.getElementById('macd-key-change-btn').addEventListener('click', ()=>{
+        if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
+        clearApiKey();
+        renderKeyForm();
+      });
+    }
+
+    function setBadge(label, val){
+      const el = document.getElementById('macd-badge-'+label);
+      if(!el) return;
+      el.classList.remove('long','short','pending');
+      const sigEl = el.querySelector('.macd-badge-signal');
+      const valEl = el.querySelector('.macd-badge-val');
+      if(val === null){
+        el.classList.add('pending');
+        sigEl.textContent = '—';
+        valEl.textContent = '数据不足';
+      } else if(val >= 0){
+        el.classList.add('long');
+        sigEl.textContent = 'LONG';
+        valEl.textContent = val.toFixed(2);
+      } else {
+        el.classList.add('short');
+        sigEl.textContent = 'SHORT';
+        valEl.textContent = val.toFixed(2);
+      }
+    }
+
+    async function refreshMacdScanner(){
+      if(isLoading) return;
+      isLoading = true;
+      const errEl = document.getElementById('macd-error');
+      const refreshBtn = document.getElementById('macd-refresh-btn');
+      if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.style.opacity='.6'; refreshBtn.textContent = '⟳ 更新中...'; }
+      if(errEl) errEl.textContent = '';
+      try{
+        const [m1, m30, d1] = await Promise.all([
+          fetchSeries('1min', 5000),
+          fetchSeries('30min', 5000),
+          fetchSeries('1day', 1000),
+        ]);
+        const cachedBase = { '1min':m1, '30min':m30, '1day':d1 };
+        TF_GROUPS.forEach(g=>{
+          const base = cachedBase[g.base];
+          g.items.forEach(it=>{
+            const closes = resample(base, it.mult);
+            const val = macdLineLatest(closes);
+            setBadge(it.label, val);
+          });
+        });
+        const upEl = document.getElementById('macd-updated');
+        if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false});
+      }catch(e){
+        if(errEl) errEl.textContent = '获取数据失败：' + e.message + '（可能是 Key 无效、超出免费额度，或网络问题）';
+      }finally{
+        isLoading = false;
+        if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.style.opacity=''; refreshBtn.textContent = '⟳ 刷新'; }
+      }
+    }
+
+    function startMacdScanner(){
+      renderGrid();
+      refreshMacdScanner();
+      if(refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(refreshMacdScanner, AUTO_REFRESH_MS);
+    }
+
+    window.initMacdScanner = function(){
+      if(document.getElementById('macd-scan-mount').childElementCount > 0) return; // 已初始化过，避免重复渲染/重复计时器
+      if(getApiKey()){ startMacdScanner(); } else { renderKeyForm(); }
+    };
   })();
 
   /* ================= SUPABASE STORAGE ================= */
