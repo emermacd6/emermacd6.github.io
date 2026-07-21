@@ -220,16 +220,16 @@
   /* ---------- 优势/劣势 setup 左右对照表 ---------- */
   .setup-table{display:flex;flex-direction:column;gap:8px;}
   .setup-head{
-    display:grid;grid-template-columns:78px 1fr 1fr;gap:10px;padding:0 9px;
+    display:grid;grid-template-columns:118px 1fr 1fr;gap:10px;padding:0 9px;
   }
   .setup-head-label{
-    font-family:var(--disp);font-size:12.5px;font-weight:700;letter-spacing:.4px;
+    font-family:var(--disp);font-size:13.5px;font-weight:700;letter-spacing:.4px;
     padding-bottom:2px;
   }
   .setup-head-label.good{color:var(--long);}
   .setup-head-label.bad{color:var(--short);}
   .setup-row{
-    display:grid;grid-template-columns:78px 1fr 1fr;gap:10px;align-items:start;
+    display:grid;grid-template-columns:118px 1fr 1fr;gap:10px;align-items:start;
     padding:9px;border-radius:10px;border:1px solid var(--line-soft);background:var(--bg-raise);
   }
   .setup-row-hi{
@@ -237,15 +237,18 @@
     box-shadow:0 0 0 1px rgba(39,221,223,.25) inset;
   }
   .setup-dim{
-    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.4px;
-    line-height:1.3;text-transform:uppercase;padding-top:6px;
+    font-family:var(--mono);font-size:13px;color:var(--text-faint);letter-spacing:.3px;
+    line-height:1.35;text-transform:uppercase;padding-top:6px;
   }
   .setup-row-hi .setup-dim{color:var(--accent);font-weight:700;}
+  .setup-dim .hint{display:block;text-transform:none;font-weight:500;letter-spacing:0;color:var(--text-faint);font-size:11.5px;margin-top:3px;line-height:1.4;}
   .setup-cell-adv,.setup-cell-dis{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+  .setup-cell-adv .chip,.setup-cell-dis .chip{font-size:14.5px;padding:8px 12px;}
   @media (max-width:560px){
     .setup-head{display:none;}
     .setup-row{grid-template-columns:1fr;gap:10px;padding:11px;}
-    .setup-dim{padding-left:2px;padding-top:0;font-size:11px;}
+    .setup-dim{padding-left:2px;padding-top:0;font-size:13px;}
+    .setup-dim .hint{font-size:11.5px;}
     .setup-cell-adv,.setup-cell-dis{position:relative;padding-top:19px;}
     .setup-cell-adv::before,.setup-cell-dis::before{
       content:'优势';position:absolute;top:0;left:0;
@@ -253,7 +256,7 @@
     }
     .setup-cell-adv::before{color:var(--long);}
     .setup-cell-dis::before{content:'劣势';color:var(--short);}
-    .setup-cell-adv .chip,.setup-cell-dis .chip{padding:7px 11px;font-size:13px;}
+    .setup-cell-adv .chip,.setup-cell-dis .chip{padding:7px 11px;font-size:14px;}
   }
 
   /* ---------- weight-based click gradient flash (强弱按权重区分) ---------- */
@@ -1156,7 +1159,6 @@
               <div class="radio-row" data-single="session">
                 <button type="button" class="pill" data-value="london" data-w="2.5">London Session (+2.5%)</button>
                 <button type="button" class="pill" data-value="ny" data-w="5">New York Session (+5%)</button>
-                <button type="button" class="pill" data-value="golden" data-w="4">London &amp; New York 黄金时间 8–10PM (+5%)</button>
               </div>
             </div>
             <div class="field-group">
@@ -1473,7 +1475,7 @@
   ];
   const TF_COUNT_THRESHOLD = 3;
   const TF_COUNT_BONUS = 3;
-  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:10}, {id:'uncertain', label:'不确定', w:0}, {id:'no', label:'没有', w:-10} ];
+  const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:10}, {id:'no', label:'没有', w:-5} ];
   const TRIPLE_BONUS_WEIGHT = 10;
   const TRIPLE_BONUS_IDS = ['zeroenergy'];
   const FLASH_MAX_ABS_W = 12; // 用于按权重强弱缩放点击渐变动画强度
@@ -1500,24 +1502,30 @@
         {id:'ema52distance', label:'EMA52有距离', w:-6},
       ]
     },
-    { name:'背离状态',
+    { name:'单位调整之间背离', hint:'完美走势，中间有回零轴，中间没有距离',
       adv:[
-        {id:'nodiv', label:'无背离', w:3},
-        {id:'potentialdiv', label:'潜在背离', w:4},
-        {id:'bottomdiv', label:'底部背离', w:6},
-        {id:'confirmeddivplayout', label:'确定背离Playout', w:10},
+        {id:'divbetween_yes', label:'有', w:8},
+        {id:'divbetween_potential', label:'潜在', w:3},
       ],
       dis:[
-        {id:'minorharmdiv', label:'分时间级别有害背离', w:-6},
-        {id:'majorharmdiv', label:'主时间级别有害背离', w:-12},
+        {id:'divbetween_no', label:'没有', w:0},
       ]
     },
-    { name:'零轴隐形',
+    { name:'单位调整之内背离', hint:'不是完美走势，中间还有距离，没回零轴继续拉',
       adv:[
-        {id:'zerohiddenno', label:'无', w:5},
+        {id:'divwithin_yes', label:'有', w:8},
+        {id:'divwithin_potential', label:'潜在', w:3},
       ],
       dis:[
-        {id:'zerohiddenyes', label:'有', w:-5},
+        {id:'divwithin_no', label:'没有', w:0},
+      ]
+    },
+    { name:'零轴隐形', dynamicName:true,
+      adv:[
+        {id:'zerohidden_yes', label:'有', w:5},
+      ],
+      dis:[
+        {id:'zerohidden_no', label:'没有', w:0},
       ]
     },
   ];
@@ -1547,6 +1555,25 @@
   });
 
   /* ================= RENDER TF CARDS (可重复调用，设置修改后会重新渲染) ================= */
+  // 大时间级别的优势/劣势 Setup 权重额外加多 0.5%（0 分选项不调整）
+  function bigAdjust(w, groupKey){
+    if(groupKey !== 'big' || w === 0) return w;
+    const adjusted = w > 0 ? (w + 0.5) : (w - 0.5);
+    return Math.round(adjusted*100)/100;
+  }
+  function fmtPct(w){
+    if(w === 0) return '0%';
+    return (w>0?'+':'') + w + '%';
+  }
+  // 零轴隐形维度的名称依据当前选择的方向动态变化
+  function getDimName(d){
+    if(d.dynamicName){
+      if(state.direction==='short') return '出现上涨零轴隐形';
+      if(state.direction==='long') return '出现下跌零轴隐形';
+      return '零轴隐形（请先选择方向）';
+    }
+    return d.name;
+  }
   function buildSetupTableHtml(g){
     return `
       <div class="setup-table" data-setup="${g.key}">
@@ -1557,12 +1584,12 @@
         </div>
         ${SETUP_DIMENSIONS.map(d=>`
           <div class="setup-row${d.highlight?' setup-row-hi':''}">
-            <div class="setup-dim">${d.name}</div>
+            <div class="setup-dim"${d.dynamicName?' data-dyn-dim="1"':''}>${getDimName(d)}${d.hint?` <span class="hint">${d.hint}</span>`:''}</div>
             <div class="setup-cell-adv">
-              ${d.adv.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${o.w}">${o.label} (+${o.w}%)</button>`).join('')}
+              ${d.adv.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${bigAdjust(o.w,g.key)}">${o.label} (${fmtPct(bigAdjust(o.w,g.key))})</button>`).join('')}
             </div>
             <div class="setup-cell-dis">
-              ${d.dis.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w}%)</button>`).join('')}
+              ${d.dis.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${bigAdjust(o.w,g.key)}">${o.label} (${fmtPct(bigAdjust(o.w,g.key))})</button>`).join('')}
             </div>
           </div>`).join('')}
       </div>`;
@@ -1626,24 +1653,23 @@
           recalc();
         });
       });
-      // advantage (multi)
-      document.querySelectorAll(`[data-setup="${g.key}"] .chip-good`).forEach(chip=>{
-        chip.addEventListener('click', ()=>{
-          const set = state.tf[g.key].adv;
-          const v = chip.dataset.value;
-          if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
-          else{ set.add(v); chip.classList.add('active'); }
-          recalc();
-        });
-      });
-      // disadvantage (multi)
-      document.querySelectorAll(`[data-setup="${g.key}"] .chip-bad`).forEach(chip=>{
-        chip.addEventListener('click', ()=>{
-          const set = state.tf[g.key].dis;
-          const v = chip.dataset.value;
-          if(set.has(v)){ set.delete(v); chip.classList.remove('active'); }
-          else{ set.add(v); chip.classList.add('active'); }
-          recalc();
+      // 优势/劣势：同一维度（同一行）内，不论左右两栏，只能选择其中一个选项
+      document.querySelectorAll(`[data-setup="${g.key}"] .setup-row`).forEach(row=>{
+        row.querySelectorAll('.chip-good, .chip-bad').forEach(chip=>{
+          chip.addEventListener('click', ()=>{
+            const isGood = chip.classList.contains('chip-good');
+            const v = chip.dataset.value;
+            const already = chip.classList.contains('active');
+            const advSet = state.tf[g.key].adv, disSet = state.tf[g.key].dis;
+            row.querySelectorAll('.chip-good, .chip-bad').forEach(c=>{
+              advSet.delete(c.dataset.value); disSet.delete(c.dataset.value); c.classList.remove('active');
+            });
+            if(!already){
+              if(isGood) advSet.add(v); else disSet.add(v);
+              chip.classList.add('active');
+            }
+            recalc();
+          });
         });
       });
     });
@@ -1733,6 +1759,14 @@
     if(state.direction==='long'){ tag.textContent='▲ 做多 LONG'; tag.className='dir-tag long'; }
     else if(state.direction==='short'){ tag.textContent='▼ 做空 SHORT'; tag.className='dir-tag short'; }
     else { tag.textContent='尚未选择方向'; tag.className='dir-tag'; }
+    updateDynamicDimLabels();
+  }
+  // 依据当前方向刷新 零轴隐形 维度的标题文字（LONG/SHORT 不同）
+  function updateDynamicDimLabels(){
+    document.querySelectorAll('[data-dyn-dim]').forEach(el=>{
+      const d = SETUP_DIMENSIONS.find(x=>x.dynamicName);
+      if(d) el.innerHTML = getDimName(d) + (d.hint?` <span class="hint">${d.hint}</span>`:'');
+    });
   }
 
   /* ================= single-select rows (snr/session/news/rr) ================= */
@@ -1759,7 +1793,7 @@
     }
 
     if(state.session){
-      const opt = {london:['London Session',2.5], ny:['New York Session',5], golden:['London & NY 黄金时间',5]}[state.session];
+      const opt = {london:['London Session',2.5], ny:['New York Session',5]}[state.session];
       rows.push({label:'Session: '+opt[0], w:opt[1]});
     }
     if(state.news){
@@ -1785,13 +1819,14 @@
       let hasBonusSetup = false;
       ADV_OPTS.forEach(o=>{
         if(t.adv.has(o.id)){
-          rows.push({label:`${g.name}优势: ${o.label}`, w:o.w});
-          gSum += o.w;
+          const w = bigAdjust(o.w, g.key);
+          rows.push({label:`${g.name}优势: ${o.label}`, w});
+          gSum += w;
           if(TRIPLE_BONUS_IDS.includes(o.id)) hasBonusSetup = true;
         }
       });
       DIS_OPTS.forEach(o=>{
-        if(t.dis.has(o.id)){ rows.push({label:`${g.name}劣势: ${o.label}`, w:o.w}); gSum += o.w; }
+        if(t.dis.has(o.id)){ const w = bigAdjust(o.w, g.key); rows.push({label:`${g.name}劣势: ${o.label}`, w}); gSum += w; }
       });
       tripleCheck.push(hasBonusSetup);
       tfGroupSums[g.key] = gSum;
@@ -1853,7 +1888,7 @@
     const groupMax = {};
     TF_GROUPS.forEach(g=>{
       let m = TF_COUNT_BONUS + 10; // 3个以上级别的加成 + 两个时间配合(有)的加成，作为该维度参考上限
-      ADV_OPTS.forEach(o=>{ if(o.w>0) m += o.w; });
+      ADV_OPTS.forEach(o=>{ const w = bigAdjust(o.w, g.key); if(w>0) m += w; });
       groupMax[g.key] = m || 1;
     });
     const rawGroupVals = {};
