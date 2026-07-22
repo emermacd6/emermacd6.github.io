@@ -82,6 +82,7 @@
   nav.tabs button.active{background:var(--accent);color:#062223;}
   nav.tabs button:not(.active):hover{color:var(--text);background:var(--line-soft);}
   .tab-icon{width:15px;height:15px;flex-shrink:0;color:currentColor;}
+  .tabs-scroll-hint{display:none;}
 
   /* ---------- mobile header / nav: 避免检查清单/历史记录/仪表盘/介绍挤在一起 ---------- */
   @media (max-width:760px){
@@ -95,6 +96,7 @@
     .brand-text .eyebrow{font-size:9px;}
     .header-actions{width:100%;justify-content:space-between;gap:8px;}
     nav.tabs{
+      position:relative;
       flex:1;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;
       -webkit-overflow-scrolling:touch;scrollbar-width:none;
     }
@@ -104,6 +106,15 @@
     }
     .tab-icon{width:13px;height:13px;}
     .settings-gear-btn{flex-shrink:0;}
+    /* 提示还有更多标签（例如 MACD 扫描）在右侧被遮挡，滑到底后自动隐藏 */
+    .tabs-scroll-hint{
+      position:absolute;top:2px;bottom:2px;right:0;width:30px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:flex-end;padding-right:3px;
+      background:linear-gradient(90deg, rgba(36,36,36,0) , var(--bg-raise) 65%);
+      color:var(--accent);font-size:14px;font-weight:700;border:none;pointer-events:none;
+      z-index:2;transition:opacity .2s ease;border-radius:0 9px 9px 0;
+    }
+    .tabs-scroll-hint.hide{opacity:0;}
   }
   @media (max-width:420px){
     nav.tabs button{padding:7px 10px;font-size:11.5px;}
@@ -150,6 +161,8 @@
   .settings-gear-btn:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);transform:rotate(35deg);}
 
   main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 90px;}
+  @media (min-width:1400px){ main{max-width:1400px;} }
+  @media (min-width:1680px){ main{max-width:1560px;} }
   .view{display:none;animation:fade .25s ease;}
   .view.active{display:block;}
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
@@ -167,6 +180,7 @@
   /* ---------- layout ---------- */
   .layout{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start;}
   @media (max-width:920px){.layout{grid-template-columns:1fr;}}
+  @media (min-width:1400px){ .layout{grid-template-columns:1fr 380px;gap:30px;} }
 
   /* ---------- direction switch ---------- */
   .direction-bar{
@@ -677,6 +691,15 @@
   .settings-col-label.good{color:var(--long);}
   .settings-col-label.bad{color:var(--short);}
   .settings-opt-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+  .settings-opt-move{display:flex;flex-direction:column;gap:1px;flex-shrink:0;}
+  .settings-move-btn{
+    appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
+    width:18px;height:14px;line-height:1;font-size:8px;border-radius:3px;cursor:pointer;padding:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .settings-move-btn:hover:not(:disabled){color:var(--accent);border-color:var(--accent);}
+  .settings-move-btn:disabled{opacity:.25;cursor:default;}
+  .settings-tf-move{display:flex;flex-direction:column;gap:1px;}
   .settings-opt-label{
     flex:1;min-width:0;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
     padding:7px 9px;border-radius:7px;font-size:12.5px;font-family:var(--sans);
@@ -778,9 +801,58 @@
   .rank-bar-bg{height:7px;background:var(--line-soft);border-radius:4px;overflow:hidden;}
   .rank-bar-fg{height:100%;background:var(--accent);border-radius:4px;}
   .rank-bar-fg.count{background:var(--text-faint);}
+  .rank-bar-fg.loss{background:var(--short);}
+  .rank-top .rmeta .net-pos{color:var(--long);font-weight:700;}
+  .rank-top .rmeta .net-neg{color:var(--short);font-weight:700;}
 
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media (max-width:760px){.two-col{grid-template-columns:1fr;}}
+
+  /* ---------- dashboard: 优势/劣势 Setup 专项统计 ---------- */
+  .setup-stats-head{margin:28px 0 14px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .setup-stats-head h3{margin:0;font-family:var(--disp);font-size:16.5px;}
+  .setup-stats-head .sub{color:var(--text-dim);font-size:12.5px;font-family:var(--mono);}
+
+  /* ---------- 留言墙 ---------- */
+  .wall-form{background:var(--bg-card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:22px;}
+  .wall-form-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .wall-form-row .field-group{flex:1;min-width:160px;margin-bottom:0;}
+  .wall-name-input{
+    width:100%;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
+    padding:10px 12px;border-radius:8px;font-family:var(--sans);font-size:13.5px;
+  }
+  .wall-name-input:focus{outline:none;border-color:var(--accent);}
+  .wall-mood-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .wall-mood-btn{
+    appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
+    font-size:20px;width:42px;height:42px;border-radius:10px;cursor:pointer;transition:.15s ease;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .wall-mood-btn:hover{border-color:var(--accent);}
+  .wall-mood-btn.active{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 1px var(--accent) inset;}
+  .wall-content-input{
+    width:100%;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
+    padding:12px;border-radius:10px;font-family:var(--sans);font-size:13.5px;resize:vertical;min-height:76px;
+  }
+  .wall-content-input:focus{outline:none;border-color:var(--accent);}
+  .wall-submit-row{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap;}
+  .wall-submit-btn{
+    background:var(--accent);color:#062223;border:none;padding:10px 22px;border-radius:9px;
+    font-family:var(--sans);font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s ease;
+  }
+  .wall-submit-btn:hover{filter:brightness(1.08);}
+  .wall-submit-btn:disabled{opacity:.5;cursor:default;}
+  .wall-hint{color:var(--text-faint);font-size:11.5px;font-family:var(--mono);}
+
+  .wall-list{display:flex;flex-direction:column;gap:12px;}
+  .wall-item{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .wall-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .wall-item-who{display:flex;align-items:center;gap:9px;}
+  .wall-item-mood{font-size:19px;}
+  .wall-item-name{font-family:var(--disp);font-weight:700;font-size:14px;}
+  .wall-item-time{color:var(--text-faint);font-size:11px;font-family:var(--mono);}
+  .wall-item-content{font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+  @media (max-width:600px){ .wall-mood-btn{width:38px;height:38px;font-size:18px;} }
 
   footer{
     text-align:center;padding:26px 20px 40px;color:var(--text-faint);font-family:var(--mono);font-size:11.5px;
@@ -1094,6 +1166,8 @@
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
       <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
       <button class="tab-btn" data-view="macd"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> MACD 扫描</button>
+      <button class="tab-btn" data-view="wall"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 留言墙</button>
+      <span class="tabs-scroll-hint" id="tabs-scroll-hint">›</span>
     </nav>
     <button id="settings-open-btn" class="settings-gear-btn" type="button" title="Setup 设置（需要密码）">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -1323,6 +1397,31 @@
     <div id="macd-scan-mount"></div>
   </section>
 
+  <!-- ================= 留言墙 VIEW ================= -->
+  <section class="view" id="view-wall">
+    <div class="wall-form">
+      <div class="wall-form-row">
+        <div class="field-group">
+          <label class="field-label">名称</label>
+          <input type="text" id="wall-name-input" class="wall-name-input" maxlength="30" placeholder="你的称呼">
+        </div>
+      </div>
+      <div class="field-group" style="margin-bottom:14px;">
+        <label class="field-label">今天心情怎么样</label>
+        <div class="wall-mood-row" id="wall-mood-row"></div>
+      </div>
+      <div class="field-group" style="margin-bottom:0;">
+        <label class="field-label">留言内容 <span class="hint">今天交易的兴趣、想法或想发现的东西</span></label>
+        <textarea id="wall-content-input" class="wall-content-input" maxlength="500" placeholder="写点什么……"></textarea>
+      </div>
+      <div class="wall-submit-row">
+        <span class="wall-hint">留言公开可见，请勿留下敏感个人信息</span>
+        <button type="button" class="wall-submit-btn" id="wall-submit-btn">发布留言</button>
+      </div>
+    </div>
+    <div id="wall-mount"><div class="empty-state">加载中...</div></div>
+  </section>
+
 </main>
 
 <footer>EMER MACD SYSTEM — 数据仅保存在本地，用于辅助判断，不构成投资建议</footer>
@@ -1530,6 +1629,33 @@
     },
   ];
 
+  /* ================= 设置持久化（保存到本机浏览器 localStorage）=================
+     检查清单设置面板里的增/删/改/排序，会立即写入 localStorage；
+     下次打开网站时会先用这里保存的配置覆盖上面的默认值，做到"改了就不会丢"。 */
+  const LS_SETUP_DIMS_KEY = 'emer_macd_setup_dimensions_v1';
+  const LS_TF_GROUPS_KEY = 'emer_macd_tf_groups_v1';
+  function persistSetupDimensions(){
+    try{ localStorage.setItem(LS_SETUP_DIMS_KEY, JSON.stringify(SETUP_DIMENSIONS)); }catch(e){}
+  }
+  function persistTFGroups(){
+    try{ localStorage.setItem(LS_TF_GROUPS_KEY, JSON.stringify(TF_GROUPS.map(g=>({key:g.key, tfs:g.tfs})))); }catch(e){}
+  }
+  (function loadPersistedSettings(){
+    try{
+      const savedDims = JSON.parse(localStorage.getItem(LS_SETUP_DIMS_KEY) || 'null');
+      if(Array.isArray(savedDims) && savedDims.length){ SETUP_DIMENSIONS = savedDims; }
+    }catch(e){}
+    try{
+      const savedTF = JSON.parse(localStorage.getItem(LS_TF_GROUPS_KEY) || 'null');
+      if(Array.isArray(savedTF) && savedTF.length){
+        savedTF.forEach(sg=>{
+          const g = TF_GROUPS.find(x=>x.key===sg.key);
+          if(g && Array.isArray(sg.tfs) && sg.tfs.length) g.tfs = sg.tfs;
+        });
+      }
+    }catch(e){}
+  })();
+
   // 展平为 ADV_OPTS / DIS_OPTS 供计分逻辑使用；设置面板增删改后需重新调用
   let ADV_OPTS = [];
   let DIS_OPTS = [];
@@ -1736,8 +1862,25 @@
       if(btn.dataset.view==='history') renderHistory();
       if(btn.dataset.view==='dashboard') renderDashboard();
       if(btn.dataset.view==='macd' && window.initMacdScanner) window.initMacdScanner();
+      if(btn.dataset.view==='wall') renderWall();
     });
   });
+
+  /* ================= 手机端标签栏：提示右侧还有更多标签（如 MACD 扫描 / 留言墙）================= */
+  (function(){
+    const navTabsEl = document.querySelector('nav.tabs');
+    const hintEl = document.getElementById('tabs-scroll-hint');
+    if(!navTabsEl || !hintEl) return;
+    function updateTabsScrollHint(){
+      const scrollable = navTabsEl.scrollWidth > navTabsEl.clientWidth + 2;
+      const atEnd = navTabsEl.scrollLeft + navTabsEl.clientWidth >= navTabsEl.scrollWidth - 4;
+      hintEl.classList.toggle('hide', !scrollable || atEnd);
+    }
+    navTabsEl.addEventListener('scroll', updateTabsScrollHint);
+    window.addEventListener('resize', updateTabsScrollHint);
+    hintEl.addEventListener('click', ()=>{ navTabsEl.scrollBy({left:120, behavior:'smooth'}); });
+    setTimeout(updateTabsScrollHint, 50);
+  })();
 
   /* ================= COLLAPSE CARDS ================= */
   document.addEventListener('click', (e)=>{
@@ -2159,6 +2302,10 @@
         <div class="settings-tf-list" data-tf-gi="${gi}">
           ${g.tfs.map((v,vi)=>`
             <div class="settings-tf-row">
+              <div class="settings-tf-move">
+                <button type="button" class="settings-move-btn" data-tf-move-gi="${gi}" data-tf-move-vi="${vi}" data-tf-move-dir="up" ${vi===0?'disabled':''} title="上移">▲</button>
+                <button type="button" class="settings-move-btn" data-tf-move-gi="${gi}" data-tf-move-vi="${vi}" data-tf-move-dir="down" ${vi===g.tfs.length-1?'disabled':''} title="下移">▼</button>
+              </div>
               <input type="text" value="${escapeAttr(v)}" data-gi="${gi}" data-vi="${vi}">
               <button type="button" class="settings-opt-del" data-tf-del-gi="${gi}" data-tf-del-vi="${vi}" title="删除">✕</button>
             </div>`).join('')}
@@ -2180,6 +2327,7 @@
           const set = state.tf[g.key].tfs;
           if(set.has(oldVal)){ set.delete(oldVal); set.add(val); }
         });
+        persistTFGroups();
       });
     });
     settingsTFMount.querySelectorAll('[data-tf-del-gi]').forEach(btn=>{
@@ -2188,6 +2336,7 @@
         const removed = TF_GROUPS[gi].tfs[vi];
         TF_GROUPS[gi].tfs.splice(vi, 1);
         state.tf[TF_GROUPS[gi].key].tfs.delete(removed);
+        persistTFGroups();
         renderSettingsTF();
       });
     });
@@ -2197,6 +2346,19 @@
         const label = prompt('新的 MACD 级别名称（例如 6H、90m）：');
         if(!label || !label.trim()) return;
         TF_GROUPS[gi].tfs.push(label.trim());
+        persistTFGroups();
+        renderSettingsTF();
+      });
+    });
+    // 上移 / 下移级别
+    settingsTFMount.querySelectorAll('[data-tf-move-gi]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const gi = +btn.dataset.tfMoveGi, vi = +btn.dataset.tfMoveVi, dir = btn.dataset.tfMoveDir;
+        const arr = TF_GROUPS[gi].tfs;
+        const target = dir==='up' ? vi-1 : vi+1;
+        if(target<0 || target>=arr.length) return;
+        [arr[vi], arr[target]] = [arr[target], arr[vi]];
+        persistTFGroups();
         renderSettingsTF();
       });
     });
@@ -2209,9 +2371,13 @@
     recalc();
   });
 
-  function settingsOptRowHtml(di, side, oi, o){
+  function settingsOptRowHtml(di, side, oi, o, count){
     return `
       <div class="settings-opt-row">
+        <div class="settings-opt-move">
+          <button type="button" class="settings-move-btn" data-move-dim="${di}" data-move-side="${side}" data-move-idx="${oi}" data-move-dir="up" ${oi===0?'disabled':''} title="上移">▲</button>
+          <button type="button" class="settings-move-btn" data-move-dim="${di}" data-move-side="${side}" data-move-idx="${oi}" data-move-dir="down" ${oi===count-1?'disabled':''} title="下移">▼</button>
+        </div>
         <input type="text" class="settings-opt-label" value="${escapeAttr(o.label)}" data-dim="${di}" data-side="${side}" data-idx="${oi}" data-field="label">
         <input type="number" class="settings-opt-w" value="${o.w}" step="1" data-dim="${di}" data-side="${side}" data-idx="${oi}" data-field="w">
         <span class="settings-opt-pct">%</span>
@@ -2226,12 +2392,12 @@
         <div class="settings-dim-cols">
           <div class="settings-col">
             <div class="settings-col-label good">优势</div>
-            ${dim.adv.map((o,oi)=>settingsOptRowHtml(di,'adv',oi,o)).join('')}
+            ${dim.adv.map((o,oi)=>settingsOptRowHtml(di,'adv',oi,o,dim.adv.length)).join('')}
             <button type="button" class="settings-add-btn good" data-add-dim="${di}" data-add-side="adv">+ 添加优势选项</button>
           </div>
           <div class="settings-col">
             <div class="settings-col-label bad">劣势</div>
-            ${dim.dis.map((o,oi)=>settingsOptRowHtml(di,'dis',oi,o)).join('')}
+            ${dim.dis.map((o,oi)=>settingsOptRowHtml(di,'dis',oi,o,dim.dis.length)).join('')}
             <button type="button" class="settings-add-btn bad" data-add-dim="${di}" data-add-side="dis">+ 添加劣势选项</button>
           </div>
         </div>
@@ -2247,6 +2413,7 @@
         if(field==='label'){ opt.label = inp.value.trim() || opt.label; }
         else{ opt.w = parseFloat(inp.value) || 0; }
         rebuildFlatOpts();
+        persistSetupDimensions();
       });
     });
     // 删除选项
@@ -2255,6 +2422,20 @@
         const di = +btn.dataset.delDim, side = btn.dataset.delSide, oi = +btn.dataset.delIdx;
         SETUP_DIMENSIONS[di][side].splice(oi, 1);
         rebuildFlatOpts();
+        persistSetupDimensions();
+        renderSettingsPanel();
+      });
+    });
+    // 上移 / 下移选项
+    settingsDimsMount.querySelectorAll('.settings-move-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const di = +btn.dataset.moveDim, side = btn.dataset.moveSide, oi = +btn.dataset.moveIdx, dir = btn.dataset.moveDir;
+        const arr = SETUP_DIMENSIONS[di][side];
+        const target = dir==='up' ? oi-1 : oi+1;
+        if(target<0 || target>=arr.length) return;
+        [arr[oi], arr[target]] = [arr[target], arr[oi]];
+        rebuildFlatOpts();
+        persistSetupDimensions();
         renderSettingsPanel();
       });
     });
@@ -2270,6 +2451,7 @@
         const id = 'custom_' + Date.now() + '_' + Math.floor(Math.random()*1000);
         SETUP_DIMENSIONS[di][side].push({ id, label: label.trim(), w });
         rebuildFlatOpts();
+        persistSetupDimensions();
         renderSettingsPanel();
       });
     });
@@ -3036,6 +3218,91 @@
     }catch(e){ console.error(e); return false; }
   }
 
+  /* ================= 留言墙 SUPABASE STORAGE =================
+     用到一张新表 wall_messages，需要在 Supabase 后台建表一次（SQL 见项目说明）。
+     公开留言板：所有访问网站的人都能看到彼此的留言，读写都走 anon key。 */
+  async function loadWallMessages(){
+    if(!storageAvailable) return [];
+    try{
+      const {data, error} = await supabaseClient.from('wall_messages').select('*').order('ts', {ascending:false}).limit(200);
+      if(error) throw error;
+      return data || [];
+    }catch(e){ console.error(e); return []; }
+  }
+  async function postWallMessage(msg){
+    if(!storageAvailable){ alert('尚未连接 Supabase，留言无法保存。'); return false; }
+    try{
+      const {error} = await supabaseClient.from('wall_messages').insert({
+        id: 'wall_'+Date.now()+'_'+Math.floor(Math.random()*1000),
+        ts: Date.now(),
+        name: msg.name, mood: msg.mood, content: msg.content
+      });
+      if(error) throw error;
+      return true;
+    }catch(e){ alert('发布失败：'+e.message); return false; }
+  }
+
+  const WALL_MOODS = ['😄','🙂','😐','😴','😤','🔥','😩','🤔'];
+  let wallSelectedMood = WALL_MOODS[0];
+  const wallMoodRow = document.getElementById('wall-mood-row');
+  if(wallMoodRow){
+    wallMoodRow.innerHTML = WALL_MOODS.map((m,i)=>`<button type="button" class="wall-mood-btn${i===0?' active':''}" data-mood="${m}">${m}</button>`).join('');
+    wallMoodRow.querySelectorAll('.wall-mood-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        wallMoodRow.querySelectorAll('.wall-mood-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        wallSelectedMood = btn.dataset.mood;
+      });
+    });
+  }
+  const wallNameInput = document.getElementById('wall-name-input');
+  if(wallNameInput){
+    try{
+      const savedName = localStorage.getItem('emer_macd_trader_name');
+      if(savedName) wallNameInput.value = savedName;
+    }catch(e){}
+  }
+  const wallSubmitBtn = document.getElementById('wall-submit-btn');
+  if(wallSubmitBtn){
+    wallSubmitBtn.addEventListener('click', async ()=>{
+      const nameEl = document.getElementById('wall-name-input');
+      const contentEl = document.getElementById('wall-content-input');
+      const name = (nameEl.value||'').trim() || '匿名交易员';
+      const content = (contentEl.value||'').trim();
+      if(!content){ alert('留言内容不能为空。'); return; }
+      wallSubmitBtn.disabled = true;
+      const ok = await postWallMessage({name, mood:wallSelectedMood, content});
+      wallSubmitBtn.disabled = false;
+      if(ok){
+        contentEl.value = '';
+        try{ localStorage.setItem('emer_macd_trader_name', name); }catch(e){}
+        renderWall();
+      }
+    });
+  }
+
+  async function renderWall(){
+    const mount = document.getElementById('wall-mount');
+    if(!mount) return;
+    mount.innerHTML = '<div class="empty-state">加载中...</div>';
+    const msgs = await loadWallMessages();
+    if(msgs.length===0){
+      mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>暂无留言<br>成为第一个留言的人吧</div>`;
+      return;
+    }
+    mount.innerHTML = `<div class="wall-list">${msgs.map(m=>`
+      <div class="wall-item">
+        <div class="wall-item-head">
+          <div class="wall-item-who">
+            <span class="wall-item-mood">${escapeAttr(m.mood||'🙂')}</span>
+            <span class="wall-item-name">${escapeAttr(m.name||'匿名交易员')}</span>
+          </div>
+          <span class="wall-item-time">${fmtTime(Number(m.ts))}</span>
+        </div>
+        <div class="wall-item-content">${escapeAttr(m.content||'')}</div>
+      </div>`).join('')}</div>`;
+  }
+
   const RESULT_META = {
     win:{label:'盈利', cls:'win'},
     loss:{label:'亏损', cls:'loss'},
@@ -3198,6 +3465,25 @@
     return conds;
   }
 
+  // 只取「优势 / 劣势 Setup」选项（不含 SNR/Session/新闻/RR/方向/共振等其他条件），供仪表盘专项统计使用
+  function extractSetupConditions(t){
+    const conds = [];
+    const snap = t.snapshot || {};
+    TF_GROUPS.forEach(g=>{
+      const tf = (snap.tf||{})[g.key];
+      if(!tf) return;
+      (tf.adv||[]).forEach(id=>{
+        const o = ADV_OPTS.find(x=>x.id===id);
+        if(o) conds.push(`${g.name}优势: ${o.label}`);
+      });
+      (tf.dis||[]).forEach(id=>{
+        const o = DIS_OPTS.find(x=>x.id===id);
+        if(o) conds.push(`${g.name}劣势: ${o.label}`);
+      });
+    });
+    return conds;
+  }
+
   async function renderDashboard(){
     const mount = document.getElementById('dashboard-mount');
     mount.innerHTML = '<div class="empty-state">加载中...</div>';
@@ -3243,6 +3529,31 @@
 
     const maxCount = Math.max(...entries.map(e=>e.count),1);
 
+    // 优势 / 劣势 Setup 专项统计（只看 Setup 选项，不含 SNR / Session / 新闻 / RR / 方向等其他条件）
+    const setupMap = {}; // label -> {count, wins, losses}
+    trades.forEach(t=>{
+      const conds = extractSetupConditions(t);
+      const uniq = [...new Set(conds)];
+      uniq.forEach(label=>{
+        if(!setupMap[label]) setupMap[label] = {count:0, wins:0, losses:0};
+        setupMap[label].count++;
+        if(t.result==='win') setupMap[label].wins++;
+        if(t.result==='loss') setupMap[label].losses++;
+      });
+    });
+    const setupEntries = Object.entries(setupMap).map(([label,v])=>{
+      const decidedN = v.wins+v.losses;
+      const rate = decidedN>0 ? v.wins/decidedN*100 : null;
+      return {label, count:v.count, wins:v.wins, losses:v.losses, net:v.wins-v.losses, rate};
+    });
+    // 最多选择：按出现次数排序，同时展示其盈亏表现
+    const setupByCount = [...setupEntries].sort((a,b)=> b.count-a.count || b.net-a.net).slice(0,6);
+    const maxSetupCount = Math.max(...setupEntries.map(e=>e.count),1);
+    // 亏损最多：按净胜负（wins-losses）从低到高排，只看有过亏损的选项，净值可为负
+    const setupByLoss = [...setupEntries].filter(e=>e.losses>0).sort((a,b)=> a.net-b.net || b.losses-a.losses).slice(0,6);
+    const maxSetupLoss = Math.max(...setupByLoss.map(e=>e.losses),1);
+    function netBadge(n){ return n>0 ? `<span class="net-pos">净+${n}</span>` : (n<0 ? `<span class="net-neg">净${n}</span>` : `<span>净0</span>`); }
+
     mount.innerHTML = `
       <div class="stat-grid">
         <div class="stat-box acc"><div class="n">${total}</div><div class="l">总交易数</div></div>
@@ -3277,6 +3588,29 @@
               <div class="rank-top"><span class="rlabel">${e.label}</span><span class="rmeta">${e.count}次${e.rate!==null?(' · '+Math.round(e.rate)+'%'):''}</span></div>
               <div class="rank-bar-bg"><div class="rank-bar-fg count" style="width:${(e.count/maxCount*100)}%"></div></div>
             </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="setup-stats-head">
+        <h3>⭐ 优势 / 劣势 Setup 专项统计</h3>
+        <span class="sub">只统计检查清单里的优势/劣势 Setup 选项，不含 SNR / Session / 新闻 / RR / 方向</span>
+      </div>
+      <div class="two-col">
+        <div class="rank-card">
+          <h3>最多选择的 Setup Top 6（附盈亏）</h3>
+          ${setupByCount.length ? setupByCount.map(e=>`
+            <div class="rank-row">
+              <div class="rank-top"><span class="rlabel">${e.label}</span><span class="rmeta">${e.count}次${e.rate!==null?(' · 胜率'+Math.round(e.rate)+'%'):''} · ${netBadge(e.net)}</span></div>
+              <div class="rank-bar-bg"><div class="rank-bar-fg count" style="width:${(e.count/maxSetupCount*100)}%"></div></div>
+            </div>`).join('') : '<div class="detail-empty">暂无 Setup 选项数据</div>'}
+        </div>
+        <div class="rank-card">
+          <h3>亏损最多的 Setup Top 6</h3>
+          ${setupByLoss.length ? setupByLoss.map(e=>`
+            <div class="rank-row">
+              <div class="rank-top"><span class="rlabel">${e.label}</span><span class="rmeta">亏${e.losses}次 · 赢${e.wins}次 · ${netBadge(e.net)}</span></div>
+              <div class="rank-bar-bg"><div class="rank-bar-fg loss" style="width:${(e.losses/maxSetupLoss*100)}%"></div></div>
+            </div>`).join('') : '<div class="detail-empty">暂无亏损记录</div>'}
         </div>
       </div>
     `;
