@@ -844,14 +844,37 @@
   .wall-submit-btn:disabled{opacity:.5;cursor:default;}
   .wall-hint{color:var(--text-faint);font-size:11.5px;font-family:var(--mono);}
 
-  .wall-list{display:flex;flex-direction:column;gap:12px;}
-  .wall-item{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
-  .wall-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
-  .wall-item-who{display:flex;align-items:center;gap:9px;}
+  .wall-board{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:20px;
+    padding:30px 26px 20px;position:relative;
+    background-image:radial-gradient(var(--line-soft) 1px, transparent 1px);
+    background-size:16px 16px;
+  }
+  .wall-list{display:flex;flex-wrap:wrap;align-items:flex-start;gap:26px 22px;}
+  .wall-item{
+    width:220px;min-height:170px;position:relative;padding:22px 16px 14px;
+    border-radius:3px;box-shadow:0 12px 20px -8px rgba(0,0,0,.4), 0 3px 6px rgba(0,0,0,.28);
+    transition:transform .18s ease, box-shadow .18s ease;
+    font-family:var(--sans);
+  }
+  .wall-item:hover{ transform:translateY(-5px) rotate(0deg) !important; box-shadow:0 18px 28px -8px rgba(0,0,0,.45); z-index:5; }
+  .wall-item::before{
+    content:'📌';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+    font-size:20px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4));
+  }
+  .wall-item.c0{background:#fdf1a8;color:#3a2f00;transform:rotate(-3deg);}
+  .wall-item.c1{background:#c3f2d6;color:#0d3320;transform:rotate(2deg);}
+  .wall-item.c2{background:#ffd3e6;color:#4a0f28;transform:rotate(-2deg);}
+  .wall-item.c3{background:#d2e3ff;color:#0b2a52;transform:rotate(2.5deg);}
+  .wall-item.c4{background:#ffdfba;color:#4a2600;transform:rotate(-1.5deg);}
+  .wall-item.c5{background:#e3d6ff;color:#2c1652;transform:rotate(1.5deg);}
+  .wall-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+  .wall-item-who{display:flex;align-items:center;gap:7px;}
   .wall-item-mood{font-size:19px;}
-  .wall-item-name{font-family:var(--disp);font-weight:700;font-size:14px;}
-  .wall-item-time{color:var(--text-faint);font-size:11px;font-family:var(--mono);}
-  .wall-item-content{font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+  .wall-item-name{font-family:var(--disp);font-weight:700;font-size:13.5px;}
+  .wall-item-time{opacity:.6;font-size:10.5px;font-family:var(--mono);}
+  .wall-item-content{font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+  @media (max-width:600px){ .wall-item{width:150px;min-height:140px;padding:18px 12px 12px;} .wall-list{gap:20px 14px;} .wall-board{padding:24px 14px 14px;} }
   @media (max-width:600px){ .wall-mood-btn{width:38px;height:38px;font-size:18px;} }
 
   footer{
@@ -1436,15 +1459,7 @@
     <input type="text" id="modal-trader" placeholder="例如：Emer" autocomplete="off">
 
     <label>交易品种 Symbol</label>
-    <select id="modal-symbol">
-      <option value="XAUUSD">XAUUSD</option>
-      <option value="XTIUSD">XTIUSD</option>
-      <option value="BTCUSD">BTCUSD</option>
-      <option value="ETHUSD">ETHUSD</option>
-      <option value="DJ30">DJ30</option>
-      <option value="UK100">UK100</option>
-      <option value="GER40">GER40</option>
-    </select>
+    <select id="modal-symbol"></select>
 
     <label>交易结果 Result</label>
     <div class="result-row">
@@ -1486,15 +1501,7 @@
     <input type="text" id="edit-trader" placeholder="例如：Emer" autocomplete="off">
 
     <label>交易品种 Symbol</label>
-    <select id="edit-symbol">
-      <option value="XAUUSD">XAUUSD</option>
-      <option value="XTIUSD">XTIUSD</option>
-      <option value="BTCUSD">BTCUSD</option>
-      <option value="ETHUSD">ETHUSD</option>
-      <option value="DJ30">DJ30</option>
-      <option value="UK100">UK100</option>
-      <option value="GER40">GER40</option>
-    </select>
+    <select id="edit-symbol"></select>
 
     <label>方向 Direction</label>
     <div class="result-row">
@@ -1668,6 +1675,59 @@
     });
   }
   rebuildFlatOpts();
+
+  /* ================= 交易品种 Symbol 列表（可自行添加，永久保存在本机浏览器） ================= */
+  const SYMBOL_BASE_OPTIONS = ['XAUUSD','XTIUSD','BTCUSD','ETHUSD','DJ30','UK100','GER40'];
+  const LS_CUSTOM_SYMBOLS_KEY = 'emer_macd_custom_symbols_v1';
+  function loadCustomSymbols(){
+    try{
+      const arr = JSON.parse(localStorage.getItem(LS_CUSTOM_SYMBOLS_KEY) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function saveCustomSymbols(arr){
+    try{ localStorage.setItem(LS_CUSTOM_SYMBOLS_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+  let customSymbols = loadCustomSymbols();
+  function getAllSymbols(){
+    const all = [...SYMBOL_BASE_OPTIONS];
+    customSymbols.forEach(s=>{ if(!all.includes(s)) all.push(s); });
+    return all;
+  }
+  function renderSymbolSelect(selectEl, selectedValue){
+    if(!selectEl) return;
+    const all = getAllSymbols();
+    // 若当前值是旧记录里罕见的代码（不在列表里），也补进去，避免被悄悄改成别的品种
+    if(selectedValue && !all.includes(selectedValue)) all.push(selectedValue);
+    selectEl.innerHTML = all.map(s=>`<option value="${escapeAttr(s)}">${escapeAttr(s)}</option>`).join('')
+      + `<option value="__add_symbol__">+ 添加新代码…</option>`;
+    selectEl.value = (selectedValue && all.includes(selectedValue)) ? selectedValue : all[0];
+    selectEl.dataset.prevValue = selectEl.value;
+  }
+  function refreshSymbolSelects(preferred){
+    const modalSel = document.getElementById('modal-symbol');
+    const editSel = document.getElementById('edit-symbol');
+    const modalKeep = (preferred && preferred.selectId==='modal-symbol') ? preferred.value : (modalSel ? modalSel.value : SYMBOL_BASE_OPTIONS[0]);
+    const editKeep = (preferred && preferred.selectId==='edit-symbol') ? preferred.value : (editSel ? editSel.value : SYMBOL_BASE_OPTIONS[0]);
+    renderSymbolSelect(modalSel, modalKeep);
+    renderSymbolSelect(editSel, editKeep);
+  }
+  function onSymbolSelectChange(e){
+    const sel = e.target;
+    if(sel.value !== '__add_symbol__'){ sel.dataset.prevValue = sel.value; return; }
+    const prev = sel.dataset.prevValue || SYMBOL_BASE_OPTIONS[0];
+    const raw = prompt('输入新的交易品种代码（例如 EURUSD、NAS100）：');
+    const val = (raw||'').trim().toUpperCase();
+    if(!val){ refreshSymbolSelects({selectId: sel.id, value: prev}); return; }
+    if(!getAllSymbols().includes(val)){
+      customSymbols.push(val);
+      saveCustomSymbols(customSymbols);
+    }
+    refreshSymbolSelects({selectId: sel.id, value: val});
+  }
+  document.getElementById('modal-symbol').addEventListener('change', onSymbolSelectChange);
+  document.getElementById('edit-symbol').addEventListener('change', onSymbolSelectChange);
+  refreshSymbolSelects();
 
   /* ================= STATE ================= */
   let state = {
@@ -3290,8 +3350,8 @@
       mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>暂无留言<br>成为第一个留言的人吧</div>`;
       return;
     }
-    mount.innerHTML = `<div class="wall-list">${msgs.map(m=>`
-      <div class="wall-item">
+    mount.innerHTML = `<div class="wall-board"><div class="wall-list">${msgs.map((m,i)=>`
+      <div class="wall-item c${i%6}">
         <div class="wall-item-head">
           <div class="wall-item-who">
             <span class="wall-item-mood">${escapeAttr(m.mood||'🙂')}</span>
@@ -3300,7 +3360,7 @@
           <span class="wall-item-time">${fmtTime(Number(m.ts))}</span>
         </div>
         <div class="wall-item-content">${escapeAttr(m.content||'')}</div>
-      </div>`).join('')}</div>`;
+      </div>`).join('')}</div></div>`;
   }
 
   const RESULT_META = {
@@ -3388,7 +3448,7 @@
     editDirection = t.direction;
     editResult = t.result;
     document.getElementById('edit-trader').value = t.trader || '';
-    document.getElementById('edit-symbol').value = t.symbol;
+    renderSymbolSelect(document.getElementById('edit-symbol'), t.symbol);
     document.getElementById('edit-score').value = t.score;
     document.getElementById('edit-notes').value = t.notes || '';
     editOverlay.querySelectorAll('[data-edir]').forEach(b=>b.classList.toggle('active', b.dataset.edir===editDirection));
