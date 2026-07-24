@@ -289,13 +289,15 @@
   .chip,.pill{
     appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
     padding:8px 13px;border-radius:8px;font-size:14px;font-family:var(--sans);cursor:pointer;transition:.12s ease;
-    font-weight:500;
+    font-weight:500;transform:scale(1);
   }
-  .chip:hover,.pill:hover{border-color:var(--text-faint);color:var(--text);}
+  .chip:hover,.pill:hover{border-color:var(--text-faint);color:var(--text);transform:scale(1.06);z-index:1;}
+  .chip:active,.pill:active{transform:scale(.97);}
   .chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
   .pill.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
   .chip-good.active{background:var(--long-dim);border-color:var(--long);color:var(--long);}
   .chip-bad.active{background:var(--short-dim);border-color:var(--short);color:var(--short);}
+  .chip.active:hover,.pill.active:hover{transform:scale(1.08);}
 
   /* ---------- score sidebar ---------- */
   .side-sticky{position:sticky;top:88px;display:flex;flex-direction:column;gap:16px;}
@@ -794,38 +796,70 @@
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr) 1.05fr;border-top:1px solid var(--line-soft);border-left:1px solid var(--line-soft);}
   .cal-weekday{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--text-faint);text-transform:uppercase;padding:9px 12px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);}
   .cal-weekday.cal-total-head{color:var(--text-dim);}
-  .cal-cell{min-height:96px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:8px 10px;position:relative;transition:background .15s ease;}
+  .cal-cell{min-height:96px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:8px 10px;position:relative;transition:background .25s ease,transform .15s ease;overflow:hidden;}
   .cal-cell.has-trades{cursor:pointer;}
   .cal-cell.has-trades:hover{background:var(--line-soft);}
+  .cal-cell.has-trades:active{transform:scale(.96);background:radial-gradient(circle at 50% 40%, rgba(39,221,223,.28), transparent 70%);}
+  .cal-cell.pnl-pos.has-trades:active{background:radial-gradient(circle at 50% 40%, rgba(55,223,142,.32), transparent 70%);}
+  .cal-cell.pnl-neg.has-trades:active{background:radial-gradient(circle at 50% 40%, rgba(246,79,79,.32), transparent 70%);}
   .cal-cell.other-month .cal-daynum{color:var(--text-faint);opacity:.45;}
   .cal-cell.selected{box-shadow:inset 0 0 0 2px var(--accent);}
   .cal-daynum{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);}
-  .cal-cell.pnl-pos{background:var(--long-dim);}
-  .cal-cell.pnl-neg{background:var(--short-dim);}
+  .cal-cell.pnl-pos{background:var(--long-dim);animation:cellFlashGreen .8s ease-out;}
+  .cal-cell.pnl-neg{background:var(--short-dim);animation:cellFlashRed .8s ease-out;}
   .cal-cell.pnl-pos:hover{background:rgba(55,223,142,.24);}
   .cal-cell.pnl-neg:hover{background:rgba(246,79,79,.24);}
-  .cal-cell-pnl{font-family:var(--mono);font-size:14px;font-weight:700;margin-top:10px;}
-  .cal-cell-pnl.pos{color:var(--long);}
-  .cal-cell-pnl.neg{color:var(--short);}
-  .cal-cell-trades{font-family:var(--sans);font-size:11px;color:var(--text-dim);margin-top:3px;}
-  .cal-week-total{min-height:96px;background:var(--bg-raise);border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:10px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;}
-  .cal-week-total .lbl{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;}
-  .cal-week-total .val{font-family:var(--mono);font-size:14.5px;font-weight:700;}
-  .cal-week-total .val.pos{color:var(--long);}
-  .cal-week-total .val.neg{color:var(--short);}
+  .cal-cell-pnl{font-family:var(--mono);font-size:14px;font-weight:700;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cal-cell-pnl.pos{color:var(--long);animation:textFlashGreen .8s ease-out;}
+  .cal-cell-pnl.neg{color:var(--short);animation:textFlashRed .8s ease-out;}
+  .cal-cell-trades{font-family:var(--sans);font-size:11px;color:var(--text-dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cal-week-total{min-height:96px;background:var(--bg-raise);border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:10px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;overflow:hidden;}
+  .cal-week-total .lbl{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;white-space:nowrap;}
+  .cal-week-total .val{font-family:var(--mono);font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .cal-week-total .val.pos{color:var(--long);animation:textFlashGreen .8s ease-out;}
+  .cal-week-total .val.neg{color:var(--short);animation:textFlashRed .8s ease-out;}
   .cal-week-total .val.zero{color:var(--text-faint);}
   .cal-day-panel{margin-top:16px;}
   .cal-day-panel-head{font-family:var(--sans);font-size:13px;color:var(--text-dim);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
   .cal-day-panel-head b{color:var(--text);font-family:var(--disp);}
+  @keyframes cellFlashGreen{
+    0%{box-shadow:inset 0 0 0 60px rgba(55,223,142,.55);}
+    100%{box-shadow:inset 0 0 0 60px rgba(55,223,142,0);}
+  }
+  @keyframes cellFlashRed{
+    0%{box-shadow:inset 0 0 0 60px rgba(246,79,79,.55);}
+    100%{box-shadow:inset 0 0 0 60px rgba(246,79,79,0);}
+  }
+  @keyframes textFlashGreen{
+    0%{text-shadow:0 0 12px rgba(55,223,142,1);}
+    100%{text-shadow:0 0 0 rgba(55,223,142,0);}
+  }
+  @keyframes textFlashRed{
+    0%{text-shadow:0 0 12px rgba(246,79,79,1);}
+    100%{text-shadow:0 0 0 rgba(246,79,79,0);}
+  }
   @media (max-width:760px){
-    .cal-grid{grid-template-columns:repeat(7,minmax(38px,1fr)) 1fr;}
-    .cal-cell{min-height:64px;padding:6px 5px;}
-    .cal-cell-pnl{font-size:11px;margin-top:5px;}
-    .cal-cell-trades{font-size:9.5px;}
-    .cal-weekday{padding:6px 4px;font-size:9px;letter-spacing:.5px;}
-    .cal-week-total{min-height:64px;padding:6px 6px;}
-    .cal-week-total .val{font-size:11.5px;}
+    .cal-grid{grid-template-columns:repeat(7,minmax(34px,1fr)) 1fr;}
+    .cal-cell{min-height:64px;padding:6px 4px;}
+    .cal-daynum{font-size:11px;}
+    .cal-cell-pnl{font-size:10.5px;margin-top:5px;}
+    .cal-cell-trades{font-size:9px;}
+    .cal-weekday{padding:6px 3px;font-size:8.5px;letter-spacing:.3px;}
+    .cal-week-total{min-height:64px;padding:6px 5px;}
+    .cal-week-total .lbl{font-size:9px;}
+    .cal-week-total .val{font-size:10.5px;}
     .cal-title{font-size:15px;}
+  }
+  @media (max-width:480px){
+    .cal-grid{grid-template-columns:repeat(7,minmax(30px,1fr)) .85fr;}
+    .cal-cell{min-height:54px;padding:5px 3px;}
+    .cal-daynum{font-size:10px;}
+    .cal-cell-pnl{font-size:9px;margin-top:3px;}
+    .cal-cell-trades{display:none;}
+    .cal-weekday{font-size:8px;padding:5px 2px;}
+    .cal-week-total{min-height:54px;padding:5px 3px;}
+    .cal-week-total .lbl{font-size:8px;}
+    .cal-week-total .val{font-size:9.5px;}
   }
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
   .empty-state .big{width:40px;height:40px;margin:0 auto 12px;color:var(--text-faint);}
@@ -1248,9 +1282,9 @@
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
-      <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
       <button class="tab-btn" data-view="macd"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> MACD 扫描</button>
       <button class="tab-btn" data-view="wall"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 留言墙</button>
+      <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
       <span class="tabs-scroll-hint" id="tabs-scroll-hint">›</span>
     </nav>
     <button id="settings-open-btn" class="settings-gear-btn" type="button" title="Setup 设置（需要密码）">
@@ -1831,7 +1865,7 @@
     const adjusted = w > 0 ? (w + 0.5) : (w - 0.5);
     return Math.round(adjusted*100)/100;
   }
-  function fmtPct(w){
+  function fmtWeight(w){
     if(w === 0) return '0%';
     return (w>0?'+':'') + w + '%';
   }
@@ -1856,10 +1890,10 @@
           <div class="setup-row${d.highlight?' setup-row-hi':''}">
             <div class="setup-dim"${d.dynamicName?' data-dyn-dim="1"':''}>${getDimName(d)}${d.hint?` <span class="hint">${d.hint}</span>`:''}</div>
             <div class="setup-cell-adv">
-              ${d.adv.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${bigAdjust(o.w,g.key)}">${o.label} (${fmtPct(bigAdjust(o.w,g.key))})</button>`).join('')}
+              ${d.adv.map(o=>`<button type="button" class="chip chip-good" data-value="${o.id}" data-w="${bigAdjust(o.w,g.key)}">${o.label} (${fmtWeight(bigAdjust(o.w,g.key))})</button>`).join('')}
             </div>
             <div class="setup-cell-dis">
-              ${d.dis.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${bigAdjust(o.w,g.key)}">${o.label} (${fmtPct(bigAdjust(o.w,g.key))})</button>`).join('')}
+              ${d.dis.map(o=>`<button type="button" class="chip chip-bad" data-value="${o.id}" data-w="${bigAdjust(o.w,g.key)}">${o.label} (${fmtWeight(bigAdjust(o.w,g.key))})</button>`).join('')}
             </div>
           </div>`).join('')}
       </div>`;
