@@ -341,6 +341,8 @@
   }
   .myt-session.active-london{animation:sessionPulseLondon 3.4s ease-in-out infinite;}
   .myt-session.active-ny{animation:sessionPulseNY 2.2s ease-in-out infinite;}
+  /* Tokyo Session：较弱的时段，颜色刻意调淡，不使用发光/脉动动画 */
+  .myt-session.active-tokyo{color:var(--text-dim);border-color:var(--line);background:var(--bg-chip);box-shadow:none;opacity:.85;}
 
   .gauge-wrap{position:relative;width:180px;height:180px;margin:14px auto 6px;}
   .gauge-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
@@ -654,11 +656,14 @@
   .modal h2{margin:0 0 4px;font-family:var(--disp);font-size:19px;}
   .modal .sub{color:var(--text-dim);font-size:12.5px;margin:0 0 18px;}
   .modal label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;}
-  .modal select,.modal textarea,.modal input[type="text"]{
+  .modal select,.modal textarea,.modal input[type="text"],.modal input[type="number"]{
     width:100%;background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
     padding:10px 12px;border-radius:8px;font-family:var(--sans);font-size:13.5px;
   }
-  .modal input[type="text"]:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:var(--accent);}
+  .modal input[type="text"]:focus,.modal input[type="number"]:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:var(--accent);}
+  .modal input[type="number"]{font-family:var(--mono);color-scheme:dark;}
+  .modal input[type="number"]::-webkit-inner-spin-button,
+  .modal input[type="number"]::-webkit-outer-spin-button{filter:invert(0.7) brightness(1.3);}
   .modal textarea{resize:vertical;min-height:60px;}
   .result-row{display:flex;gap:8px;}
   .result-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);cursor:pointer;font-weight:600;font-size:13px;}
@@ -766,6 +771,62 @@
   .hist-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line-soft);}
   .hist-body.open{display:block;}
   .hist-note{font-size:12.5px;color:var(--text-dim);margin:12px 0;font-style:italic;}
+  .hist-rr{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:5px;border:1px solid var(--line);color:var(--text-dim);}
+  .hist-pnl{font-family:var(--mono);font-size:12.5px;font-weight:700;}
+  .hist-pnl.pos{color:var(--long);}
+  .hist-pnl.neg{color:var(--short);}
+
+  /* ---------- 历史记录：日历视图 ---------- */
+  .cal-wrap{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 8px;margin-bottom:18px;}
+  .cal-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .cal-nav{display:flex;align-items:center;gap:8px;}
+  .cal-today-btn{appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;transition:.15s ease;}
+  .cal-today-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .cal-arrow-btn{appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s ease;}
+  .cal-arrow-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .cal-arrow-btn svg{width:16px;height:16px;}
+  .cal-title{font-family:var(--disp);font-size:18px;font-weight:700;letter-spacing:.3px;margin:0 4px;white-space:nowrap;}
+  .cal-stats{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .cal-stat-chip{font-family:var(--mono);font-size:12px;color:var(--text-dim);background:var(--bg-chip);border:1px solid var(--line);padding:6px 12px;border-radius:20px;display:flex;align-items:center;gap:7px;}
+  .cal-stat-chip b{font-size:13px;}
+  .cal-stat-chip.pnl-pos b{color:var(--long);}
+  .cal-stat-chip.pnl-neg b{color:var(--short);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr) 1.05fr;border-top:1px solid var(--line-soft);border-left:1px solid var(--line-soft);}
+  .cal-weekday{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--text-faint);text-transform:uppercase;padding:9px 12px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);}
+  .cal-weekday.cal-total-head{color:var(--text-dim);}
+  .cal-cell{min-height:96px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:8px 10px;position:relative;transition:background .15s ease;}
+  .cal-cell.has-trades{cursor:pointer;}
+  .cal-cell.has-trades:hover{background:var(--line-soft);}
+  .cal-cell.other-month .cal-daynum{color:var(--text-faint);opacity:.45;}
+  .cal-cell.selected{box-shadow:inset 0 0 0 2px var(--accent);}
+  .cal-daynum{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);}
+  .cal-cell.pnl-pos{background:var(--long-dim);}
+  .cal-cell.pnl-neg{background:var(--short-dim);}
+  .cal-cell.pnl-pos:hover{background:rgba(55,223,142,.24);}
+  .cal-cell.pnl-neg:hover{background:rgba(246,79,79,.24);}
+  .cal-cell-pnl{font-family:var(--mono);font-size:14px;font-weight:700;margin-top:10px;}
+  .cal-cell-pnl.pos{color:var(--long);}
+  .cal-cell-pnl.neg{color:var(--short);}
+  .cal-cell-trades{font-family:var(--sans);font-size:11px;color:var(--text-dim);margin-top:3px;}
+  .cal-week-total{min-height:96px;background:var(--bg-raise);border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:10px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;}
+  .cal-week-total .lbl{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;}
+  .cal-week-total .val{font-family:var(--mono);font-size:14.5px;font-weight:700;}
+  .cal-week-total .val.pos{color:var(--long);}
+  .cal-week-total .val.neg{color:var(--short);}
+  .cal-week-total .val.zero{color:var(--text-faint);}
+  .cal-day-panel{margin-top:16px;}
+  .cal-day-panel-head{font-family:var(--sans);font-size:13px;color:var(--text-dim);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .cal-day-panel-head b{color:var(--text);font-family:var(--disp);}
+  @media (max-width:760px){
+    .cal-grid{grid-template-columns:repeat(7,minmax(38px,1fr)) 1fr;}
+    .cal-cell{min-height:64px;padding:6px 5px;}
+    .cal-cell-pnl{font-size:11px;margin-top:5px;}
+    .cal-cell-trades{font-size:9.5px;}
+    .cal-weekday{padding:6px 4px;font-size:9px;letter-spacing:.5px;}
+    .cal-week-total{min-height:64px;padding:6px 6px;}
+    .cal-week-total .val{font-size:11.5px;}
+    .cal-title{font-size:15px;}
+  }
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
   .empty-state .big{width:40px;height:40px;margin:0 auto 12px;color:var(--text-faint);}
   .empty-state .big svg{width:100%;height:100%;display:block;}
@@ -862,12 +923,12 @@
     content:'📌';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
     font-size:20px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4));
   }
-  .wall-item.c0{background:#fdf1a8;color:#3a2f00;transform:rotate(-3deg);}
-  .wall-item.c1{background:#c3f2d6;color:#0d3320;transform:rotate(2deg);}
-  .wall-item.c2{background:#ffd3e6;color:#4a0f28;transform:rotate(-2deg);}
-  .wall-item.c3{background:#d2e3ff;color:#0b2a52;transform:rotate(2.5deg);}
-  .wall-item.c4{background:#ffdfba;color:#4a2600;transform:rotate(-1.5deg);}
-  .wall-item.c5{background:#e3d6ff;color:#2c1652;transform:rotate(1.5deg);}
+  .wall-item.c0{background:var(--bg-chip);color:var(--text);border:1px solid var(--line);border-top:3px solid var(--accent);transform:rotate(-1.4deg);}
+  .wall-item.c1{background:var(--bg-chip);color:var(--text);border:1px solid var(--line);border-top:3px solid var(--long);transform:rotate(1deg);}
+  .wall-item.c2{background:var(--bg-chip);color:var(--text);border:1px solid var(--line);border-top:3px solid var(--short);transform:rotate(-1deg);}
+  .wall-item.c3{background:var(--bg-chip);color:var(--text);border:1px solid var(--line);border-top:3px solid #6f9bd6;transform:rotate(1.2deg);}
+  .wall-item.c4{background:var(--bg-chip);color:var(--text);border:1px solid var(--line);border-top:3px solid #c99a4a;transform:rotate(-.8deg);}
+  .wall-item.c5{background:var(--bg-chip);color:var(--text);border:1px solid var(--line);border-top:3px solid #9a86c9;transform:rotate(.8deg);}
   .wall-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
   .wall-item-who{display:flex;align-items:center;gap:7px;}
   .wall-item-mood{font-size:19px;}
@@ -1469,6 +1530,12 @@
       <button type="button" class="result-btn" data-r="open">◐ 开单中</button>
     </div>
 
+    <label>盈亏 Profit / Drawdown（%，亏损请填负数，例如 -1.5）</label>
+    <input type="number" step="0.01" id="modal-pnl" placeholder="例如：2.5 或 -1.5" autocomplete="off">
+
+    <label>风险回报比 Risk / Reward Ratio（选填）</label>
+    <input type="text" id="modal-rr" placeholder="例如：1:2" autocomplete="off">
+
     <label>备注 Notes（选填）</label>
     <textarea id="modal-notes" placeholder="例如：进场理由、心态、执行细节..."></textarea>
 
@@ -1519,6 +1586,12 @@
 
     <label>评分 Score（%）</label>
     <input type="text" id="edit-score" placeholder="0-100" autocomplete="off">
+
+    <label>盈亏 Profit / Drawdown（%，亏损请填负数）</label>
+    <input type="number" step="0.01" id="edit-pnl" placeholder="例如：2.5 或 -1.5" autocomplete="off">
+
+    <label>风险回报比 Risk / Reward Ratio（选填）</label>
+    <input type="text" id="edit-rr" placeholder="例如：1:2" autocomplete="off">
 
     <label>备注 Notes</label>
     <textarea id="edit-notes" placeholder="例如：进场理由、心态、执行细节..."></textarea>
@@ -1582,6 +1655,14 @@
   const TF_COUNT_THRESHOLD = 3;
   const TF_COUNT_BONUS = 3;
   const CONFLUENCE_OPTS = [ {id:'yes', label:'有', w:10}, {id:'no', label:'没有', w:-5} ];
+  // 「是否有两个大时间配合」里，只有大时间的"有"额外 +2%（10% -> 12%），中时间/小时间维持 10% 不变
+  const CONFLUENCE_BIG_BONUS = 2;
+  function confluenceWeight(id, groupKey){
+    const o = CONFLUENCE_OPTS.find(x=>x.id===id);
+    if(!o) return 0;
+    if(groupKey==='big' && id==='yes') return o.w + CONFLUENCE_BIG_BONUS;
+    return o.w;
+  }
   const TRIPLE_BONUS_WEIGHT = 10;
   const TRIPLE_BONUS_IDS = ['zeroenergy'];
   const FLASH_MAX_ABS_W = 12; // 用于按权重强弱缩放点击渐变动画强度
@@ -1594,6 +1675,7 @@
         {id:'nearzero', label:'靠近零轴', w:3},
         {id:'zerosupport', label:'零轴有效支撑', w:6},
         {id:'zeroenergy', label:'零轴反弹 + 能量柱', w:10},
+        {id:'zeroinvalid', label:'零轴无效', w:6},
       ],
       dis:[
         {id:'zerodistance', label:'零轴有距离', w:-6},
@@ -1603,6 +1685,7 @@
       adv:[
         {id:'nearema52', label:'靠近EMA52', w:3},
         {id:'ema52support', label:'EMA52有效支撑', w:6},
+        {id:'ema52invalid', label:'EMA52无效', w:6},
       ],
       dis:[
         {id:'ema52distance', label:'EMA52有距离', w:-6},
@@ -1614,7 +1697,7 @@
         {id:'divbetween_potential', label:'潜在', w:3},
       ],
       dis:[
-        {id:'divbetween_no', label:'没有', w:0},
+        {id:'divbetween_no', label:'没有', w:2},
       ]
     },
     { name:'单位调整之内背离', hint:'不是完美走势，中间还有距离，没回零轴继续拉',
@@ -1623,15 +1706,16 @@
         {id:'divwithin_potential', label:'潜在', w:3},
       ],
       dis:[
-        {id:'divwithin_no', label:'没有', w:0},
+        {id:'divwithin_no', label:'没有', w:2},
       ]
     },
     { name:'零轴隐形', dynamicName:true,
       adv:[
         {id:'zerohidden_yes', label:'有', w:5},
+        {id:'zerohidden_reversal', label:'主拉升级别出现隐形 + 分时级别反弹出能力柱', w:10},
       ],
       dis:[
-        {id:'zerohidden_no', label:'没有', w:0},
+        {id:'zerohidden_no', label:'没有', w:2},
       ]
     },
   ];
@@ -1801,7 +1885,7 @@
           <div class="field-group">
             <label class="field-label">是否有两个${g.name}配合</label>
             <div class="radio-row" data-confluence="${g.key}">
-              ${CONFLUENCE_OPTS.map(o=>`<button type="button" class="pill" data-value="${o.id}" data-w="${o.w}">${o.label} (${o.w>0?'+':''}${o.w}%)</button>`).join('')}
+              ${CONFLUENCE_OPTS.map(o=>`<button type="button" class="pill" data-value="${o.id}" data-w="${confluenceWeight(o.id,g.key)}">${o.label} (${confluenceWeight(o.id,g.key)>0?'+':''}${confluenceWeight(o.id,g.key)}%)</button>`).join('')}
             </div>
           </div>
           <div class="field-group">
@@ -2016,8 +2100,9 @@
       if(t.tfs.size >= TF_COUNT_THRESHOLD){ rows.push({label:`${g.name}: 已选 ${t.tfs.size} 个级别`, w:TF_COUNT_BONUS}); gSum += TF_COUNT_BONUS; }
       if(t.confluence){
         const o = CONFLUENCE_OPTS.find(x=>x.id===t.confluence);
-        rows.push({label:`${g.name}两个时间配合: ${o.label}`, w:o.w});
-        gSum += o.w;
+        const w = confluenceWeight(t.confluence, g.key);
+        rows.push({label:`${g.name}两个时间配合: ${o.label}`, w:w});
+        gSum += w;
       }
       let hasBonusSetup = false;
       ADV_OPTS.forEach(o=>{
@@ -2219,6 +2304,7 @@
     const traderName = document.getElementById('modal-trader').value.trim();
     if(!traderName){ alert('请输入你的名字'); return; }
     if(!modalResult){ alert('请选择交易结果'); return; }
+    const pnlRaw = parseFloat(document.getElementById('modal-pnl').value);
     const trade = {
       id: 'trade_'+Date.now(),
       ts: Date.now(),
@@ -2227,6 +2313,8 @@
       result: modalResult,
       score: window.__currentScore,
       trader: traderName,
+      pnl: isNaN(pnlRaw) ? 0 : pnlRaw,
+      rr: document.getElementById('modal-rr').value.trim(),
       notes: document.getElementById('modal-notes').value.trim(),
       rows: window.__currentRows,
       snapshot: JSON.parse(JSON.stringify(state, (k,v)=> v instanceof Set ? [...v] : v))
@@ -2237,6 +2325,8 @@
     modalResult = null;
     overlay.querySelectorAll('.result-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById('modal-notes').value = '';
+    document.getElementById('modal-pnl').value = '';
+    document.getElementById('modal-rr').value = '';
     resetChecklist();
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -2551,6 +2641,7 @@
     const wdEn = fmtWeekdayEn.format(now);
     const isWeekend = (wdEn === 'Sat' || wdEn === 'Sun');
 
+    const T0900 = 9*60, T1400 = 14*60;
     const T1430 = 14*60+30, T1500 = 15*60, T1930 = 19*60+30, T2000 = 20*60, T0330 = 3*60+30;
     const T1500sec = T1500*60, T2000sec = T2000*60;
     const COUNTDOWN_WINDOW = 180; // 开盘前 3 分钟
@@ -2562,7 +2653,8 @@
       label = 'Market Closed · 休市';
       cls = 'closed';
     } else {
-      if(mins>=T1430 && mins<T1500){ label = 'London Session Ready...'; cls = 'ready'; }
+      if(mins>=T0900 && mins<T1400){ label = 'Tokyo Session Open'; cls = 'active-tokyo'; }
+      else if(mins>=T1430 && mins<T1500){ label = 'London Session Ready...'; cls = 'ready'; }
       else if(mins>=T1500 && mins<T1930){ label = 'London Session Open'; cls = 'active active-london'; }
       else if(mins>=T1930 && mins<T2000){ label = 'New York Session Ready...'; cls = 'ready'; }
       else if(mins>=T2000 || mins<T0330){ label = 'New York Session Open'; cls = 'active active-ny'; }
@@ -3137,7 +3229,7 @@
             setBadge(it.label, result, g.showConfirm);
           });
         });
-        const nowTxt = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour12:false});
+        const nowTxt = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour12:true});
         const upEl = document.getElementById('macd-updated');
         if(upEl) upEl.textContent = nowTxt;
         const sumUpEl = document.getElementById('macd-sum-updated');
@@ -3227,6 +3319,7 @@
     return {
       id:r.id, ts:Number(r.ts), direction:r.direction, symbol:r.symbol,
       result:r.result, score:r.score, trader:r.trader||'', notes:r.notes||'',
+      pnl:(r.pnl===undefined || r.pnl===null) ? 0 : Number(r.pnl), rr:r.rr||'',
       rows:r.rows||[], snapshot:r.snapshot||{}
     };
   }
@@ -3234,6 +3327,7 @@
     return {
       id:t.id, ts:t.ts, direction:t.direction, symbol:t.symbol,
       result:t.result, score:t.score, trader:t.trader||'', notes:t.notes||'',
+      pnl:(t.pnl===undefined || t.pnl===null) ? 0 : Number(t.pnl), rr:t.rr||'',
       rows:t.rows||[], snapshot:t.snapshot||{}
     };
   }
@@ -3374,10 +3468,32 @@
   function fmtTime(ts){
     const d = new Date(ts);
     const p = n=>String(n).padStart(2,'0');
-    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${WEEKDAY_ZH[d.getDay()]} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    let h12 = d.getHours() % 12; if(h12===0) h12 = 12;
+    const ampm = d.getHours() < 12 ? '上午' : '下午';
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${WEEKDAY_ZH[d.getDay()]} ${ampm}${h12}:${p(d.getMinutes())}`;
+  }
+  // 仅时:分（12小时制），用于日历卡片里精简显示
+  function fmtTimeShort(ts){
+    const d = new Date(ts);
+    const p = n=>String(n).padStart(2,'0');
+    let h12 = d.getHours() % 12; if(h12===0) h12 = 12;
+    const ampm = d.getHours() < 12 ? 'AM' : 'PM';
+    return `${h12}:${p(d.getMinutes())} ${ampm}`;
   }
 
-  /* ================= HISTORY VIEW ================= */
+  /* ================= HISTORY VIEW（日历） ================= */
+  const CAL_WEEKDAY_HEAD = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+  const CAL_MONTH_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let calYear, calMonth; // 当前日历显示的年 / 月（0-indexed 月份）
+  (function initCalDate(){ const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); })();
+  let calSelectedDay = null; // 'YYYY-M-D'，点击某天后展开该天的交易明细
+
+  function dateKeyLocal(ts){
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  function fmtPct(n){ return (n>0?'+':'') + n.toFixed(2) + '%'; }
+
   async function renderHistory(){
     const mount = document.getElementById('history-mount');
     mount.innerHTML = '<div class="empty-state">加载中...</div>';
@@ -3386,40 +3502,152 @@
       mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"></path><path d="M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg></div>暂无交易记录<br>完成一笔交易后会显示在这里</div>`;
       return;
     }
-    mount.innerHTML = trades.map(t=>{
-      const rm = RESULT_META[t.result] || {label:t.result, cls:''};
-      const rowsHtml = (t.rows||[]).map(r=>`<div class="detail-row"><span>${r.label}</span><span class="${r.w>=0?'w-pos':'w-neg'}">${r.w>0?'+':''}${r.w}%</span></div>`).join('') || '<div class="detail-empty">无附加条件</div>';
-      return `
-      <div class="hist-item">
-        <div class="hist-head" data-hist-toggle="${t.id}">
-          <div class="hist-left">
-            <span class="hist-badge ${rm.cls}">${rm.label}</span>
-            <span class="hist-sym">${t.symbol}</span>
-            <span class="hist-dir ${t.direction}">${t.direction==='long'?'▲ LONG':'▼ SHORT'}</span>
-            <span class="hist-score">评分 ${t.score}%</span>
-            ${t.trader ? `<span class="hist-trader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"></path></svg>${escapeHtml(t.trader)}</span>` : ''}
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="hist-time">${fmtTime(t.ts)}</span>
-            <button class="hist-edit" data-edit="${t.id}" title="编辑">✎</button>
-            <button class="hist-del" data-del="${t.id}" title="删除">✕</button>
-            <span class="chevron">▾</span>
-          </div>
-        </div>
-        <div class="hist-body" id="hist-body-${t.id}">
-          ${t.notes ? `<div class="hist-note">“${escapeHtml(t.notes)}”</div>` : ''}
-          <div class="detail-list open" style="margin-top:6px;">${rowsHtml}</div>
-        </div>
-      </div>`;
-    }).join('');
+    renderCalendar(mount, trades);
+  }
 
-    mount.querySelectorAll('[data-hist-toggle]').forEach(h=>{
+  function renderCalendar(mount, trades){
+    // 按日分组（本机所在时区的自然日）
+    const dayMap = {};
+    trades.forEach(t=>{
+      const key = dateKeyLocal(t.ts);
+      if(!dayMap[key]) dayMap[key] = { pnl:0, count:0, trades:[] };
+      dayMap[key].pnl += (Number(t.pnl)||0);
+      dayMap[key].count++;
+      dayMap[key].trades.push(t);
+    });
+
+    const firstOfMonth = new Date(calYear, calMonth, 1);
+    const startWeekday = (firstOfMonth.getDay()+6)%7; // 周一 = 0
+    const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+    const totalCells = Math.ceil((startWeekday+daysInMonth)/7)*7;
+
+    const cells = [];
+    for(let i=0;i<totalCells;i++){
+      const dayNum = i - startWeekday + 1;
+      const cellDate = new Date(calYear, calMonth, dayNum);
+      const key = dateKeyLocal(cellDate.getTime());
+      cells.push({ date:cellDate, key, inMonth:cellDate.getMonth()===calMonth, data:dayMap[key] });
+    }
+
+    let monthPnl = 0, tradingDays = 0;
+    cells.forEach(c=>{ if(c.inMonth && c.data){ monthPnl += c.data.pnl; tradingDays++; } });
+
+    let gridBody = '';
+    for(let w=0; w<cells.length/7; w++){
+      const weekCells = cells.slice(w*7, w*7+7);
+      let weekPnl = 0, weekHasData = false;
+      weekCells.forEach(c=>{ if(c.data){ weekPnl += c.data.pnl; weekHasData = true; } });
+      weekCells.forEach(c=>{
+        const has = !!c.data;
+        const pnlSideCls = has ? (c.data.pnl>0?'pnl-pos':(c.data.pnl<0?'pnl-neg':'')) : '';
+        const selCls = (calSelectedDay===c.key) ? 'selected' : '';
+        gridBody += `<div class="cal-cell ${c.inMonth?'':'other-month'} ${has?'has-trades':''} ${pnlSideCls} ${selCls}" ${has?`data-cal-day="${c.key}"`:''}>
+          <div class="cal-daynum">${c.date.getDate()}</div>
+          ${has ? `<div class="cal-cell-pnl ${c.data.pnl>0?'pos':(c.data.pnl<0?'neg':'')}">${fmtPct(c.data.pnl)}</div>
+          <div class="cal-cell-trades">Trades: ${c.data.count}</div>` : ''}
+        </div>`;
+      });
+      const weekCls = weekHasData ? (weekPnl>0?'pos':(weekPnl<0?'neg':'zero')) : 'zero';
+      gridBody += `<div class="cal-week-total"><span class="lbl">Total</span><span class="val ${weekCls}">${weekHasData?fmtPct(weekPnl):'—'}</span></div>`;
+    }
+
+    const monthTitle = `${CAL_MONTH_EN[calMonth]} ${calYear}`;
+    const monthChipCls = tradingDays>0 ? (monthPnl>0?'pnl-pos':(monthPnl<0?'pnl-neg':'')) : '';
+    const weekdayHead = CAL_WEEKDAY_HEAD.map(w=>`<div class="cal-weekday">${w}</div>`).join('') + `<div class="cal-weekday cal-total-head">TOTAL</div>`;
+
+    mount.innerHTML = `
+      <div class="cal-wrap">
+        <div class="cal-toolbar">
+          <div class="cal-nav">
+            <button class="cal-today-btn" id="cal-today-btn" type="button">Today</button>
+            <button class="cal-arrow-btn" id="cal-prev-btn" type="button" title="上一月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></button>
+            <div class="cal-title">${monthTitle}</div>
+            <button class="cal-arrow-btn" id="cal-next-btn" type="button" title="下一月"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg></button>
+          </div>
+          <div class="cal-stats">
+            <span class="cal-stat-chip ${monthChipCls}">Monthly stats: <b>${tradingDays>0?fmtPct(monthPnl):'—'}</b></span>
+            <span class="cal-stat-chip">Trading days: <b>${tradingDays}</b></span>
+          </div>
+        </div>
+        <div class="cal-grid">${weekdayHead}${gridBody}</div>
+      </div>
+      <div class="cal-day-panel" id="cal-day-panel"></div>
+    `;
+
+    document.getElementById('cal-today-btn').addEventListener('click', ()=>{
+      const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); calSelectedDay = null;
+      renderCalendar(mount, trades);
+    });
+    document.getElementById('cal-prev-btn').addEventListener('click', ()=>{
+      calMonth--; if(calMonth<0){ calMonth=11; calYear--; } calSelectedDay = null;
+      renderCalendar(mount, trades);
+    });
+    document.getElementById('cal-next-btn').addEventListener('click', ()=>{
+      calMonth++; if(calMonth>11){ calMonth=0; calYear++; } calSelectedDay = null;
+      renderCalendar(mount, trades);
+    });
+    mount.querySelectorAll('[data-cal-day]').forEach(cell=>{
+      cell.addEventListener('click', ()=>{
+        const key = cell.dataset.calDay;
+        calSelectedDay = (calSelectedDay===key) ? null : key;
+        renderCalendar(mount, trades);
+        const panel = document.getElementById('cal-day-panel');
+        if(calSelectedDay && panel) panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+      });
+    });
+
+    renderCalDayPanel(dayMap, trades);
+  }
+
+  function renderCalDayPanel(dayMap, trades){
+    const panel = document.getElementById('cal-day-panel');
+    if(!panel) return;
+    if(!calSelectedDay || !dayMap[calSelectedDay]){ panel.innerHTML = ''; return; }
+    const dayTrades = dayMap[calSelectedDay].trades.slice().sort((a,b)=>b.ts-a.ts);
+    const [yy,mm,dd] = calSelectedDay.split('-');
+    panel.innerHTML = `<div class="cal-day-panel-head"><b>${yy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}</b> · 共 ${dayTrades.length} 笔交易 · 当日 ${fmtPct(dayMap[calSelectedDay].pnl)}</div>` +
+      dayTrades.map(t=>buildHistItemHtml(t)).join('');
+    bindHistItemEvents(panel, trades);
+  }
+
+  function buildHistItemHtml(t){
+    const rm = RESULT_META[t.result] || {label:t.result, cls:''};
+    const pnl = Number(t.pnl)||0;
+    const rowsHtml = (t.rows||[]).map(r=>`<div class="detail-row"><span>${r.label}</span><span class="${r.w>=0?'w-pos':'w-neg'}">${r.w>0?'+':''}${r.w}%</span></div>`).join('') || '<div class="detail-empty">无附加条件</div>';
+    return `
+    <div class="hist-item">
+      <div class="hist-head" data-hist-toggle="${t.id}">
+        <div class="hist-left">
+          <span class="hist-badge ${rm.cls}">${rm.label}</span>
+          <span class="hist-sym">${t.symbol}</span>
+          <span class="hist-dir ${t.direction}">${t.direction==='long'?'▲ LONG':'▼ SHORT'}</span>
+          <span class="hist-score">评分 ${t.score}%</span>
+          <span class="hist-pnl ${pnl>0?'pos':(pnl<0?'neg':'')}">${fmtPct(pnl)}</span>
+          ${t.rr ? `<span class="hist-rr">RR ${escapeHtml(t.rr)}</span>` : ''}
+          ${t.trader ? `<span class="hist-trader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"></path></svg>${escapeHtml(t.trader)}</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="hist-time">${fmtTime(t.ts)}</span>
+          <button class="hist-edit" data-edit="${t.id}" title="编辑">✎</button>
+          <button class="hist-del" data-del="${t.id}" title="删除">✕</button>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="hist-body" id="hist-body-${t.id}">
+        ${t.notes ? `<div class="hist-note">"${escapeHtml(t.notes)}"</div>` : ''}
+        <div class="detail-list open" style="margin-top:6px;">${rowsHtml}</div>
+      </div>
+    </div>`;
+  }
+
+  function bindHistItemEvents(container, trades){
+    container.querySelectorAll('[data-hist-toggle]').forEach(h=>{
       h.addEventListener('click', (e)=>{
-        if(e.target.closest('[data-del]')) return;
+        if(e.target.closest('[data-del]') || e.target.closest('[data-edit]')) return;
         document.getElementById('hist-body-'+h.dataset.histToggle).classList.toggle('open');
       });
     });
-    mount.querySelectorAll('[data-del]').forEach(btn=>{
+    container.querySelectorAll('[data-del]').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
         e.stopPropagation();
         openSettingsPw(async ()=>{
@@ -3430,7 +3658,7 @@
         });
       });
     });
-    mount.querySelectorAll('[data-edit]').forEach(btn=>{
+    container.querySelectorAll('[data-edit]').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
         e.stopPropagation();
         const t = trades.find(x=>x.id===btn.dataset.edit);
@@ -3450,6 +3678,8 @@
     document.getElementById('edit-trader').value = t.trader || '';
     renderSymbolSelect(document.getElementById('edit-symbol'), t.symbol);
     document.getElementById('edit-score').value = t.score;
+    document.getElementById('edit-pnl').value = (t.pnl===undefined || t.pnl===null) ? '' : t.pnl;
+    document.getElementById('edit-rr').value = t.rr || '';
     document.getElementById('edit-notes').value = t.notes || '';
     editOverlay.querySelectorAll('[data-edir]').forEach(b=>b.classList.toggle('active', b.dataset.edir===editDirection));
     editOverlay.querySelectorAll('[data-er]').forEach(b=>b.classList.toggle('active', b.dataset.er===editResult));
@@ -3479,12 +3709,15 @@
     if(!traderName){ alert('请输入你的名字'); return; }
     if(!editResult){ alert('请选择交易结果'); return; }
     const scoreRaw = parseFloat(document.getElementById('edit-score').value);
+    const pnlRaw = parseFloat(document.getElementById('edit-pnl').value);
     const patch = {
       trader: traderName,
       symbol: document.getElementById('edit-symbol').value,
       direction: editDirection,
       result: editResult,
       score: isNaN(scoreRaw) ? 0 : scoreRaw,
+      pnl: isNaN(pnlRaw) ? 0 : pnlRaw,
+      rr: document.getElementById('edit-rr').value.trim(),
       notes: document.getElementById('edit-notes').value.trim()
     };
     const ok = await updateTrade(editingTradeId, patch);
