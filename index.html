@@ -741,6 +741,21 @@
   }
   .greet-forget-btn:hover{color:var(--text-dim);}
 
+  /* ---------- history: 多人档案切换条 ---------- */
+  .hist-profile-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .hist-profile-btn{
+    display:inline-flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px 8px 14px;cursor:pointer;transition:.15s ease;
+  }
+  .hist-profile-btn:hover{border-color:var(--accent);}
+  .hist-profile-btn.active{border-color:var(--accent);background:var(--accent-dim);}
+  .hist-profile-btn.active .hp-name{color:var(--accent);}
+  .hp-name{font-family:var(--sans);font-weight:700;font-size:13.5px;color:var(--text);}
+  .hp-count{font-family:var(--mono);font-size:11px;color:var(--text-dim);background:var(--bg-chip);border-radius:20px;padding:2px 8px;}
+  .hp-edit{appearance:none;border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:12.5px;padding:2px 4px;border-radius:5px;}
+  .hp-edit:hover{color:var(--accent);background:var(--line-soft);}
+  .hist-profile-btn.all{background:transparent;}
+
   /* ---------- history ---------- */
   .hist-item{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
   .hist-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;gap:12px;}
@@ -1478,6 +1493,7 @@
 
   <!-- ================= HISTORY VIEW ================= -->
   <section class="view" id="view-history">
+    <div id="history-profile-bar" class="hist-profile-bar"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:14px;">
       <button class="btn-cancel" id="export-btn" type="button" style="padding:9px 16px;border-radius:8px;cursor:pointer;">⭳ 导出备份</button>
       <button class="btn-cancel" id="import-btn" type="button" style="padding:9px 16px;border-radius:8px;cursor:pointer;">⭱ 导入备份</button>
@@ -1725,7 +1741,7 @@
         {id:'divbetween_potential', label:'潜在', w:3},
       ],
       dis:[
-        {id:'divbetween_no', label:'没有', w:2},
+        {id:'divbetween_no', label:'没有', w:-2},
       ]
     },
     { name:'单位调整之内背离', hint:'不是完美走势，中间还有距离，没回零轴继续拉',
@@ -1734,7 +1750,7 @@
         {id:'divwithin_potential', label:'潜在', w:3},
       ],
       dis:[
-        {id:'divwithin_no', label:'没有', w:2},
+        {id:'divwithin_no', label:'没有', w:-2},
       ]
     },
     { name:'零轴隐形', dynamicName:true,
@@ -1743,7 +1759,7 @@
         {id:'zerohidden_reversal', label:'主拉升级别出现隐形 + 分时级别反弹出能力柱', w:10},
       ],
       dis:[
-        {id:'zerohidden_no', label:'没有', w:2},
+        {id:'zerohidden_no', label:'没有', w:-2},
       ]
     },
   ];
@@ -3516,6 +3532,73 @@
   (function initCalDate(){ const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); })();
   let calSelectedDay = null; // 'YYYY-M-D'，点击某天后展开该天的交易明细
 
+  /* ================= 历史记录：多人档案（可改名，按记录里的"名字"字段区分） =================
+     默认两个档案：Emer / Kaiwen，点击档案名旁边的 ✎ 可修改名字，保存到 localStorage，
+     修改后会用新名字去匹配交易记录里保存的 trader 字段（不区分大小写、忽略首尾空格）。 */
+  const LS_HIST_PROFILES_KEY = 'emer_macd_history_profiles_v1';
+  const LS_HIST_ACTIVE_KEY = 'emer_macd_history_active_profile_v1';
+  let historyProfiles = ['Emer','Kaiwen'];
+  try{
+    const savedProfiles = JSON.parse(localStorage.getItem(LS_HIST_PROFILES_KEY)||'null');
+    if(Array.isArray(savedProfiles) && savedProfiles.length) historyProfiles = savedProfiles;
+  }catch(e){}
+  function persistHistoryProfiles(){
+    try{ localStorage.setItem(LS_HIST_PROFILES_KEY, JSON.stringify(historyProfiles)); }catch(e){}
+  }
+  let activeHistoryProfile = 0; // 档案数组下标；-1 表示"全部"
+  try{
+    const savedActive = localStorage.getItem(LS_HIST_ACTIVE_KEY);
+    if(savedActive!==null && !isNaN(parseInt(savedActive,10))) activeHistoryProfile = parseInt(savedActive,10);
+  }catch(e){}
+  function persistActiveHistoryProfile(){
+    try{ localStorage.setItem(LS_HIST_ACTIVE_KEY, String(activeHistoryProfile)); }catch(e){}
+  }
+  function tradeMatchesProfile(t, name){
+    return (t.trader||'').trim().toLowerCase() === (name||'').trim().toLowerCase();
+  }
+  function filterTradesByActiveProfile(allTrades){
+    if(activeHistoryProfile===-1) return allTrades;
+    const name = historyProfiles[activeHistoryProfile];
+    if(!name || !name.trim()) return allTrades;
+    return allTrades.filter(t=>tradeMatchesProfile(t, name));
+  }
+  function renderHistoryProfileBar(allTrades){
+    const bar = document.getElementById('history-profile-bar');
+    if(!bar) return;
+    let html = historyProfiles.map((name,i)=>`
+      <div class="hist-profile-btn ${activeHistoryProfile===i?'active':''}" data-profile-idx="${i}">
+        <span class="hp-name">${escapeHtml(name)}</span>
+        <span class="hp-count">${allTrades.filter(t=>tradeMatchesProfile(t,name)).length}</span>
+        <button type="button" class="hp-edit" data-profile-edit="${i}" title="修改名字">✎</button>
+      </div>`).join('');
+    html += `<div class="hist-profile-btn all ${activeHistoryProfile===-1?'active':''}" data-profile-idx="-1">
+        <span class="hp-name">全部</span><span class="hp-count">${allTrades.length}</span>
+      </div>`;
+    bar.innerHTML = html;
+    bar.querySelectorAll('[data-profile-idx]').forEach(el=>{
+      el.addEventListener('click', (e)=>{
+        if(e.target.closest('[data-profile-edit]')) return;
+        activeHistoryProfile = parseInt(el.dataset.profileIdx,10);
+        persistActiveHistoryProfile();
+        renderHistory();
+      });
+    });
+    bar.querySelectorAll('[data-profile-edit]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.profileEdit,10);
+        const cur = historyProfiles[idx] || '';
+        const next = prompt('修改档案名字：', cur);
+        if(next===null) return;
+        const trimmed = next.trim();
+        if(!trimmed){ alert('名字不能为空。'); return; }
+        historyProfiles[idx] = trimmed;
+        persistHistoryProfiles();
+        renderHistory();
+      });
+    });
+  }
+
   function dateKeyLocal(ts){
     const d = new Date(ts);
     return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
@@ -3525,9 +3608,12 @@
   async function renderHistory(){
     const mount = document.getElementById('history-mount');
     mount.innerHTML = '<div class="empty-state">加载中...</div>';
-    const trades = await loadTrades();
+    const allTrades = await loadTrades();
+    renderHistoryProfileBar(allTrades);
+    const trades = filterTradesByActiveProfile(allTrades);
     if(trades.length===0){
-      mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"></path><path d="M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg></div>暂无交易记录<br>完成一笔交易后会显示在这里</div>`;
+      const activeName = activeHistoryProfile>=0 ? (historyProfiles[activeHistoryProfile]||'') : '';
+      mount.innerHTML = `<div class="empty-state"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"></path><path d="M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path></svg></div>${activeName?escapeHtml(activeName)+' 暂无交易记录':'暂无交易记录'}<br>完成一笔交易后会显示在这里</div>`;
       return;
     }
     renderCalendar(mount, trades);
