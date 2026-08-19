@@ -1095,6 +1095,84 @@
     from{opacity:0;transform:translateY(9px);}
     to{opacity:1;transform:translateY(0);}
   }
+  /* ---------- 市场流动性 Market Liquidity ---------- */
+  .liq-wrap{display:flex;flex-direction:column;gap:16px;}
+  .liq-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:2px;}
+  .liq-head h2{margin:0;font-family:var(--disp);font-size:20px;font-weight:700;letter-spacing:.2px;}
+  .liq-head .sub{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+  .liq-refresh-btn{
+    appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);
+    font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;transition:.15s ease;
+  }
+  .liq-refresh-btn:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);}
+  .liq-refresh-btn:disabled{opacity:.5;cursor:default;}
+  .liq-updated{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+
+  .liq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:760px){ .liq-grid{grid-template-columns:1fr;} }
+
+  .liq-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+  .liq-card h3{
+    margin:0 0 14px;font-family:var(--disp);font-size:14.5px;font-weight:700;letter-spacing:.4px;
+    text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:8px;
+  }
+  .liq-row{
+    display:flex;align-items:center;justify-content:space-between;padding:11px 0;
+    border-top:1px solid var(--line-soft);
+  }
+  .liq-row:first-of-type{border-top:none;}
+  .liq-row-label{font-family:var(--sans);font-size:13px;color:var(--text-dim);font-weight:600;}
+  .liq-row-val{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:14px;font-weight:700;}
+  .liq-row-val .liq-note{font-family:var(--sans);font-size:10.5px;font-weight:500;color:var(--text-faint);}
+  .liq-up{color:var(--long);}
+  .liq-down{color:var(--short);}
+  .liq-flat{color:var(--text-dim);}
+  .liq-tag{
+    display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+    font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.2px;
+  }
+  .liq-tag.strong{background:var(--long-dim);color:var(--long);}
+  .liq-tag.normal{background:rgba(230,180,40,.14);color:#e6b428;}
+  .liq-tag.weak{background:var(--short-dim);color:var(--short);}
+  .liq-tag.na{background:var(--bg-chip);color:var(--text-faint);}
+
+  .liq-verdict{
+    border-radius:var(--radius);padding:22px;text-align:center;
+    border:1px solid var(--line);background:var(--bg-card);
+  }
+  .liq-verdict .liq-verdict-label{
+    font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:8px;
+  }
+  .liq-verdict .liq-verdict-main{
+    font-family:var(--disp);font-size:24px;font-weight:800;letter-spacing:.3px;margin-bottom:6px;
+  }
+  .liq-verdict.good{border-color:rgba(55,223,142,.4);background:linear-gradient(180deg, rgba(55,223,142,.08), transparent);}
+  .liq-verdict.good .liq-verdict-main{color:var(--long);}
+  .liq-verdict.selective{border-color:rgba(230,180,40,.4);background:linear-gradient(180deg, rgba(230,180,40,.08), transparent);}
+  .liq-verdict.selective .liq-verdict-main{color:#e6b428;}
+  .liq-verdict.low{border-color:rgba(246,79,79,.4);background:linear-gradient(180deg, rgba(246,79,79,.08), transparent);}
+  .liq-verdict.low .liq-verdict-main{color:var(--short);}
+  .liq-verdict .liq-verdict-sub{font-family:var(--sans);font-size:12.5px;color:var(--text-dim);max-width:520px;margin:0 auto;}
+
+  .liq-sources{
+    font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.7;
+    border-top:1px solid var(--line-soft);padding-top:12px;margin-top:2px;
+  }
+  .liq-sources b{color:var(--text-dim);}
+  .liq-empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    padding:60px 20px;color:var(--text-faint);font-family:var(--sans);font-size:13px;text-align:center;
+  }
+  .liq-empty .spinner{
+    width:26px;height:26px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--accent);
+    animation:liqspin .8s linear infinite;
+  }
+  @keyframes liqspin{to{transform:rotate(360deg);}}
+  .liq-error{
+    background:var(--short-dim);border:1px solid var(--short);color:var(--short);
+    padding:14px 16px;border-radius:10px;font-size:13px;line-height:1.6;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1290,6 +1368,7 @@
   </div>
   <div class="header-actions" style="display:flex;align-items:center;gap:10px;">
     <nav class="tabs">
+      <button class="tab-btn" data-view="liquidity"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s7 7.6 7 12a7 7 0 0 1-14 0c0-4.4 7-12 7-12z"></path></svg> 市场流动性</button>
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
@@ -1309,6 +1388,11 @@
   <div id="config-banner" style="display:none;background:var(--short-dim);border:1px solid var(--short);color:var(--short);padding:14px 18px;border-radius:10px;margin-bottom:18px;font-size:13px;line-height:1.6;">
     ⚠️ 尚未配置 Supabase：请打开 index.html，在 <code>&lt;script&gt;</code> 顶部把 <code>SUPABASE_URL</code> 和 <code>SUPABASE_ANON_KEY</code> 换成你自己 Supabase 项目的值，否则交易记录无法保存或同步。
   </div>
+
+  <!-- ================= 市场流动性 VIEW ================= -->
+  <section class="view" id="view-liquidity">
+    <div id="liquidity-mount"></div>
+  </section>
 
   <!-- ================= CHECKLIST VIEW ================= -->
   <section class="view active" id="view-checklist">
@@ -2053,6 +2137,7 @@
       if(btn.dataset.view==='dashboard') renderDashboard();
       if(btn.dataset.view==='macd' && window.initMacdScanner) window.initMacdScanner();
       if(btn.dataset.view==='wall') renderWall();
+      if(btn.dataset.view==='liquidity' && window.initLiquidity) window.initLiquidity();
     });
   });
 
@@ -3346,6 +3431,303 @@
     startMacdScanner();
   })();
 
+  /* =====================================================================================
+     市场流动性 MARKET LIQUIDITY —— 只看 XAUUSD，用于判断"现在市场有没有足够的参与和力度让
+     MACD 走出有持续性的趋势"，不是用来预测涨跌。
+
+     数据来源（全部免费，复用 MACD 扫描页已经在用的 Twelve Data 免费 Key，不新增付费/复杂后端）：
+       1. XAU/USD 每日 K 线（open/high/low/close）→ 用真实价格波动（Range/ATR）衡量 Momentum。
+          现货黄金 XAU/USD 属于 OTC 报价，Twelve Data 不提供真实成交量，所以不会用它假装 Volume。
+       2. GLD（SPDR Gold Shares ETF）每日 K 线 volume 字段 → 这是交易所里真实记录的成交量，
+          拿来当作黄金整体"资金参与度"的代理指标（Volume + Open Interest 都拿不到时的替代方案）。
+     Gold Futures Volume / Open Interest：免费 API 没有可靠来源，直接忽略，不编造数据。
+     ===================================================================================== */
+  (function(){
+    const TD_KEY_STORAGE = 'emer_macd_td_apikey_v1'; // 复用 MACD 扫描页已保存的同一把 Key
+    const DEFAULT_API_KEY = '0f3baefc9f7b411896bc947e1a4ec169';
+    const CACHE_KEY = 'emer_liquidity_cache_v1';
+    const CACHE_TTL_MS = 12*60*1000; // 12 分钟内不重复拉取，避免打爆免费额度
+    let loading = false;
+
+    function getApiKey(){
+      try{ return localStorage.getItem(TD_KEY_STORAGE) || DEFAULT_API_KEY; }catch(e){ return DEFAULT_API_KEY; }
+    }
+
+    async function fetchDaily(symbol, outputsize){
+      const key = getApiKey();
+      const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(symbol) +
+        '&interval=1day&outputsize=' + outputsize + '&apikey=' + encodeURIComponent(key);
+      const res = await fetch(url);
+      const data = await res.json();
+      if(data.status === 'error' || !data.values) throw new Error((symbol+'：'+(data.message||'Twelve Data 请求失败')));
+      // 转成按时间正序（旧→新）
+      return data.values.map(v=>({
+        date: v.datetime.slice(0,10),
+        open: parseFloat(v.open), high: parseFloat(v.high), low: parseFloat(v.low), close: parseFloat(v.close),
+        volume: (v.volume!==undefined && v.volume!==null && v.volume!=='') ? parseFloat(v.volume) : null,
+      })).reverse();
+    }
+
+    function getWeekStart(dateStr){
+      const d = new Date(dateStr+'T00:00:00Z');
+      const day = (d.getUTCDay()+6)%7; // 周一=0
+      d.setUTCDate(d.getUTCDate()-day);
+      return d.toISOString().slice(0,10);
+    }
+
+    // 把每日K线按「本周 / 上周 / 之前」分组，today = 最新一根（可能是今天，也可能是上一个已收盘交易日）
+    function splitPeriods(bars){
+      if(!bars.length) return null;
+      const todayBar = bars[bars.length-1];
+      const thisWeekStart = getWeekStart(todayBar.date);
+      const lastWeekDate = new Date(thisWeekStart+'T00:00:00Z'); lastWeekDate.setUTCDate(lastWeekDate.getUTCDate()-7);
+      const lastWeekStart = lastWeekDate.toISOString().slice(0,10);
+      const thisWeekBars = bars.filter(b=>getWeekStart(b.date)===thisWeekStart);
+      const lastWeekBars = bars.filter(b=>getWeekStart(b.date)===lastWeekStart);
+      // baseline：排除今天，往回最多 20 根交易日的均值，用来判断"今天"算不算异常
+      const baseline = bars.slice(0, -1).slice(-20);
+      return {todayBar, thisWeekBars, lastWeekBars, baseline};
+    }
+
+    function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
+    function pctChange(cur, base){ if(cur==null||base==null||base===0) return null; return (cur-base)/base*100; }
+    function trueRange(bar, prevClose){
+      const hl = bar.high-bar.low;
+      if(prevClose==null) return hl;
+      return Math.max(hl, Math.abs(bar.high-prevClose), Math.abs(bar.low-prevClose));
+    }
+    function tier(ratio){
+      if(ratio==null) return null;
+      if(ratio>=1.15) return 'strong';
+      if(ratio>=0.85) return 'normal';
+      return 'weak';
+    }
+    function tierLabel(t){
+      if(t==='strong') return {icon:'🟢', text:'STRONG'};
+      if(t==='normal') return {icon:'🟡', text:'NORMAL'};
+      if(t==='weak') return {icon:'🔴', text:'WEAK'};
+      return {icon:'⚪', text:'N/A'};
+    }
+    function fmtPct(p){ if(p==null) return {arrow:'', text:'无数据', cls:'liq-flat'}; const s=p>=0?'↑':'↓'; return {arrow:s, text:s+' '+Math.abs(p).toFixed(1)+'%', cls:p>=0?'liq-up':(p<0?'liq-down':'liq-flat')}; }
+
+    // 用「真实波幅 Range」序列算 Momentum：今天 range vs baseline 均值；本周日均 range vs 上周日均 range
+    function buildRangeSeries(bars){
+      return bars.map((b,i)=>({date:b.date, tr: trueRange(b, i>0?bars[i-1].close:null)}));
+    }
+
+    function computeMetrics(xauBars, gldBars){
+      const xauSplit = splitPeriods(xauBars);
+      if(!xauSplit) return null;
+      const rangeSeries = buildRangeSeries(xauBars);
+      const rangeByDate = {}; rangeSeries.forEach(r=>rangeByDate[r.date]=r.tr);
+
+      // -------- Momentum（用 XAU/USD 真实价格波幅，非成交量）--------
+      const todayRange = rangeByDate[xauSplit.todayBar.date];
+      const baselineRanges = xauSplit.baseline.map(b=>rangeByDate[b.date]).filter(v=>v!=null);
+      const baselineAvgRange = avg(baselineRanges);
+      const todayMomentumRatio = (todayRange!=null && baselineAvgRange) ? todayRange/baselineAvgRange : null;
+      const todayMomentumTier = tier(todayMomentumRatio);
+
+      const thisWeekRanges = xauSplit.thisWeekBars.map(b=>rangeByDate[b.date]).filter(v=>v!=null);
+      const lastWeekRanges = xauSplit.lastWeekBars.map(b=>rangeByDate[b.date]).filter(v=>v!=null);
+      const thisWeekAvgRange = avg(thisWeekRanges);
+      const lastWeekAvgRange = avg(lastWeekRanges);
+      const weekMomentumRatio = (thisWeekAvgRange!=null && lastWeekAvgRange) ? thisWeekAvgRange/lastWeekAvgRange : null;
+      const weekMomentumTier = tier(weekMomentumRatio);
+      const weekMomentumPct = pctChange(thisWeekAvgRange, lastWeekAvgRange);
+
+      // -------- Volume / Participation（用 GLD ETF 真实成交量代理黄金整体资金参与度）--------
+      let todayVolPct=null, todayVolTier=null, weekVolPct=null, weekVolTier=null;
+      if(gldBars && gldBars.length){
+        const gSplit = splitPeriods(gldBars);
+        if(gSplit){
+          const todayVol = gSplit.todayBar.volume;
+          const baseVols = gSplit.baseline.map(b=>b.volume).filter(v=>v!=null);
+          const baseAvgVol = avg(baseVols);
+          if(todayVol!=null && baseAvgVol){
+            todayVolPct = pctChange(todayVol, baseAvgVol);
+            todayVolTier = tier(todayVol/baseAvgVol);
+          }
+          const thisWeekVols = gSplit.thisWeekBars.map(b=>b.volume).filter(v=>v!=null);
+          const lastWeekVols = gSplit.lastWeekBars.map(b=>b.volume).filter(v=>v!=null);
+          const thisWeekAvgVol = avg(thisWeekVols);
+          const lastWeekAvgVol = avg(lastWeekVols);
+          if(thisWeekAvgVol!=null && lastWeekAvgVol){
+            weekVolPct = pctChange(thisWeekAvgVol, lastWeekAvgVol);
+            weekVolTier = tier(thisWeekAvgVol/lastWeekAvgVol);
+          }
+        }
+      }
+
+      // Participation：结合 Volume 强弱 + Momentum 强弱一起看（没有 Volume 数据时，只看 Momentum）
+      function participationTier(volTier, momTier){
+        const tiers = [volTier, momTier].filter(Boolean);
+        if(!tiers.length) return null;
+        if(tiers.every(t=>t==='strong')) return 'strong';
+        if(tiers.every(t=>t==='weak')) return 'weak';
+        return 'normal';
+      }
+      const todayParticipationTier = participationTier(todayVolTier, todayMomentumTier);
+      const weekParticipationTier = participationTier(weekVolTier, weekMomentumTier);
+
+      // -------- 综合判断 GOOD FOR MACD / TRADE SELECTIVELY / LOW MOMENTUM --------
+      function scoreOf(t){ if(t==='strong') return 1; if(t==='weak') return -1; return 0; }
+      const score =
+        scoreOf(todayVolTier) + scoreOf(todayParticipationTier) + scoreOf(todayMomentumTier) +
+        scoreOf(weekVolTier) + scoreOf(weekParticipationTier) + scoreOf(weekMomentumTier);
+      let verdict;
+      if(score>=3) verdict='good';
+      else if(score<=-3) verdict='low';
+      else verdict='selective';
+
+      return {
+        today:{
+          volPct: todayVolPct, volTier: todayVolTier,
+          participationTier: todayParticipationTier,
+          momentumTier: todayMomentumTier, momentumRatio: todayMomentumRatio,
+          date: xauSplit.todayBar.date,
+        },
+        week:{
+          volPct: weekVolPct, volTier: weekVolTier,
+          participationTier: weekParticipationTier,
+          momentumTier: weekMomentumTier, momentumPct: weekMomentumPct,
+        },
+        verdict,
+        hasVolume: gldBars && gldBars.length>0,
+      };
+    }
+
+    function verdictInfo(v){
+      if(v==='good') return {cls:'good', main:'🟢 GOOD FOR MACD', sub:'成交量、资金参与度与价格波动力度都偏强，趋势更容易走出持续性，是 MACD 顺势跟随比较合适的环境。'};
+      if(v==='low') return {cls:'low', main:'🔴 LOW MOMENTUM', sub:'成交量、参与度与波动力度都偏弱，市场缺乏推动力，MACD 信号容易出现假信号或反复拉锯，建议观望或减少交易频率。'};
+      return {cls:'selective', main:'🟡 TRADE SELECTIVELY', sub:'各项指标强弱不一，市场参与度中性偏混合，建议只挑选条件明确、确认充分的信号交易，避免逢信号必进。'};
+    }
+
+    function renderRow(label, pct, tierVal, opts){
+      opts = opts||{};
+      const p = fmtPct(pct);
+      const tl = tierLabel(tierVal);
+      const valHtml = tierVal===undefined && pct===undefined ? '<span class="liq-note">'+ (opts.naText||'无免费数据来源，已忽略') +'</span>' :
+        (opts.tagOnly ?
+          '<span class="liq-tag '+(tierVal||'na')+'">'+tl.icon+' '+tl.text+'</span>' :
+          '<span class="'+p.cls+'">'+ (pct==null? '无数据' : p.text) +'</span>');
+      return '<div class="liq-row"><span class="liq-row-label">'+label+'</span><div class="liq-row-val">'+valHtml+'</div></div>';
+    }
+
+    function render(metrics, updatedAt, warnMsg){
+      const mount = document.getElementById('liquidity-mount');
+      if(!mount) return;
+      if(!metrics){
+        mount.innerHTML = '<div class="liq-error">'+(warnMsg||'暂时无法取得市场数据，请稍后点击刷新重试。')+'</div>';
+        return;
+      }
+      const vi = verdictInfo(metrics.verdict);
+      const todayTl = tierLabel(metrics.today.participationTier);
+      const todayMomTl = tierLabel(metrics.today.momentumTier);
+      const weekTl = tierLabel(metrics.week.participationTier);
+      const weekMomTl = tierLabel(metrics.week.momentumTier);
+
+      mount.innerHTML = `
+        <div class="liq-wrap">
+          <div class="liq-head">
+            <div>
+              <h2>💧 市场流动性 · XAUUSD</h2>
+              <div class="sub">只看现在市场有没有比平时更多的参与和力度，不预测涨跌方向</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="liq-updated">更新于 ${updatedAt}</span>
+              <button class="liq-refresh-btn" id="liq-refresh-btn" type="button">⟳ 刷新</button>
+            </div>
+          </div>
+
+          ${warnMsg ? `<div class="liq-error">${warnMsg}</div>` : ''}
+
+          <div class="liq-grid">
+            <div class="liq-card">
+              <h3>TODAY（${metrics.today.date}）</h3>
+              ${metrics.hasVolume
+                ? renderRow('Volume（GLD ETF 成交量代理）', metrics.today.volPct, metrics.today.volTier)
+                : renderRow('Volume（GLD ETF 成交量代理）', undefined, undefined, {naText:'免费数据源暂时取不到，已忽略'})}
+              <div class="liq-row"><span class="liq-row-label">Participation</span><div class="liq-row-val"><span class="liq-tag ${metrics.today.participationTier||'na'}">${todayTl.icon} ${todayTl.text}</span></div></div>
+              <div class="liq-row"><span class="liq-row-label">Momentum（价格波幅 vs 20日均值）</span><div class="liq-row-val"><span class="liq-tag ${metrics.today.momentumTier||'na'}">${todayMomTl.icon} ${todayMomTl.text}</span></div></div>
+            </div>
+            <div class="liq-card">
+              <h3>THIS WEEK vs LAST WEEK</h3>
+              ${metrics.hasVolume
+                ? renderRow('Volume（GLD ETF 成交量代理）', metrics.week.volPct, metrics.week.volTier)
+                : renderRow('Volume（GLD ETF 成交量代理）', undefined, undefined, {naText:'免费数据源暂时取不到，已忽略'})}
+              <div class="liq-row"><span class="liq-row-label">Participation</span><div class="liq-row-val"><span class="liq-tag ${metrics.week.participationTier||'na'}">${weekTl.icon} ${weekTl.text}</span></div></div>
+              <div class="liq-row"><span class="liq-row-label">Momentum（日均波幅 vs 上周）</span><div class="liq-row-val"><span class="liq-tag ${metrics.week.momentumTier||'na'}">${weekMomTl.icon} ${weekMomTl.text}</span></div></div>
+            </div>
+          </div>
+
+          <div class="liq-verdict ${vi.cls}">
+            <div class="liq-verdict-label">MARKET CONDITION</div>
+            <div class="liq-verdict-main">${vi.main}</div>
+            <div class="liq-verdict-sub">${vi.sub}</div>
+          </div>
+
+          <div class="liq-sources">
+            <b>数据来源：</b>XAU/USD 每日价格波幅（Twelve Data，真实报价，用于 Momentum）
+            ${metrics.hasVolume ? ' · GLD 黄金 ETF 每日成交量（Twelve Data，真实成交量，用作参与度/资金流代理指标）' : ''}<br>
+            <b>已忽略：</b>Gold Futures Volume、Open Interest —— 免费 API 无可靠来源，未使用假数据填充。
+          </div>
+        </div>
+      `;
+      const btn = document.getElementById('liq-refresh-btn');
+      if(btn) btn.addEventListener('click', ()=>loadLiquidity(true));
+    }
+
+    function renderLoading(){
+      const mount = document.getElementById('liquidity-mount');
+      if(!mount) return;
+      mount.innerHTML = '<div class="liq-empty"><div class="spinner"></div>正在拉取 XAUUSD 市场流动性数据…</div>';
+    }
+
+    function readCache(){
+      try{
+        const raw = localStorage.getItem(CACHE_KEY);
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        if(!obj || !obj.ts || (Date.now()-obj.ts)>CACHE_TTL_MS*4) return null; // 超过48分钟的缓存不再当"新鲜"备份用
+        return obj;
+      }catch(e){ return null; }
+    }
+    function writeCache(metrics, updatedAt){
+      try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), metrics, updatedAt})); }catch(e){}
+    }
+
+    async function loadLiquidity(forceRefresh){
+      if(loading) return;
+      const cached = readCache();
+      if(cached && !forceRefresh && (Date.now()-cached.ts)<CACHE_TTL_MS){
+        render(cached.metrics, cached.updatedAt);
+        return;
+      }
+      if(cached){ render(cached.metrics, cached.updatedAt); } // 先显示旧数据，避免空白，再去后台刷新
+      else{ renderLoading(); }
+      loading = true;
+      try{
+        const [xauBars, gldResult] = await Promise.all([
+          fetchDaily('XAU/USD', 40),
+          fetchDaily('GLD', 40).catch(()=>null), // GLD 拿不到就忽略 Volume，不中断整个功能
+        ]);
+        const metrics = computeMetrics(xauBars, gldResult);
+        const updatedAt = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+        writeCache(metrics, updatedAt);
+        render(metrics, updatedAt, gldResult ? null : null);
+      }catch(err){
+        if(cached){ render(cached.metrics, cached.updatedAt, '刷新失败（'+err.message+'），以下为上一次的数据。'); }
+        else{ render(null, null, '取得市场数据失败：'+err.message); }
+      }finally{
+        loading = false;
+      }
+    }
+
+    window.initLiquidity = function(){
+      loadLiquidity(false);
+    };
+  })();
 
   /* ================= SUPABASE STORAGE ================= */
   /* 把下面两个值换成你自己 Supabase 项目 Settings → API 里的 Project URL 和 anon public key */
