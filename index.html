@@ -1111,6 +1111,18 @@
 
   .liq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media (max-width:760px){ .liq-grid{grid-template-columns:1fr;} }
+  .liq-grid-3{grid-template-columns:repeat(3,1fr);}
+  @media (max-width:1020px){ .liq-grid-3{grid-template-columns:1fr 1fr;} }
+  @media (max-width:760px){ .liq-grid-3{grid-template-columns:1fr;} }
+
+  .liq-inst-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+  .liq-inst-btn{
+    appearance:none;border:1px solid var(--line);background:var(--bg-raise);color:var(--text-dim);
+    font-family:var(--sans);font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;
+    transition:.15s ease;
+  }
+  .liq-inst-btn:hover{color:var(--text);border-color:var(--text-faint);}
+  .liq-inst-btn.active{background:var(--accent);color:#062223;border-color:var(--accent);}
 
   .liq-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
   .liq-card h3{
@@ -3451,37 +3463,55 @@
   })();
 
   /* =====================================================================================
-     市场流动性 MARKET LIQUIDITY —— 只看 XAUUSD，用于判断"现在市场有没有足够的参与和力度让
-     MACD 走出有持续性的趋势"，不是用来预测涨跌。
+     市场流动性 MARKET LIQUIDITY —— 目前支持 XAUUSD 与 DJ30 两个品种，用于判断"现在市场有没有
+     足够的参与和力度让 MACD 走出有持续性的趋势"，不是用来预测涨跌。
 
-     设计目标：不是简单丢一个 STRONG/WEAK 标签，而是给出可以直接拿来做进场判断依据的
-     具体数字——原始数值、相对倍数（vs 均值）、Z-Score（标准差偏离程度）——这样才有辨识度，
-     而不是 TradingView 图表上已经能看到的东西。
+     这个功能完全在浏览器里跑（纯前端 fetch + 计算），不经过 Claude / 任何 LLM，
+     所以不会消耗对话 token；唯一的"额度"是 Twelve Data 免费 API 的请求次数限制，
+     已经用 12 分钟本地缓存 + 手动刷新来控制，不会每次开页面都重新打一轮请求。
+
+     每个品种给三个时间维度：TODAY / THIS WEEK / THIS MONTH，每个维度给具体数字
+     （原始值、基准均值、倍数、Z-Score），而不是只给一个模糊的 STRONG/WEAK 标签。
 
      数据来源（全部免费，复用 MACD 扫描页已经在用的 Twelve Data 免费 Key，不新增付费/复杂后端）：
-       1. XAU/USD 每日 K 线（open/high/low/close）→ 真实价格波幅（True Range）衡量 Momentum。
-          现货黄金 XAU/USD 属于 OTC 报价，Twelve Data 不提供真实成交量，所以不会用它假装 Volume。
-       2. GLD（SPDR Gold Shares ETF）每日 K 线 volume 字段 → 交易所里真实记录的成交量，
-          拿来当作黄金整体"资金参与度"的代理指标（Volume + Open Interest 都拿不到时的替代方案）。
-     Gold Futures Volume / Open Interest：免费 API 没有可靠来源，直接忽略，不编造数据。
+       XAUUSD：
+         1. XAU/USD 每日 K 线（open/high/low/close）→ 真实价格波幅（True Range）衡量 Momentum。
+            现货黄金属于 OTC 报价，没有真实成交量，所以不会假装有 Volume。
+         2. GLD（SPDR 黄金 ETF）每日成交量 → 交易所真实记录，作为资金参与度代理指标。
+       DJ30：
+         1. DJI（道琼斯工业指数，找不到就依次尝试 US30/USD → US30 → DIA）每日 K 线 → True Range。
+         2. DIA（SPDR 道琼斯 ETF）每日成交量 → 作为资金参与度代理指标。
+     Gold/Index Futures Volume、Open Interest：免费 API 没有可靠来源，直接忽略，不编造数据。
 
      统计口径：
-       - Z-Score = (今天的值 − 基准期均值) / 基准期标准差，是判断"今天是不是异常"的标准统计量，
-         比单纯"涨跌 XX%"更可靠，因为它把波动本身的离散程度也考虑进去了。
-       - TODAY 用最近 20 个交易日（不含今天）做基准；THIS WEEK 用最近 8 周完整周做基准。
+       - Z-Score = (当前值 − 基准期均值) / 基准期标准差。
+       - TODAY 基准 = 近 20 个交易日（不含今天）；THIS WEEK 基准 = 近 8 个完整交易周；
+         THIS MONTH 基准 = 近 6 个完整自然月。
        - 分级门槛：Z ≥ +1.0 → STRONG；−1.0 < Z < +1.0 → NORMAL；Z ≤ −1.0 → WEAK。
-         （±1 个标准差是统计上常用、且对日频金融数据比较稳健的门槛，不是随手拍的数字。）
      ===================================================================================== */
   (function(){
     const TD_KEY_STORAGE = 'emer_macd_td_apikey_v1'; // 复用 MACD 扫描页已保存的同一把 Key
     const DEFAULT_API_KEY = '0f3baefc9f7b411896bc947e1a4ec169';
-    const CACHE_KEY = 'emer_liquidity_cache_v2';
-    const CACHE_TTL_MS = 12*60*1000; // 12 分钟内不重复拉取，避免打爆免费额度
-    const OUTPUT_SIZE = 130; // ~ 半年交易日，够算 20 日基准 + 近 8~10 周完整周基准
+    const CACHE_KEY = 'emer_liquidity_cache_v3';
+    const RESOLVED_STORAGE = 'emer_liquidity_resolved_v1';
+    const CACHE_TTL_MS = 12*60*1000; // 12 分钟内不重复拉取
+    const OUTPUT_SIZE = 220; // ~ 一年交易日，够算 20日 / 8周 / 6月 三种基准
     let loading = false;
+    let activeInstrument = 'XAUUSD';
+
+    const INSTRUMENTS = [
+      {key:'XAUUSD', label:'XAUUSD', icon:'🥇', priceCandidates:['XAU/USD'], volumeSymbol:'GLD', volumeLabel:'GLD 黄金 ETF'},
+      {key:'DJ30', label:'DJ30', icon:'🇺🇸', priceCandidates:['DJI','US30/USD','US30','DIA'], volumeSymbol:'DIA', volumeLabel:'DIA 道琼斯 ETF'},
+    ];
 
     function getApiKey(){
       try{ return localStorage.getItem(TD_KEY_STORAGE) || DEFAULT_API_KEY; }catch(e){ return DEFAULT_API_KEY; }
+    }
+    function getResolved(key){
+      try{ const map = JSON.parse(localStorage.getItem(RESOLVED_STORAGE)||'{}'); return map[key]||null; }catch(e){ return null; }
+    }
+    function saveResolved(key,q){
+      try{ const map = JSON.parse(localStorage.getItem(RESOLVED_STORAGE)||'{}'); map[key]=q; localStorage.setItem(RESOLVED_STORAGE, JSON.stringify(map)); }catch(e){}
     }
 
     async function fetchDaily(symbol, outputsize){
@@ -3496,6 +3526,21 @@
         open: parseFloat(v.open), high: parseFloat(v.high), low: parseFloat(v.low), close: parseFloat(v.close),
         volume: (v.volume!==undefined && v.volume!==null && v.volume!=='') ? parseFloat(v.volume) : null,
       })).reverse(); // 旧→新
+    }
+
+    // 依次尝试候选代码，找到第一个能返回数据的就记住并使用；已经试过的直接用缓存，不重复浪费请求额度
+    async function fetchPriceBars(instrumentKey, candidates, outputsize){
+      const cached = getResolved(instrumentKey);
+      const tryList = cached ? [cached, ...candidates.filter(c=>c!==cached)] : candidates;
+      let lastErr = null;
+      for(const q of tryList){
+        try{
+          const bars = await fetchDaily(q, outputsize);
+          saveResolved(instrumentKey, q);
+          return bars;
+        }catch(e){ lastErr = e; }
+      }
+      throw lastErr || new Error('没有可用的代码');
     }
 
     /* ---------- 统计工具 ---------- */
@@ -3530,6 +3575,7 @@
       d.setUTCDate(d.getUTCDate()-day);
       return d.toISOString().slice(0,10);
     }
+    function getMonthKey(dateStr){ return dateStr.slice(0,7); } // YYYY-MM
     function trueRange(bar, prevClose){
       const hl = bar.high-bar.low;
       if(prevClose==null) return hl;
@@ -3559,72 +3605,56 @@
       return (cur-base)/base*100;
     }
 
-    /* ---------- 按周聚合每日序列，得到「每周均值」时间序列 ---------- */
-    function buildWeeklySeries(bars, valueGetter){
-      const map = {}; // weekStart -> array of values
-      bars.forEach(b=>{
-        const v = valueGetter(b);
-        if(v==null) return;
-        const ws = getWeekStart(b.date);
-        if(!map[ws]) map[ws]=[];
-        map[ws].push(v);
+    /* ---------- 按周期（周 / 月）聚合每日序列，得到「本期 vs 上期 + Z-Score」 ---------- */
+    function periodAnalysis(dailyVals, keyFn, baselineCount){
+      const map = {};
+      dailyVals.forEach(d=>{
+        if(d.v==null) return;
+        const k = keyFn(d.date);
+        if(!map[k]) map[k]=[];
+        map[k].push(d.v);
       });
-      const weekStarts = Object.keys(map).sort();
-      return weekStarts.map(ws=>({weekStart:ws, avg:mean(map[ws]), count:map[ws].length}));
+      const keys = Object.keys(map).sort();
+      if(keys.length<2) return null;
+      const periods = keys.map(k=>({key:k, avg:mean(map[k]), count:map[k].length}));
+      const thisP = periods[periods.length-1];
+      const lastP = periods[periods.length-2];
+      const historyP = periods.slice(0,-2).slice(-baselineCount);
+      const baselineArr = historyP.map(p=>p.avg);
+      const z = zscore(thisP.avg, baselineArr.length>=3 ? baselineArr : [lastP.avg].concat(baselineArr));
+      return {
+        thisAvg: thisP.avg, lastAvg: lastP.avg, thisCount: thisP.count, lastCount: lastP.count,
+        z, tier: tierFromZ(z), ratio: fmtRatio(thisP.avg, lastP.avg), pctChg: fmtPctChg(thisP.avg, lastP.avg),
+      };
     }
 
-    /* ---------- 核心计算：给定一组「每日数值」（volume 或 true range），算出 TODAY / THIS WEEK 完整统计 ---------- */
+    /* ---------- 给定一组每日数值（volume 或 true range），算出 TODAY / WEEK / MONTH 完整统计 ---------- */
     function analyzeSeries(bars, valueGetter){
       if(!bars.length) return null;
       const dailyVals = bars.map(b=>({date:b.date, v:valueGetter(b)}));
       const todayEntry = dailyVals[dailyVals.length-1];
       const todayVal = todayEntry.v;
 
-      // TODAY：基准 = 最近 20 个交易日（不含今天）
       const dailyBaselineArr = dailyVals.slice(0,-1).slice(-20).map(d=>d.v).filter(v=>v!=null);
       const dailyBaselineAvg = mean(dailyBaselineArr);
       const todayZ = zscore(todayVal, dailyBaselineArr);
-      const todayTier = tierFromZ(todayZ);
-      const todayRatio = fmtRatio(todayVal, dailyBaselineAvg);
-      const todayPctChg = fmtPctChg(todayVal, dailyBaselineAvg);
 
-      // 周序列
-      const weekly = buildWeeklySeries(bars, valueGetter);
-      if(weekly.length<2){
-        return {
-          today:{date:todayEntry.date, value:todayVal, baselineAvg:dailyBaselineAvg, z:todayZ, tier:todayTier, ratio:todayRatio, pctChg:todayPctChg},
-          week:null,
-        };
-      }
-      const thisWeek = weekly[weekly.length-1];
-      const lastWeek = weekly[weekly.length-2];
-      // THIS WEEK 的基准 = 之前最多 8 个「完整周」（不含本周、不含上周），用来做 Z-Score
-      const historyWeeks = weekly.slice(0, -2).slice(-8);
-      const weekBaselineArr = historyWeeks.map(w=>w.avg).filter(v=>v!=null);
-      const weekZ = zscore(thisWeek.avg, weekBaselineArr.length>=3 ? weekBaselineArr : [lastWeek.avg].concat(weekBaselineArr));
-      const weekTier = tierFromZ(weekZ);
-      const weekRatio = fmtRatio(thisWeek.avg, lastWeek.avg);
-      const weekPctChg = fmtPctChg(thisWeek.avg, lastWeek.avg);
-
-      return {
-        today:{date:todayEntry.date, value:todayVal, baselineAvg:dailyBaselineAvg, z:todayZ, tier:todayTier, ratio:todayRatio, pctChg:todayPctChg},
-        week:{thisAvg:thisWeek.avg, lastAvg:lastWeek.avg, thisCount:thisWeek.count, lastCount:lastWeek.count, z:weekZ, tier:weekTier, ratio:weekRatio, pctChg:weekPctChg},
+      const today = {
+        date: todayEntry.date, value: todayVal, baselineAvg: dailyBaselineAvg, z: todayZ,
+        tier: tierFromZ(todayZ), ratio: fmtRatio(todayVal, dailyBaselineAvg), pctChg: fmtPctChg(todayVal, dailyBaselineAvg),
       };
+      const week = periodAnalysis(dailyVals, d=>getWeekStart(d), 8);
+      const month = periodAnalysis(dailyVals, d=>getMonthKey(d), 6);
+      return {today, week, month};
     }
 
-    function computeMetrics(xauBars, gldBars){
-      if(!xauBars.length) return null;
+    function computeInstrumentMetrics(priceBars, volumeBars){
+      if(!priceBars || !priceBars.length) return null;
 
-      // Momentum：用 XAU/USD 真实价格波幅 True Range（美元/盎司）
       let prevClose = null;
-      const rangeBars = xauBars.map(b=>{ const tr = trueRange(b, prevClose); prevClose = b.close; return {date:b.date, tr}; });
+      const rangeBars = priceBars.map(b=>{ const tr = trueRange(b, prevClose); prevClose = b.close; return {date:b.date, tr}; });
       const momentum = analyzeSeries(rangeBars, b=>b.tr);
-
-      // Volume / Participation：用 GLD ETF 真实成交量
-      let volume = null;
-      if(gldBars && gldBars.length){
-        volume = analyzeSeries(gldBars, b=>b.volume);
-      }
+      const volume = (volumeBars && volumeBars.length) ? analyzeSeries(volumeBars, b=>b.volume) : null;
 
       function participationTier(volTier, momTier){
         const tiers = [volTier, momTier].filter(Boolean);
@@ -3633,36 +3663,35 @@
         if(tiers.every(t=>t==='weak')) return 'weak';
         return 'normal';
       }
+      const participation = {
+        today: participationTier(volume ? volume.today.tier : null, momentum.today.tier),
+        week: participationTier(volume && volume.week ? volume.week.tier : null, momentum.week ? momentum.week.tier : null),
+        month: participationTier(volume && volume.month ? volume.month.tier : null, momentum.month ? momentum.month.tier : null),
+      };
+
       function scoreOf(t){ if(t==='strong') return 1; if(t==='weak') return -1; return 0; }
-
-      const todayVolTier = volume ? volume.today.tier : null;
-      const todayMomTier = momentum.today.tier;
-      const todayParticipationTier = participationTier(todayVolTier, todayMomTier);
-
-      const weekVolTier = (volume && volume.week) ? volume.week.tier : null;
-      const weekMomTier = momentum.week ? momentum.week.tier : null;
-      const weekParticipationTier = participationTier(weekVolTier, weekMomTier);
-
-      const score = scoreOf(todayVolTier)+scoreOf(todayParticipationTier)+scoreOf(todayMomTier)
-                  + scoreOf(weekVolTier)+scoreOf(weekParticipationTier)+scoreOf(weekMomTier);
+      let score = 0;
+      ['today','week','month'].forEach(p=>{
+        score += scoreOf(volume && volume[p] ? volume[p].tier : null);
+        score += scoreOf(participation[p]);
+        score += scoreOf(momentum[p] ? momentum[p].tier : null);
+      });
       let verdict;
-      if(score>=3) verdict='good';
-      else if(score<=-3) verdict='low';
+      if(score>=4) verdict='good';
+      else if(score<=-4) verdict='low';
       else verdict='selective';
 
       return {
-        xauDate: xauBars[xauBars.length-1].date,
-        momentum, volume,
-        todayParticipationTier, weekParticipationTier,
-        verdict,
+        date: priceBars[priceBars.length-1].date,
+        momentum, volume, participation, verdict,
         hasVolume: !!volume,
       };
     }
 
     function verdictInfo(v){
-      if(v==='good') return {cls:'good', main:'🟢 GOOD FOR MACD', sub:'成交量、资金参与度与价格波动力度都高于近期基准（Z≥+1σ），趋势更容易走出持续性，是 MACD 顺势跟随比较合适的环境。'};
-      if(v==='low') return {cls:'low', main:'🔴 LOW MOMENTUM', sub:'成交量、参与度与波动力度都低于近期基准（Z≤−1σ），市场缺乏推动力，MACD 信号容易出现假信号或反复拉锯，建议观望或减少交易频率。'};
-      return {cls:'selective', main:'🟡 TRADE SELECTIVELY', sub:'各项指标强弱不一（有的高于基准、有的接近正常），建议只挑选条件明确、确认充分的信号交易，避免逢信号必进。'};
+      if(v==='good') return {cls:'good', main:'🟢 GOOD FOR MACD', sub:'成交量、资金参与度与价格波动力度在日/周/月多个维度上都高于近期基准（Z≥+1σ），趋势更容易走出持续性，是 MACD 顺势跟随比较合适的环境。'};
+      if(v==='low') return {cls:'low', main:'🔴 LOW MOMENTUM', sub:'成交量、参与度与波动力度在多个维度上都低于近期基准（Z≤−1σ），市场缺乏推动力，MACD 信号容易出现假信号或反复拉锯，建议观望或减少交易频率。'};
+      return {cls:'selective', main:'🟡 TRADE SELECTIVELY', sub:'各项指标强弱不一（不同时间维度表现不一致），建议只挑选条件明确、确认充分的信号交易，避免逢信号必进。'};
     }
 
     function metricRow(label, unitLabel, valStr, avgLabel, avgStr, ratioStr, zStr, tierVal){
@@ -3681,7 +3710,6 @@
           </div>
         </div>`;
     }
-
     function naRow(label, reason){
       return `
         <div class="liq-mrow liq-mrow-na">
@@ -3692,38 +3720,83 @@
           <div class="liq-note-line">${reason}</div>
         </div>`;
     }
+    function compositeRow(label, tierVal){
+      const tl = tierLabel(tierVal);
+      return `
+        <div class="liq-mrow liq-mrow-composite">
+          <div class="liq-mrow-top">
+            <span class="liq-mrow-label">${label}</span>
+            <span class="liq-tag ${tierVal||'na'}">${tl.icon} ${tl.text}</span>
+          </div>
+        </div>`;
+    }
 
-    function render(metrics, updatedAt, warnMsg){
+    // 渲染 TODAY / THIS WEEK / THIS MONTH 三张卡其中一张
+    function periodCard(title, momPeriod, volPeriod, participationTier, momUnit, volLabel){
+      const momRow = momPeriod
+        ? metricRow('Momentum（价格真实波幅 True Range）', momUnit.valLabel, '$'+fmtNum(momPeriod.value!==undefined?momPeriod.value:momPeriod.thisAvg,2), momUnit.avgLabel, '$'+fmtNum(momPeriod.baselineAvg!==undefined?momPeriod.baselineAvg:momPeriod.lastAvg,2), momPeriod.ratio, fmtZ(momPeriod.z), momPeriod.tier)
+        : naRow('Momentum（价格真实波幅 True Range）', '历史数据不足，无法计算，已忽略。');
+      const volRow = volPeriod
+        ? metricRow(volLabel, volPeriod.value!==undefined?'今日成交量':'本期日均量', fmtVol(volPeriod.value!==undefined?volPeriod.value:volPeriod.thisAvg), volPeriod.baselineAvg!==undefined?'20日均量':'上期日均量', fmtVol(volPeriod.baselineAvg!==undefined?volPeriod.baselineAvg:volPeriod.lastAvg), volPeriod.ratio, fmtZ(volPeriod.z), volPeriod.tier)
+        : naRow(volLabel, '免费数据源暂时取不到该成交量，已忽略，不使用假数据。');
+      return `
+        <div class="liq-card">
+          <h3>${title}</h3>
+          ${volRow}
+          ${momRow}
+          ${compositeRow('Participation（综合 Volume + Momentum）', participationTier)}
+        </div>`;
+    }
+
+    function render(dataMap, updatedAt, warnMsg){
       const mount = document.getElementById('liquidity-mount');
       if(!mount) return;
+      const inst = INSTRUMENTS.find(i=>i.key===activeInstrument) || INSTRUMENTS[0];
+      const metrics = dataMap ? dataMap[inst.key] : null;
+
+      const tabsHtml = INSTRUMENTS.map(i=>
+        `<button class="liq-inst-btn ${i.key===activeInstrument?'active':''}" data-inst="${i.key}">${i.icon} ${i.label}</button>`
+      ).join('');
+
       if(!metrics){
-        mount.innerHTML = '<div class="liq-error">'+(warnMsg||'暂时无法取得市场数据，请稍后点击刷新重试。')+'</div>';
+        mount.innerHTML = `
+          <div class="liq-wrap">
+            <div class="liq-inst-tabs">${tabsHtml}</div>
+            <div class="liq-error">${warnMsg||(inst.label+' 暂时无法取得市场数据，请稍后点击刷新重试。')}</div>
+          </div>`;
+        bindInstTabs();
         return;
       }
+
       const vi = verdictInfo(metrics.verdict);
-      const m = metrics.momentum, v = metrics.volume;
-      const todayPTl = tierLabel(metrics.todayParticipationTier);
-      const weekPTl = tierLabel(metrics.weekParticipationTier);
+      const todayTl = tierLabel(metrics.participation.today);
+      const weekTl = tierLabel(metrics.participation.week);
+      const monthTl = tierLabel(metrics.participation.month);
 
-      const todayVolRow = v
-        ? metricRow('Volume（GLD ETF 真实成交量，代理黄金资金参与度）', '今日成交量', fmtVol(v.today.value), '20日均量', fmtVol(v.today.baselineAvg), v.today.ratio, fmtZ(v.today.z), v.today.tier)
-        : naRow('Volume（GLD ETF 真实成交量）', '免费数据源暂时取不到 GLD 成交量，已忽略，不使用假数据。');
-
-      const weekVolRow = (v && v.week)
-        ? metricRow('Volume（GLD 周均量 vs 上周）', '本周日均量', fmtVol(v.week.thisAvg)+' ('+v.week.thisCount+'日)', '上周日均量', fmtVol(v.week.lastAvg)+' ('+v.week.lastCount+'日)', v.week.ratio, fmtZ(v.week.z), v.week.tier)
-        : naRow('Volume（GLD 周均量 vs 上周）', '本周或历史数据不足，无法计算，已忽略。');
-
-      const todayMomRow = metricRow('Momentum（XAU/USD 真实波幅 True Range）', '今日波幅', '$'+fmtNum(m.today.value,2), '20日均幅', '$'+fmtNum(m.today.baselineAvg,2), m.today.ratio, fmtZ(m.today.z), m.today.tier);
-
-      const weekMomRow = m.week
-        ? metricRow('Momentum（周均波幅 vs 上周）', '本周日均幅', '$'+fmtNum(m.week.thisAvg,2)+' ('+m.week.thisCount+'日)', '上周日均幅', '$'+fmtNum(m.week.lastAvg,2)+' ('+m.week.lastCount+'日)', m.week.ratio, fmtZ(m.week.z), m.week.tier)
-        : naRow('Momentum（周均波幅 vs 上周）', '历史数据不足，无法计算，已忽略。');
+      const todayCard = periodCard(
+        `TODAY（${metrics.date}）`,
+        metrics.momentum.today, metrics.volume ? metrics.volume.today : null,
+        metrics.participation.today,
+        {valLabel:'今日波幅', avgLabel:'20日均幅'}, `Volume（${inst.volumeLabel} 真实成交量）`
+      );
+      const weekCard = periodCard(
+        'THIS WEEK vs LAST WEEK',
+        metrics.momentum.week, metrics.volume ? metrics.volume.week : null,
+        metrics.participation.week,
+        {valLabel:'本周日均幅', avgLabel:'上周日均幅'}, `Volume（${inst.volumeLabel} 周均量）`
+      );
+      const monthCard = periodCard(
+        'THIS MONTH vs LAST MONTH',
+        metrics.momentum.month, metrics.volume ? metrics.volume.month : null,
+        metrics.participation.month,
+        {valLabel:'本月日均幅', avgLabel:'上月日均幅'}, `Volume（${inst.volumeLabel} 月均量）`
+      );
 
       mount.innerHTML = `
         <div class="liq-wrap">
           <div class="liq-head">
             <div>
-              <h2>💧 市场流动性 · XAUUSD</h2>
+              <h2>💧 市场流动性 · ${inst.label}</h2>
               <div class="sub">进场前用来确认「现在有没有足够参与和力度」——不是预测涨跌，是判断趋势能不能走出持续性</div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
@@ -3732,31 +3805,14 @@
             </div>
           </div>
 
+          <div class="liq-inst-tabs">${tabsHtml}</div>
+
           ${warnMsg ? `<div class="liq-error">${warnMsg}</div>` : ''}
 
-          <div class="liq-grid">
-            <div class="liq-card">
-              <h3>TODAY（${m.today.date}）</h3>
-              ${todayVolRow}
-              ${todayMomRow}
-              <div class="liq-mrow liq-mrow-composite">
-                <div class="liq-mrow-top">
-                  <span class="liq-mrow-label">Participation（综合 Volume + Momentum）</span>
-                  <span class="liq-tag ${metrics.todayParticipationTier||'na'}">${todayPTl.icon} ${todayPTl.text}</span>
-                </div>
-              </div>
-            </div>
-            <div class="liq-card">
-              <h3>THIS WEEK vs LAST WEEK</h3>
-              ${weekVolRow}
-              ${weekMomRow}
-              <div class="liq-mrow liq-mrow-composite">
-                <div class="liq-mrow-top">
-                  <span class="liq-mrow-label">Participation（综合 Volume + Momentum）</span>
-                  <span class="liq-tag ${metrics.weekParticipationTier||'na'}">${weekPTl.icon} ${weekPTl.text}</span>
-                </div>
-              </div>
-            </div>
+          <div class="liq-grid liq-grid-3">
+            ${todayCard}
+            ${weekCard}
+            ${monthCard}
           </div>
 
           <div class="liq-verdict ${vi.cls}">
@@ -3767,21 +3823,33 @@
 
           <div class="liq-sources">
             <b>口径说明：</b>Z-Score = (当前值 − 基准期均值) / 基准期标准差；TODAY 基准 = 近20个交易日（不含今天）；
-            THIS WEEK 基准 = 近8个完整交易周。Z ≥ +1σ 记 STRONG，Z ≤ −1σ 记 WEAK，介于两者之间记 NORMAL。<br>
-            <b>数据来源：</b>XAU/USD 每日真实报价（Twelve Data，用于 Momentum/True Range）
-            ${metrics.hasVolume ? ' · GLD 黄金 ETF 每日真实成交量（Twelve Data，用作参与度/资金流代理指标）' : ''}<br>
-            <b>已忽略：</b>Gold Futures Volume、Open Interest —— 免费 API 无可靠来源，未使用假数据填充。
+            THIS WEEK 基准 = 近8个完整交易周；THIS MONTH 基准 = 近6个完整自然月。
+            Z ≥ +1σ 记 STRONG，Z ≤ −1σ 记 WEAK，介于两者之间记 NORMAL。<br>
+            <b>数据来源：</b>${inst.label} 每日真实报价（Twelve Data，用于 Momentum/True Range）
+            ${metrics.hasVolume ? ` · ${inst.volumeLabel} 每日真实成交量（Twelve Data，用作参与度/资金流代理指标）` : ''}<br>
+            <b>已忽略：</b>Futures Volume、Open Interest —— 免费 API 无可靠来源，未使用假数据填充。
           </div>
         </div>
       `;
+      bindInstTabs();
       const btn = document.getElementById('liq-refresh-btn');
       if(btn) btn.addEventListener('click', ()=>loadLiquidity(true));
+    }
+
+    function bindInstTabs(){
+      document.querySelectorAll('.liq-inst-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          activeInstrument = b.dataset.inst;
+          const cached = readCache();
+          if(cached) render(cached.data, cached.updatedAt);
+        });
+      });
     }
 
     function renderLoading(){
       const mount = document.getElementById('liquidity-mount');
       if(!mount) return;
-      mount.innerHTML = '<div class="liq-empty"><div class="spinner"></div>正在拉取 XAUUSD 市场流动性数据…</div>';
+      mount.innerHTML = '<div class="liq-empty"><div class="spinner"></div>正在拉取 XAUUSD / DJ30 市场流动性数据…</div>';
     }
 
     function readCache(){
@@ -3793,31 +3861,35 @@
         return obj;
       }catch(e){ return null; }
     }
-    function writeCache(metrics, updatedAt){
-      try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), metrics, updatedAt})); }catch(e){}
+    function writeCache(data, updatedAt){
+      try{ localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data, updatedAt})); }catch(e){}
     }
 
     async function loadLiquidity(forceRefresh){
       if(loading) return;
       const cached = readCache();
       if(cached && !forceRefresh && (Date.now()-cached.ts)<CACHE_TTL_MS){
-        render(cached.metrics, cached.updatedAt);
+        render(cached.data, cached.updatedAt);
         return;
       }
-      if(cached){ render(cached.metrics, cached.updatedAt); }
+      if(cached){ render(cached.data, cached.updatedAt); }
       else{ renderLoading(); }
       loading = true;
       try{
-        const [xauBars, gldResult] = await Promise.all([
-          fetchDaily('XAU/USD', OUTPUT_SIZE),
-          fetchDaily('GLD', OUTPUT_SIZE).catch(()=>null),
-        ]);
-        const metrics = computeMetrics(xauBars, gldResult);
+        const results = await Promise.all(INSTRUMENTS.map(async inst=>{
+          const [priceBars, volumeBars] = await Promise.all([
+            fetchPriceBars(inst.key, inst.priceCandidates, OUTPUT_SIZE),
+            fetchDaily(inst.volumeSymbol, OUTPUT_SIZE).catch(()=>null),
+          ]);
+          return {key:inst.key, metrics: computeInstrumentMetrics(priceBars, volumeBars)};
+        }));
+        const data = {};
+        results.forEach(r=>{ data[r.key]=r.metrics; });
         const updatedAt = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
-        writeCache(metrics, updatedAt);
-        render(metrics, updatedAt);
+        writeCache(data, updatedAt);
+        render(data, updatedAt);
       }catch(err){
-        if(cached){ render(cached.metrics, cached.updatedAt, '刷新失败（'+err.message+'），以下为上一次的数据。'); }
+        if(cached){ render(cached.data, cached.updatedAt, '刷新失败（'+err.message+'），以下为上一次的数据。'); }
         else{ render(null, null, '取得市场数据失败：'+err.message); }
       }finally{
         loading = false;
@@ -3828,6 +3900,7 @@
       loadLiquidity(false);
     };
   })();
+
 
 
   /* ================= SUPABASE STORAGE ================= */
