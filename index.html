@@ -1107,7 +1107,7 @@
   }
   .liq-refresh-btn:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);}
   .liq-refresh-btn:disabled{opacity:.5;cursor:default;}
-  .liq-updated{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+  .liq-updated{font-family:var(--mono);font-size:14.5px;font-weight:700;color:var(--text-dim);letter-spacing:.3px;}
 
   .liq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media (max-width:760px){ .liq-grid{grid-template-columns:1fr;} }
@@ -1136,6 +1136,25 @@
   .liq-tag.normal{background:rgba(230,180,40,.14);color:#e6b428;}
   .liq-tag.weak{background:var(--short-dim);color:var(--short);}
   .liq-tag.na{background:var(--bg-chip);color:var(--text-faint);}
+
+  /* ---------- 详细指标行（数值 + 均值 + 倍数 + Z-Score） ---------- */
+  .liq-mrow{padding:13px 0;border-top:1px solid var(--line-soft);}
+  .liq-mrow:first-of-type{border-top:none;padding-top:0;}
+  .liq-mrow-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;flex-wrap:wrap;}
+  .liq-mrow-label{font-family:var(--sans);font-size:12.5px;color:var(--text-dim);font-weight:600;line-height:1.4;}
+  .liq-mrow-stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    background:var(--bg-raise);border:1px solid var(--line-soft);border-radius:10px;padding:10px 8px;
+  }
+  @media (max-width:520px){ .liq-mrow-stats{grid-template-columns:repeat(2,1fr);} }
+  .liq-stat{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
+  .liq-stat-k{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;}
+  .liq-stat-v{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--text);}
+  .liq-stat-v.liq-dim{color:var(--text-dim);font-weight:600;}
+  .liq-stat-v.liq-z{color:var(--accent);}
+  .liq-mrow-composite{padding-top:13px;}
+  .liq-mrow-composite .liq-mrow-top{margin-bottom:0;}
+  .liq-mrow-na .liq-note-line{font-family:var(--sans);font-size:11.5px;color:var(--text-faint);line-height:1.5;}
 
   .liq-verdict{
     border-radius:var(--radius);padding:22px;text-align:center;
@@ -3435,18 +3454,30 @@
      市场流动性 MARKET LIQUIDITY —— 只看 XAUUSD，用于判断"现在市场有没有足够的参与和力度让
      MACD 走出有持续性的趋势"，不是用来预测涨跌。
 
+     设计目标：不是简单丢一个 STRONG/WEAK 标签，而是给出可以直接拿来做进场判断依据的
+     具体数字——原始数值、相对倍数（vs 均值）、Z-Score（标准差偏离程度）——这样才有辨识度，
+     而不是 TradingView 图表上已经能看到的东西。
+
      数据来源（全部免费，复用 MACD 扫描页已经在用的 Twelve Data 免费 Key，不新增付费/复杂后端）：
-       1. XAU/USD 每日 K 线（open/high/low/close）→ 用真实价格波动（Range/ATR）衡量 Momentum。
+       1. XAU/USD 每日 K 线（open/high/low/close）→ 真实价格波幅（True Range）衡量 Momentum。
           现货黄金 XAU/USD 属于 OTC 报价，Twelve Data 不提供真实成交量，所以不会用它假装 Volume。
-       2. GLD（SPDR Gold Shares ETF）每日 K 线 volume 字段 → 这是交易所里真实记录的成交量，
+       2. GLD（SPDR Gold Shares ETF）每日 K 线 volume 字段 → 交易所里真实记录的成交量，
           拿来当作黄金整体"资金参与度"的代理指标（Volume + Open Interest 都拿不到时的替代方案）。
      Gold Futures Volume / Open Interest：免费 API 没有可靠来源，直接忽略，不编造数据。
+
+     统计口径：
+       - Z-Score = (今天的值 − 基准期均值) / 基准期标准差，是判断"今天是不是异常"的标准统计量，
+         比单纯"涨跌 XX%"更可靠，因为它把波动本身的离散程度也考虑进去了。
+       - TODAY 用最近 20 个交易日（不含今天）做基准；THIS WEEK 用最近 8 周完整周做基准。
+       - 分级门槛：Z ≥ +1.0 → STRONG；−1.0 < Z < +1.0 → NORMAL；Z ≤ −1.0 → WEAK。
+         （±1 个标准差是统计上常用、且对日频金融数据比较稳健的门槛，不是随手拍的数字。）
      ===================================================================================== */
   (function(){
     const TD_KEY_STORAGE = 'emer_macd_td_apikey_v1'; // 复用 MACD 扫描页已保存的同一把 Key
     const DEFAULT_API_KEY = '0f3baefc9f7b411896bc947e1a4ec169';
-    const CACHE_KEY = 'emer_liquidity_cache_v1';
+    const CACHE_KEY = 'emer_liquidity_cache_v2';
     const CACHE_TTL_MS = 12*60*1000; // 12 分钟内不重复拉取，避免打爆免费额度
+    const OUTPUT_SIZE = 130; // ~ 半年交易日，够算 20 日基准 + 近 8~10 周完整周基准
     let loading = false;
 
     function getApiKey(){
@@ -3460,47 +3491,32 @@
       const res = await fetch(url);
       const data = await res.json();
       if(data.status === 'error' || !data.values) throw new Error((symbol+'：'+(data.message||'Twelve Data 请求失败')));
-      // 转成按时间正序（旧→新）
       return data.values.map(v=>({
         date: v.datetime.slice(0,10),
         open: parseFloat(v.open), high: parseFloat(v.high), low: parseFloat(v.low), close: parseFloat(v.close),
         volume: (v.volume!==undefined && v.volume!==null && v.volume!=='') ? parseFloat(v.volume) : null,
-      })).reverse();
+      })).reverse(); // 旧→新
     }
 
-    function getWeekStart(dateStr){
-      const d = new Date(dateStr+'T00:00:00Z');
-      const day = (d.getUTCDay()+6)%7; // 周一=0
-      d.setUTCDate(d.getUTCDate()-day);
-      return d.toISOString().slice(0,10);
+    /* ---------- 统计工具 ---------- */
+    function mean(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
+    function stdev(arr){
+      if(arr.length<2) return null;
+      const m = mean(arr);
+      const variance = arr.reduce((s,v)=>s+(v-m)*(v-m),0)/(arr.length-1);
+      return Math.sqrt(variance);
     }
-
-    // 把每日K线按「本周 / 上周 / 之前」分组，today = 最新一根（可能是今天，也可能是上一个已收盘交易日）
-    function splitPeriods(bars){
-      if(!bars.length) return null;
-      const todayBar = bars[bars.length-1];
-      const thisWeekStart = getWeekStart(todayBar.date);
-      const lastWeekDate = new Date(thisWeekStart+'T00:00:00Z'); lastWeekDate.setUTCDate(lastWeekDate.getUTCDate()-7);
-      const lastWeekStart = lastWeekDate.toISOString().slice(0,10);
-      const thisWeekBars = bars.filter(b=>getWeekStart(b.date)===thisWeekStart);
-      const lastWeekBars = bars.filter(b=>getWeekStart(b.date)===lastWeekStart);
-      // baseline：排除今天，往回最多 20 根交易日的均值，用来判断"今天"算不算异常
-      const baseline = bars.slice(0, -1).slice(-20);
-      return {todayBar, thisWeekBars, lastWeekBars, baseline};
+    function zscore(value, baselineArr){
+      if(value==null || baselineArr.length<3) return null;
+      const m = mean(baselineArr), sd = stdev(baselineArr);
+      if(sd==null || sd===0) return null;
+      return (value-m)/sd;
     }
-
-    function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
-    function pctChange(cur, base){ if(cur==null||base==null||base===0) return null; return (cur-base)/base*100; }
-    function trueRange(bar, prevClose){
-      const hl = bar.high-bar.low;
-      if(prevClose==null) return hl;
-      return Math.max(hl, Math.abs(bar.high-prevClose), Math.abs(bar.low-prevClose));
-    }
-    function tier(ratio){
-      if(ratio==null) return null;
-      if(ratio>=1.15) return 'strong';
-      if(ratio>=0.85) return 'normal';
-      return 'weak';
+    function tierFromZ(z){
+      if(z==null) return null;
+      if(z>=1.0) return 'strong';
+      if(z<=-1.0) return 'weak';
+      return 'normal';
     }
     function tierLabel(t){
       if(t==='strong') return {icon:'🟢', text:'STRONG'};
@@ -3508,58 +3524,108 @@
       if(t==='weak') return {icon:'🔴', text:'WEAK'};
       return {icon:'⚪', text:'N/A'};
     }
-    function fmtPct(p){ if(p==null) return {arrow:'', text:'无数据', cls:'liq-flat'}; const s=p>=0?'↑':'↓'; return {arrow:s, text:s+' '+Math.abs(p).toFixed(1)+'%', cls:p>=0?'liq-up':(p<0?'liq-down':'liq-flat')}; }
+    function getWeekStart(dateStr){
+      const d = new Date(dateStr+'T00:00:00Z');
+      const day = (d.getUTCDay()+6)%7; // 周一=0
+      d.setUTCDate(d.getUTCDate()-day);
+      return d.toISOString().slice(0,10);
+    }
+    function trueRange(bar, prevClose){
+      const hl = bar.high-bar.low;
+      if(prevClose==null) return hl;
+      return Math.max(hl, Math.abs(bar.high-prevClose), Math.abs(bar.low-prevClose));
+    }
+    function fmtNum(n, decimals){
+      if(n==null) return '—';
+      return n.toLocaleString('en-US', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+    }
+    function fmtVol(n){
+      if(n==null) return '—';
+      if(n>=1e6) return (n/1e6).toFixed(2)+'M';
+      if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+      return Math.round(n).toString();
+    }
+    function fmtZ(z){
+      if(z==null) return '—';
+      const s = z>=0?'+':'';
+      return s+z.toFixed(2)+'σ';
+    }
+    function fmtRatio(cur, base){
+      if(cur==null||base==null||base===0) return '—';
+      return (cur/base).toFixed(2)+'x';
+    }
+    function fmtPctChg(cur, base){
+      if(cur==null||base==null||base===0) return null;
+      return (cur-base)/base*100;
+    }
 
-    // 用「真实波幅 Range」序列算 Momentum：今天 range vs baseline 均值；本周日均 range vs 上周日均 range
-    function buildRangeSeries(bars){
-      return bars.map((b,i)=>({date:b.date, tr: trueRange(b, i>0?bars[i-1].close:null)}));
+    /* ---------- 按周聚合每日序列，得到「每周均值」时间序列 ---------- */
+    function buildWeeklySeries(bars, valueGetter){
+      const map = {}; // weekStart -> array of values
+      bars.forEach(b=>{
+        const v = valueGetter(b);
+        if(v==null) return;
+        const ws = getWeekStart(b.date);
+        if(!map[ws]) map[ws]=[];
+        map[ws].push(v);
+      });
+      const weekStarts = Object.keys(map).sort();
+      return weekStarts.map(ws=>({weekStart:ws, avg:mean(map[ws]), count:map[ws].length}));
+    }
+
+    /* ---------- 核心计算：给定一组「每日数值」（volume 或 true range），算出 TODAY / THIS WEEK 完整统计 ---------- */
+    function analyzeSeries(bars, valueGetter){
+      if(!bars.length) return null;
+      const dailyVals = bars.map(b=>({date:b.date, v:valueGetter(b)}));
+      const todayEntry = dailyVals[dailyVals.length-1];
+      const todayVal = todayEntry.v;
+
+      // TODAY：基准 = 最近 20 个交易日（不含今天）
+      const dailyBaselineArr = dailyVals.slice(0,-1).slice(-20).map(d=>d.v).filter(v=>v!=null);
+      const dailyBaselineAvg = mean(dailyBaselineArr);
+      const todayZ = zscore(todayVal, dailyBaselineArr);
+      const todayTier = tierFromZ(todayZ);
+      const todayRatio = fmtRatio(todayVal, dailyBaselineAvg);
+      const todayPctChg = fmtPctChg(todayVal, dailyBaselineAvg);
+
+      // 周序列
+      const weekly = buildWeeklySeries(bars, valueGetter);
+      if(weekly.length<2){
+        return {
+          today:{date:todayEntry.date, value:todayVal, baselineAvg:dailyBaselineAvg, z:todayZ, tier:todayTier, ratio:todayRatio, pctChg:todayPctChg},
+          week:null,
+        };
+      }
+      const thisWeek = weekly[weekly.length-1];
+      const lastWeek = weekly[weekly.length-2];
+      // THIS WEEK 的基准 = 之前最多 8 个「完整周」（不含本周、不含上周），用来做 Z-Score
+      const historyWeeks = weekly.slice(0, -2).slice(-8);
+      const weekBaselineArr = historyWeeks.map(w=>w.avg).filter(v=>v!=null);
+      const weekZ = zscore(thisWeek.avg, weekBaselineArr.length>=3 ? weekBaselineArr : [lastWeek.avg].concat(weekBaselineArr));
+      const weekTier = tierFromZ(weekZ);
+      const weekRatio = fmtRatio(thisWeek.avg, lastWeek.avg);
+      const weekPctChg = fmtPctChg(thisWeek.avg, lastWeek.avg);
+
+      return {
+        today:{date:todayEntry.date, value:todayVal, baselineAvg:dailyBaselineAvg, z:todayZ, tier:todayTier, ratio:todayRatio, pctChg:todayPctChg},
+        week:{thisAvg:thisWeek.avg, lastAvg:lastWeek.avg, thisCount:thisWeek.count, lastCount:lastWeek.count, z:weekZ, tier:weekTier, ratio:weekRatio, pctChg:weekPctChg},
+      };
     }
 
     function computeMetrics(xauBars, gldBars){
-      const xauSplit = splitPeriods(xauBars);
-      if(!xauSplit) return null;
-      const rangeSeries = buildRangeSeries(xauBars);
-      const rangeByDate = {}; rangeSeries.forEach(r=>rangeByDate[r.date]=r.tr);
+      if(!xauBars.length) return null;
 
-      // -------- Momentum（用 XAU/USD 真实价格波幅，非成交量）--------
-      const todayRange = rangeByDate[xauSplit.todayBar.date];
-      const baselineRanges = xauSplit.baseline.map(b=>rangeByDate[b.date]).filter(v=>v!=null);
-      const baselineAvgRange = avg(baselineRanges);
-      const todayMomentumRatio = (todayRange!=null && baselineAvgRange) ? todayRange/baselineAvgRange : null;
-      const todayMomentumTier = tier(todayMomentumRatio);
+      // Momentum：用 XAU/USD 真实价格波幅 True Range（美元/盎司）
+      let prevClose = null;
+      const rangeBars = xauBars.map(b=>{ const tr = trueRange(b, prevClose); prevClose = b.close; return {date:b.date, tr}; });
+      const momentum = analyzeSeries(rangeBars, b=>b.tr);
 
-      const thisWeekRanges = xauSplit.thisWeekBars.map(b=>rangeByDate[b.date]).filter(v=>v!=null);
-      const lastWeekRanges = xauSplit.lastWeekBars.map(b=>rangeByDate[b.date]).filter(v=>v!=null);
-      const thisWeekAvgRange = avg(thisWeekRanges);
-      const lastWeekAvgRange = avg(lastWeekRanges);
-      const weekMomentumRatio = (thisWeekAvgRange!=null && lastWeekAvgRange) ? thisWeekAvgRange/lastWeekAvgRange : null;
-      const weekMomentumTier = tier(weekMomentumRatio);
-      const weekMomentumPct = pctChange(thisWeekAvgRange, lastWeekAvgRange);
-
-      // -------- Volume / Participation（用 GLD ETF 真实成交量代理黄金整体资金参与度）--------
-      let todayVolPct=null, todayVolTier=null, weekVolPct=null, weekVolTier=null;
+      // Volume / Participation：用 GLD ETF 真实成交量
+      let volume = null;
       if(gldBars && gldBars.length){
-        const gSplit = splitPeriods(gldBars);
-        if(gSplit){
-          const todayVol = gSplit.todayBar.volume;
-          const baseVols = gSplit.baseline.map(b=>b.volume).filter(v=>v!=null);
-          const baseAvgVol = avg(baseVols);
-          if(todayVol!=null && baseAvgVol){
-            todayVolPct = pctChange(todayVol, baseAvgVol);
-            todayVolTier = tier(todayVol/baseAvgVol);
-          }
-          const thisWeekVols = gSplit.thisWeekBars.map(b=>b.volume).filter(v=>v!=null);
-          const lastWeekVols = gSplit.lastWeekBars.map(b=>b.volume).filter(v=>v!=null);
-          const thisWeekAvgVol = avg(thisWeekVols);
-          const lastWeekAvgVol = avg(lastWeekVols);
-          if(thisWeekAvgVol!=null && lastWeekAvgVol){
-            weekVolPct = pctChange(thisWeekAvgVol, lastWeekAvgVol);
-            weekVolTier = tier(thisWeekAvgVol/lastWeekAvgVol);
-          }
-        }
+        volume = analyzeSeries(gldBars, b=>b.volume);
       }
 
-      // Participation：结合 Volume 强弱 + Momentum 强弱一起看（没有 Volume 数据时，只看 Momentum）
       function participationTier(volTier, momTier){
         const tiers = [volTier, momTier].filter(Boolean);
         if(!tiers.length) return null;
@@ -3567,51 +3633,64 @@
         if(tiers.every(t=>t==='weak')) return 'weak';
         return 'normal';
       }
-      const todayParticipationTier = participationTier(todayVolTier, todayMomentumTier);
-      const weekParticipationTier = participationTier(weekVolTier, weekMomentumTier);
-
-      // -------- 综合判断 GOOD FOR MACD / TRADE SELECTIVELY / LOW MOMENTUM --------
       function scoreOf(t){ if(t==='strong') return 1; if(t==='weak') return -1; return 0; }
-      const score =
-        scoreOf(todayVolTier) + scoreOf(todayParticipationTier) + scoreOf(todayMomentumTier) +
-        scoreOf(weekVolTier) + scoreOf(weekParticipationTier) + scoreOf(weekMomentumTier);
+
+      const todayVolTier = volume ? volume.today.tier : null;
+      const todayMomTier = momentum.today.tier;
+      const todayParticipationTier = participationTier(todayVolTier, todayMomTier);
+
+      const weekVolTier = (volume && volume.week) ? volume.week.tier : null;
+      const weekMomTier = momentum.week ? momentum.week.tier : null;
+      const weekParticipationTier = participationTier(weekVolTier, weekMomTier);
+
+      const score = scoreOf(todayVolTier)+scoreOf(todayParticipationTier)+scoreOf(todayMomTier)
+                  + scoreOf(weekVolTier)+scoreOf(weekParticipationTier)+scoreOf(weekMomTier);
       let verdict;
       if(score>=3) verdict='good';
       else if(score<=-3) verdict='low';
       else verdict='selective';
 
       return {
-        today:{
-          volPct: todayVolPct, volTier: todayVolTier,
-          participationTier: todayParticipationTier,
-          momentumTier: todayMomentumTier, momentumRatio: todayMomentumRatio,
-          date: xauSplit.todayBar.date,
-        },
-        week:{
-          volPct: weekVolPct, volTier: weekVolTier,
-          participationTier: weekParticipationTier,
-          momentumTier: weekMomentumTier, momentumPct: weekMomentumPct,
-        },
+        xauDate: xauBars[xauBars.length-1].date,
+        momentum, volume,
+        todayParticipationTier, weekParticipationTier,
         verdict,
-        hasVolume: gldBars && gldBars.length>0,
+        hasVolume: !!volume,
       };
     }
 
     function verdictInfo(v){
-      if(v==='good') return {cls:'good', main:'🟢 GOOD FOR MACD', sub:'成交量、资金参与度与价格波动力度都偏强，趋势更容易走出持续性，是 MACD 顺势跟随比较合适的环境。'};
-      if(v==='low') return {cls:'low', main:'🔴 LOW MOMENTUM', sub:'成交量、参与度与波动力度都偏弱，市场缺乏推动力，MACD 信号容易出现假信号或反复拉锯，建议观望或减少交易频率。'};
-      return {cls:'selective', main:'🟡 TRADE SELECTIVELY', sub:'各项指标强弱不一，市场参与度中性偏混合，建议只挑选条件明确、确认充分的信号交易，避免逢信号必进。'};
+      if(v==='good') return {cls:'good', main:'🟢 GOOD FOR MACD', sub:'成交量、资金参与度与价格波动力度都高于近期基准（Z≥+1σ），趋势更容易走出持续性，是 MACD 顺势跟随比较合适的环境。'};
+      if(v==='low') return {cls:'low', main:'🔴 LOW MOMENTUM', sub:'成交量、参与度与波动力度都低于近期基准（Z≤−1σ），市场缺乏推动力，MACD 信号容易出现假信号或反复拉锯，建议观望或减少交易频率。'};
+      return {cls:'selective', main:'🟡 TRADE SELECTIVELY', sub:'各项指标强弱不一（有的高于基准、有的接近正常），建议只挑选条件明确、确认充分的信号交易，避免逢信号必进。'};
     }
 
-    function renderRow(label, pct, tierVal, opts){
-      opts = opts||{};
-      const p = fmtPct(pct);
+    function metricRow(label, unitLabel, valStr, avgLabel, avgStr, ratioStr, zStr, tierVal){
       const tl = tierLabel(tierVal);
-      const valHtml = tierVal===undefined && pct===undefined ? '<span class="liq-note">'+ (opts.naText||'无免费数据来源，已忽略') +'</span>' :
-        (opts.tagOnly ?
-          '<span class="liq-tag '+(tierVal||'na')+'">'+tl.icon+' '+tl.text+'</span>' :
-          '<span class="'+p.cls+'">'+ (pct==null? '无数据' : p.text) +'</span>');
-      return '<div class="liq-row"><span class="liq-row-label">'+label+'</span><div class="liq-row-val">'+valHtml+'</div></div>';
+      return `
+        <div class="liq-mrow">
+          <div class="liq-mrow-top">
+            <span class="liq-mrow-label">${label}</span>
+            <span class="liq-tag ${tierVal||'na'}">${tl.icon} ${tl.text}</span>
+          </div>
+          <div class="liq-mrow-stats">
+            <div class="liq-stat"><span class="liq-stat-k">${unitLabel}</span><span class="liq-stat-v">${valStr}</span></div>
+            <div class="liq-stat"><span class="liq-stat-k">${avgLabel}</span><span class="liq-stat-v liq-dim">${avgStr}</span></div>
+            <div class="liq-stat"><span class="liq-stat-k">倍数</span><span class="liq-stat-v">${ratioStr}</span></div>
+            <div class="liq-stat"><span class="liq-stat-k">Z-Score</span><span class="liq-stat-v liq-z">${zStr}</span></div>
+          </div>
+        </div>`;
+    }
+
+    function naRow(label, reason){
+      return `
+        <div class="liq-mrow liq-mrow-na">
+          <div class="liq-mrow-top">
+            <span class="liq-mrow-label">${label}</span>
+            <span class="liq-tag na">⚪ N/A</span>
+          </div>
+          <div class="liq-note-line">${reason}</div>
+        </div>`;
     }
 
     function render(metrics, updatedAt, warnMsg){
@@ -3622,17 +3701,30 @@
         return;
       }
       const vi = verdictInfo(metrics.verdict);
-      const todayTl = tierLabel(metrics.today.participationTier);
-      const todayMomTl = tierLabel(metrics.today.momentumTier);
-      const weekTl = tierLabel(metrics.week.participationTier);
-      const weekMomTl = tierLabel(metrics.week.momentumTier);
+      const m = metrics.momentum, v = metrics.volume;
+      const todayPTl = tierLabel(metrics.todayParticipationTier);
+      const weekPTl = tierLabel(metrics.weekParticipationTier);
+
+      const todayVolRow = v
+        ? metricRow('Volume（GLD ETF 真实成交量，代理黄金资金参与度）', '今日成交量', fmtVol(v.today.value), '20日均量', fmtVol(v.today.baselineAvg), v.today.ratio, fmtZ(v.today.z), v.today.tier)
+        : naRow('Volume（GLD ETF 真实成交量）', '免费数据源暂时取不到 GLD 成交量，已忽略，不使用假数据。');
+
+      const weekVolRow = (v && v.week)
+        ? metricRow('Volume（GLD 周均量 vs 上周）', '本周日均量', fmtVol(v.week.thisAvg)+' ('+v.week.thisCount+'日)', '上周日均量', fmtVol(v.week.lastAvg)+' ('+v.week.lastCount+'日)', v.week.ratio, fmtZ(v.week.z), v.week.tier)
+        : naRow('Volume（GLD 周均量 vs 上周）', '本周或历史数据不足，无法计算，已忽略。');
+
+      const todayMomRow = metricRow('Momentum（XAU/USD 真实波幅 True Range）', '今日波幅', '$'+fmtNum(m.today.value,2), '20日均幅', '$'+fmtNum(m.today.baselineAvg,2), m.today.ratio, fmtZ(m.today.z), m.today.tier);
+
+      const weekMomRow = m.week
+        ? metricRow('Momentum（周均波幅 vs 上周）', '本周日均幅', '$'+fmtNum(m.week.thisAvg,2)+' ('+m.week.thisCount+'日)', '上周日均幅', '$'+fmtNum(m.week.lastAvg,2)+' ('+m.week.lastCount+'日)', m.week.ratio, fmtZ(m.week.z), m.week.tier)
+        : naRow('Momentum（周均波幅 vs 上周）', '历史数据不足，无法计算，已忽略。');
 
       mount.innerHTML = `
         <div class="liq-wrap">
           <div class="liq-head">
             <div>
               <h2>💧 市场流动性 · XAUUSD</h2>
-              <div class="sub">只看现在市场有没有比平时更多的参与和力度，不预测涨跌方向</div>
+              <div class="sub">进场前用来确认「现在有没有足够参与和力度」——不是预测涨跌，是判断趋势能不能走出持续性</div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
               <span class="liq-updated">更新于 ${updatedAt}</span>
@@ -3644,20 +3736,26 @@
 
           <div class="liq-grid">
             <div class="liq-card">
-              <h3>TODAY（${metrics.today.date}）</h3>
-              ${metrics.hasVolume
-                ? renderRow('Volume（GLD ETF 成交量代理）', metrics.today.volPct, metrics.today.volTier)
-                : renderRow('Volume（GLD ETF 成交量代理）', undefined, undefined, {naText:'免费数据源暂时取不到，已忽略'})}
-              <div class="liq-row"><span class="liq-row-label">Participation</span><div class="liq-row-val"><span class="liq-tag ${metrics.today.participationTier||'na'}">${todayTl.icon} ${todayTl.text}</span></div></div>
-              <div class="liq-row"><span class="liq-row-label">Momentum（价格波幅 vs 20日均值）</span><div class="liq-row-val"><span class="liq-tag ${metrics.today.momentumTier||'na'}">${todayMomTl.icon} ${todayMomTl.text}</span></div></div>
+              <h3>TODAY（${m.today.date}）</h3>
+              ${todayVolRow}
+              ${todayMomRow}
+              <div class="liq-mrow liq-mrow-composite">
+                <div class="liq-mrow-top">
+                  <span class="liq-mrow-label">Participation（综合 Volume + Momentum）</span>
+                  <span class="liq-tag ${metrics.todayParticipationTier||'na'}">${todayPTl.icon} ${todayPTl.text}</span>
+                </div>
+              </div>
             </div>
             <div class="liq-card">
               <h3>THIS WEEK vs LAST WEEK</h3>
-              ${metrics.hasVolume
-                ? renderRow('Volume（GLD ETF 成交量代理）', metrics.week.volPct, metrics.week.volTier)
-                : renderRow('Volume（GLD ETF 成交量代理）', undefined, undefined, {naText:'免费数据源暂时取不到，已忽略'})}
-              <div class="liq-row"><span class="liq-row-label">Participation</span><div class="liq-row-val"><span class="liq-tag ${metrics.week.participationTier||'na'}">${weekTl.icon} ${weekTl.text}</span></div></div>
-              <div class="liq-row"><span class="liq-row-label">Momentum（日均波幅 vs 上周）</span><div class="liq-row-val"><span class="liq-tag ${metrics.week.momentumTier||'na'}">${weekMomTl.icon} ${weekMomTl.text}</span></div></div>
+              ${weekVolRow}
+              ${weekMomRow}
+              <div class="liq-mrow liq-mrow-composite">
+                <div class="liq-mrow-top">
+                  <span class="liq-mrow-label">Participation（综合 Volume + Momentum）</span>
+                  <span class="liq-tag ${metrics.weekParticipationTier||'na'}">${weekPTl.icon} ${weekPTl.text}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -3668,8 +3766,10 @@
           </div>
 
           <div class="liq-sources">
-            <b>数据来源：</b>XAU/USD 每日价格波幅（Twelve Data，真实报价，用于 Momentum）
-            ${metrics.hasVolume ? ' · GLD 黄金 ETF 每日成交量（Twelve Data，真实成交量，用作参与度/资金流代理指标）' : ''}<br>
+            <b>口径说明：</b>Z-Score = (当前值 − 基准期均值) / 基准期标准差；TODAY 基准 = 近20个交易日（不含今天）；
+            THIS WEEK 基准 = 近8个完整交易周。Z ≥ +1σ 记 STRONG，Z ≤ −1σ 记 WEAK，介于两者之间记 NORMAL。<br>
+            <b>数据来源：</b>XAU/USD 每日真实报价（Twelve Data，用于 Momentum/True Range）
+            ${metrics.hasVolume ? ' · GLD 黄金 ETF 每日真实成交量（Twelve Data，用作参与度/资金流代理指标）' : ''}<br>
             <b>已忽略：</b>Gold Futures Volume、Open Interest —— 免费 API 无可靠来源，未使用假数据填充。
           </div>
         </div>
@@ -3689,7 +3789,7 @@
         const raw = localStorage.getItem(CACHE_KEY);
         if(!raw) return null;
         const obj = JSON.parse(raw);
-        if(!obj || !obj.ts || (Date.now()-obj.ts)>CACHE_TTL_MS*4) return null; // 超过48分钟的缓存不再当"新鲜"备份用
+        if(!obj || !obj.ts || (Date.now()-obj.ts)>CACHE_TTL_MS*4) return null;
         return obj;
       }catch(e){ return null; }
     }
@@ -3704,18 +3804,18 @@
         render(cached.metrics, cached.updatedAt);
         return;
       }
-      if(cached){ render(cached.metrics, cached.updatedAt); } // 先显示旧数据，避免空白，再去后台刷新
+      if(cached){ render(cached.metrics, cached.updatedAt); }
       else{ renderLoading(); }
       loading = true;
       try{
         const [xauBars, gldResult] = await Promise.all([
-          fetchDaily('XAU/USD', 40),
-          fetchDaily('GLD', 40).catch(()=>null), // GLD 拿不到就忽略 Volume，不中断整个功能
+          fetchDaily('XAU/USD', OUTPUT_SIZE),
+          fetchDaily('GLD', OUTPUT_SIZE).catch(()=>null),
         ]);
         const metrics = computeMetrics(xauBars, gldResult);
         const updatedAt = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
         writeCache(metrics, updatedAt);
-        render(metrics, updatedAt, gldResult ? null : null);
+        render(metrics, updatedAt);
       }catch(err){
         if(cached){ render(cached.metrics, cached.updatedAt, '刷新失败（'+err.message+'），以下为上一次的数据。'); }
         else{ render(null, null, '取得市场数据失败：'+err.message); }
@@ -3728,6 +3828,7 @@
       loadLiquidity(false);
     };
   })();
+
 
   /* ================= SUPABASE STORAGE ================= */
   /* 把下面两个值换成你自己 Supabase 项目 Settings → API 里的 Project URL 和 anon public key */
