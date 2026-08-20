@@ -645,6 +645,42 @@
   .macd-sum-row.compact .macd-sum-bar{height:4px;margin-bottom:8px;}
   .macd-sum-row.compact .macd-sum-chip{font-size:9.5px;padding:3px 6px;}
 
+  /* ---------- MACD ANALYSIS (new, additive module) ---------- */
+  .ma-section{margin-bottom:26px;padding-bottom:20px;border-bottom:1px dashed var(--line-soft);}
+  .ma-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .ma-header h2{margin:0;font-family:var(--disp);font-size:20px;font-weight:800;letter-spacing:.3px;color:var(--accent);}
+  .ma-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .ma-symbol{font-family:var(--mono);font-size:12px;color:var(--text-dim);}
+  .ma-settings-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .ma-settings-label{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-dim);flex-shrink:0;}
+  .ma-error{color:var(--short);font-size:12.5px;margin-bottom:12px;}
+  .ma-error:empty{display:none;}
+  .ma-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+  .ma-card{
+    background:var(--bg-chip);border:1px solid var(--line);border-radius:10px;padding:12px 12px 10px;cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .ma-card:hover{border-color:var(--text-dim);}
+  .ma-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+  .ma-card-tf{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);letter-spacing:.4px;margin-bottom:6px;}
+  .ma-card-status{font-family:var(--disp);font-weight:700;font-size:13px;margin-bottom:6px;line-height:1.4;}
+  .ma-card-meta{font-family:var(--mono);font-size:10px;color:var(--text-faint);line-height:1.6;}
+  .ma-card.long{border-color:var(--long);} .ma-card.long .ma-card-status{color:var(--long);}
+  .ma-card.short{border-color:var(--short);} .ma-card.short .ma-card-status{color:var(--short);}
+  .ma-card.watch{border-color:#e7c34a;} .ma-card.watch .ma-card-status{color:#e7c34a;}
+  .ma-card.waiting{opacity:.55;}
+  .ma-card.flash{animation:maFlash 1.4s ease 2;}
+  @keyframes maFlash{0%,100%{box-shadow:none;}50%{box-shadow:0 0 0 2px currentColor, 0 0 18px -2px currentColor;}}
+  .ma-div-note{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--text-dim);}
+  .ma-hist-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line-soft);font-size:11.5px;}
+  .ma-hist-row:last-child{border-bottom:none;}
+  .ma-hist-time{font-family:var(--mono);color:var(--text-faint);min-width:120px;}
+  .ma-hist-sym{font-weight:700;}
+  .ma-hist-tf{font-family:var(--mono);color:var(--text-dim);}
+  .ma-hist-type{font-weight:700;}
+  .ma-hist-type.long{color:var(--long);} .ma-hist-type.short{color:var(--short);}
+  .ma-hist-vals{font-family:var(--mono);color:var(--text-faint);}
+
   /* ---------- modal ---------- */
   .modal-overlay{
     position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;
@@ -1427,6 +1463,39 @@
 
   <!-- ================= CHECKLIST VIEW ================= -->
   <section class="view active" id="view-checklist">
+    <!-- ================= MACD ANALYSIS（新增独立模块，放在页面最上面） ================= -->
+    <div class="ma-section" id="ma-section">
+      <div class="ma-header">
+        <h2>MACD ANALYSIS</h2>
+        <div class="ma-header-right">
+          <span class="ma-symbol" id="ma-symbol-label">—</span>
+          <span class="macd-updated" id="ma-updated">尚未更新</span>
+          <button type="button" class="btn-cancel" id="ma-refresh-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>
+          <button type="button" class="btn-cancel" id="ma-notif-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">🔔 开启提醒</button>
+        </div>
+      </div>
+      <div class="ma-settings-row">
+        <span class="ma-settings-label">PIVOT STRENGTH</span>
+        <select id="ma-pivot-select" class="macd-tz-select">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <span class="macd-tz-hint">决定 MACD Swing Peak / Valley 的确认强度：左右各需要这么多根「已收盘」K 线的 MACD 值更高/更低，才算一个有效转折点，用于判断背离。默认 3（数字越大，认定的转折点越"大"、越少但越可靠；数字越小，转折点越多但可能是噪音）。</span>
+      </div>
+      <div class="ma-error" id="ma-error"></div>
+      <div class="ma-grid" id="ma-grid-mount"></div>
+      <div class="card" id="ma-chart-card">
+        <div class="card-header"><h3 class="sub-h3">MACD Chart — <span id="ma-chart-tf-label">1H</span></h3></div>
+        <div class="card-body"><div id="ma-chart-mount"><div class="empty-state">加载中...</div></div></div>
+      </div>
+      <div class="card" id="ma-history-card">
+        <div class="card-header"><h3 class="sub-h3">MACD Signal History</h3></div>
+        <div class="card-body"><div id="ma-history-mount"><div class="empty-state">暂无信号记录</div></div></div>
+      </div>
+    </div>
+
     <div class="direction-bar">
       <button class="dir-btn long" id="dir-long" type="button"><span class="arrow">▲</span> LONG 做多</button>
       <button class="dir-btn short" id="dir-short" type="button"><span class="arrow">▼</span> SHORT 做空</button>
@@ -3329,7 +3398,7 @@
       if(!result){
         el.classList.add('pending');
         sigEl.textContent = '—';
-        valEl.innerHTML = '数据不足';
+        valEl.innerHTML = '待扫描';
         return;
       }
       const { macd, histogram } = result;
@@ -3440,26 +3509,569 @@
       autoRetryTimer = setTimeout(()=>{ autoRetryTimer = null; refreshMacdScanner(); }, Math.max(delayMs, 1000));
     }
 
+    // 按要求改成纯手动：只做一次扫描（渲染+拉数据），不再设置自动定时刷新（原本的 refreshTimer /
+    // AUTO_REFRESH_MS 定时器已移除）。之后要更新数据，只能靠用户自己点"⟳ 刷新"按钮。
     function startMacdScanner(){
       renderGrid();
       refreshMacdScanner();
-      if(refreshTimer) clearInterval(refreshTimer);
-      refreshTimer = setInterval(refreshMacdScanner, AUTO_REFRESH_MS);
     }
 
     window.initMacdScanner = function(){
-      if(document.getElementById('macd-scan-mount').childElementCount > 0) return; // 已初始化过，避免重复渲染/重复计时器
-      startMacdScanner(); // Key 已自动绑定，直接开始（renderKeyForm 仍保留给"更改 Key"用）
+      if(document.getElementById('macd-scan-mount').childElementCount > 0) return; // 已初始化过，不重复渲染
+      renderGrid(); // 只画出周期网格骨架（都是"待扫描"状态），不自动发请求
     };
 
     // 检查清单页摘要卡片里的刷新按钮是静态 HTML（不会被 renderGrid 重新渲染），
-    // 所以只在这里绑定一次，点击时和"MACD 扫描"页的刷新按钮一样直接触发同一个刷新流程。
+    // 所以只在这里绑定一次，点击时和"MACD 扫描"页的刷新按钮一样直接触发同一个刷新流程
+    // （这也是唯一会真正发出请求的入口之一——按需扫描，不占用免费额度）。
     const sumRefreshBtnInit = document.getElementById('macd-sum-refresh-btn');
     if(sumRefreshBtnInit) sumRefreshBtnInit.addEventListener('click', ()=>refreshMacdScanner());
 
-    // 检查清单页现在也要看 MACD 摘要，所以不再等用户点开"MACD 扫描"标签才开始拉数据，
-    // 页面一打开（不管停留在哪个标签）就自动启动扫描。
-    startMacdScanner();
+    // 按要求：MACD 扫描（右上角"MACD 扫描"标签页 + 检查清单页顶部摘要小组件共用同一份数据）
+    // 改成纯手动——页面打开时只渲染"待扫描"的空壳状态，不自动发请求、也没有任何自动定时刷新，
+    // 只有用户主动点击"⟳ 刷新"（或切换品种/时区/首次填 Key）时才会真正去拉 Twelve Data 额度。
+    renderGrid();
+    renderChecklistSummary();
+
+    /* ===================================================================================
+       MACD ANALYSIS（新增独立模块）
+       ---------------------------------------------------------------------------------
+       完全复用上面已经在用的 Twelve Data Key / 品种选择 / 时区设置（activeSymbol /
+       activeTimezone / getApiKey / resolveQuery / emaSeries / MACD_FAST/SLOW/SIGNAL），
+       不新增第二个数据源、不新增第二把 Key。
+
+       只新增 7 个"原生周期"请求（1min/15min/30min/45min/1h/2h/4h，带时间戳），
+       用固定时间边界（例如 10:00–10:10）自行合并出 10M/20M/40M/90M/3H/6H 这几个
+       API 不直接提供的周期，而不是像上面旧的"MACD 扫描"那样用"从最新往回凑数量"的近似合并。
+
+       每个原生周期都有自己的缓存时间（越大的周期缓存越久），加上启动延迟错峰，
+       避免和上面的旧 MACD 扫描器在页面刚打开时同时打满 Twelve Data 每分钟请求额度。
+       =================================================================================== */
+    (function(){
+      const MA_PIVOT_STORAGE = 'emer_macd_analysis_pivot_v1';
+      const MA_HISTORY_STORAGE = 'emer_macd_analysis_history_v1';
+
+      // 12 个需要分析的 timeframe：base 指向下面 MA_BASE_SPECS 里的原生周期，
+      // minutes 是这个 timeframe 自己的分钟数，用来做固定时间边界合并（bucket = minutes*60 秒）。
+      // 当 minutes 恰好等于 base 原生周期本身时（例如 15M←m15），合并等价于直接使用原生K线。
+      const MA_TIMEFRAMES = [
+        {label:'5M',  minutes:5,   base:'m1'},
+        {label:'10M', minutes:10,  base:'m1'},
+        {label:'15M', minutes:15,  base:'m15'},
+        {label:'20M', minutes:20,  base:'m1'},
+        {label:'30M', minutes:30,  base:'m30'},
+        {label:'40M', minutes:40,  base:'m1'},
+        {label:'45M', minutes:45,  base:'m45'},
+        {label:'1H',  minutes:60,  base:'h1'},
+        {label:'90M', minutes:90,  base:'m45'},
+        {label:'2H',  minutes:120, base:'h2'},
+        {label:'3H',  minutes:180, base:'h1'},
+        {label:'4H',  minutes:240, base:'h4'},
+        {label:'6H',  minutes:360, base:'h2'},
+      ];
+
+      // 7 个原生周期请求：outputsize 尽量拉大，给合并出来的大周期（比如 6H）留够历史K线，
+      // 才能做 Swing Peak/Valley 和背离判断；cacheMs 越大的周期缓存越久，减少重复请求。
+      const MA_BASE_SPECS = {
+        m1:  {interval:'1min',  outputsize:5000, cacheMs:55*1000,        sec:60},
+        m15: {interval:'15min', outputsize:2000, cacheMs:5*60*1000,      sec:900},
+        m30: {interval:'30min', outputsize:2000, cacheMs:10*60*1000,     sec:1800},
+        m45: {interval:'45min', outputsize:2000, cacheMs:15*60*1000,     sec:2700},
+        h1:  {interval:'1h',    outputsize:2000, cacheMs:20*60*1000,     sec:3600},
+        h2:  {interval:'2h',    outputsize:1500, cacheMs:40*60*1000,     sec:7200},
+        h4:  {interval:'4h',    outputsize:1200, cacheMs:60*60*1000,     sec:14400},
+      };
+
+      const MA_INITIAL_DELAY_MS = 70*1000;   // 页面打开后延迟 70 秒才开始第一次拉取，错开上面旧扫描器的启动请求
+      const MA_AUTO_REFRESH_MS = 5*60*1000;  // 之后每 5 分钟检查一次（各周期是否需要重新拉取由各自 cacheMs 决定）
+      const MA_BASE_STAGGER_MS = STAGGER_MS * 3; // 7 个原生请求之间错峰更久一点
+
+      const maBaseCache = {};   // key -> {data:[{t,c}], at}
+      let maResults = {};       // label -> 分析结果
+      let maSelectedTF = '1H';
+      let maIsLoading = false;
+      let maRefreshTimer = null;
+
+      function maLoadPivot(){
+        try{
+          const v = parseInt(localStorage.getItem(MA_PIVOT_STORAGE));
+          return [2,3,4,5].includes(v) ? v : 3;
+        }catch(e){ return 3; }
+      }
+      let maPivotStrength = maLoadPivot();
+
+      function maLoadHistory(){
+        try{ return JSON.parse(localStorage.getItem(MA_HISTORY_STORAGE) || '[]'); }catch(e){ return []; }
+      }
+      let maSignalHistory = maLoadHistory();
+      let maSeenKeys = new Set(maSignalHistory.map(e=>e.dedupeKey).filter(Boolean));
+
+      function maSaveHistory(){
+        try{ localStorage.setItem(MA_HISTORY_STORAGE, JSON.stringify(maSignalHistory.slice(0,200))); }catch(e){}
+      }
+
+      // 拉取一个原生周期（带时间戳），命中缓存直接返回，不产生新请求
+      async function maFetchBase(key){
+        const now = Date.now();
+        const spec = MA_BASE_SPECS[key];
+        const cached = maBaseCache[key];
+        if(cached && (now - cached.at) < spec.cacheMs) return cached.data;
+        const query = await resolveQuery(activeSymbol);
+        const apiKey = getApiKey();
+        const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(query) +
+          '&interval=' + spec.interval + '&outputsize=' + spec.outputsize +
+          '&timezone=' + encodeURIComponent(activeTimezone.tz) + '&apikey=' + encodeURIComponent(apiKey);
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data.status === 'error' || !data.values) throw new Error(data.message || ('Twelve Data 请求失败：' + key));
+        // datetime 字符串按「activeTimezone 的挂钟时间」直接当成时间戳用（不做时区换算），
+        // 只用来做固定时间边界的合并与排序，不需要真实 UTC 绝对值。
+        const arr = data.values.map(v=>{
+          const s = v.datetime; // "YYYY-MM-DD HH:MM:SS" 或 "YYYY-MM-DD"
+          const t = Date.UTC(
+            +s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10),
+            s.length>10 ? +s.slice(11,13) : 0, s.length>10 ? +s.slice(14,16) : 0
+          ) / 1000;
+          return { t, c: parseFloat(v.close) };
+        }).reverse(); // 转成按时间正序（旧→新）
+        maBaseCache[key] = { data: arr, at: now };
+        return arr;
+      }
+
+      async function maFetchAllBases(){
+        const errors = [];
+        for(const key of Object.keys(MA_BASE_SPECS)){
+          try{ await maFetchBase(key); }
+          catch(e){ errors.push(key + '：' + e.message); }
+          await sleep(MA_BASE_STAGGER_MS);
+        }
+        return errors;
+      }
+
+      // 用固定时间边界（例如 10:00–10:10、10:10–10:20）把原生周期合并成目标 timeframe，
+      // 不根据用户打开网页的时间重新划分。closed=true 表示这根K线已经完整走完，
+      // 只有 closed 的K线才能用来判断 Cross / Divergence（不能用正在形成的K线，不 repaint）。
+      function maAggregate(baseArr, minutes, baseIntervalSec){
+        if(!baseArr || !baseArr.length) return [];
+        const bucketSec = minutes * 60;
+        const map = new Map();
+        for(const pt of baseArr){
+          const bStart = Math.floor(pt.t / bucketSec) * bucketSec;
+          map.set(bStart, pt.c); // 数据按时间正序遍历，同一个桶里后面的收盘价会覆盖前面的，最终等于该桶最后一次收盘价
+        }
+        const keys = Array.from(map.keys()).sort((a,b)=>a-b);
+        const lastBaseTime = baseArr[baseArr.length-1].t;
+        const coverageEnd = lastBaseTime + baseIntervalSec; // 目前原生数据实际覆盖到的时间点
+        return keys.map(k=>({ t:k, c:map.get(k), closed:(k+bucketSec) <= coverageEnd }));
+      }
+
+      // 计算完整的 MACD / Signal / Histogram 序列（不只是最新一根），用于 Cross 确认和 Swing 检测
+      function maComputeMacdSeries(closes){
+        if(closes.length < MACD_SLOW + MACD_SIGNAL + 5) return null;
+        const fastE = emaSeries(closes, MACD_FAST);
+        const slowE = emaSeries(closes, MACD_SLOW);
+        const macdFull = closes.map((_,i)=> (fastE[i]!=null && slowE[i]!=null) ? fastE[i]-slowE[i] : null);
+        const macdValsOnly = [], idxMap = [];
+        macdFull.forEach((v,i)=>{ if(v!=null){ macdValsOnly.push(v); idxMap.push(i); } });
+        if(!macdValsOnly.length) return null;
+        const sigE = emaSeries(macdValsOnly, MACD_SIGNAL);
+        const signalFull = new Array(closes.length).fill(null);
+        const histFull = new Array(closes.length).fill(null);
+        sigE.forEach((v,j)=>{
+          if(v!=null){
+            const origIdx = idxMap[j];
+            signalFull[origIdx] = v;
+            histFull[origIdx] = macdFull[origIdx] - v;
+          }
+        });
+        return { macd:macdFull, signal:signalFull, hist:histFull };
+      }
+
+      // 黄金交叉 / 死亡交叉：只用最后两根「已收盘」K线比较，不能在K线中途交叉时提前发信号
+      function maDetectCross(series){
+        const { macd, signal, hist } = series;
+        let i2 = -1;
+        for(let i=macd.length-1;i>=0;i--){ if(macd[i]!=null && signal[i]!=null){ i2=i; break; } }
+        if(i2 < 1) return null;
+        let i1 = -1;
+        for(let i=i2-1;i>=0;i--){ if(macd[i]!=null && signal[i]!=null){ i1=i; break; } }
+        if(i1 < 0) return null;
+        const pM=macd[i1], pS=signal[i1], cM=macd[i2], cS=signal[i2], cH=hist[i2];
+        if(pM<=pS && cM>cS && cM>0 && cS>0 && cH>0) return { type:'golden', idx:i2 };
+        if(pM>=pS && cM<cS && cM<0 && cS<0 && cH<0) return { type:'death', idx:i2 };
+        return null;
+      }
+
+      // Swing Peak/Valley：MACD 值比左右至少 pivotStrength 根K线都高/都低才算一个转折点。
+      // confirmed=true 表示右侧已经有足够的K线走完，可以确定这个转折点不会再变了（不会 repaint）；
+      // confirmed=false 表示这个转折点刚形成，右侧K线还不够，只能算「潜在」。
+      function maFindPivots(macd, strength){
+        const n = macd.length;
+        const pivots = [];
+        for(let i=strength;i<n;i++){
+          if(macd[i]==null) continue;
+          let isPeak = true, isValley = true;
+          for(let k=1;k<=strength;k++){
+            const l = macd[i-k];
+            if(l==null){ isPeak=false; isValley=false; break; }
+            if(l>=macd[i]) isPeak=false;
+            if(l<=macd[i]) isValley=false;
+          }
+          if(!isPeak && !isValley) continue;
+          const rightAvailable = (i+strength) < n;
+          for(let k=1; k<=strength && rightAvailable; k++){
+            const r = macd[i+k];
+            if(r==null){ isPeak=false; isValley=false; break; }
+            if(r>=macd[i]) isPeak=false;
+            if(r<=macd[i]) isValley=false;
+          }
+          if(isPeak) pivots.push({ idx:i, type:'peak', value:macd[i], confirmed:rightAvailable });
+          if(isValley) pivots.push({ idx:i, type:'valley', value:macd[i], confirmed:rightAvailable });
+        }
+        return pivots;
+      }
+
+      // 背离检测：用收盘价代表 Price Swing（和网站现有的 MACD 逻辑一致，都是只看收盘价，不额外拉 OHLC）
+      function maDetectDivergence(series, closes, strength){
+        const pivots = maFindPivots(series.macd, strength);
+        const peaks = pivots.filter(p=>p.type==='peak');
+        const valleys = pivots.filter(p=>p.type==='valley');
+
+        function zeroAxisOk(list, i1, i2, wantPositive){
+          for(let i=i1+1;i<i2;i++){
+            const m = series.macd[i], s = series.signal[i];
+            if(wantPositive){
+              if(m!=null && m<0) return false;
+              if(s!=null && s<0) return false;
+            } else {
+              if(m!=null && m>0) return false;
+              if(s!=null && s>0) return false;
+            }
+          }
+          return true;
+        }
+
+        if(peaks.length>=2){
+          const p1=peaks[peaks.length-2], p2=peaks[peaks.length-1];
+          const m1=series.macd[p1.idx], s1=series.signal[p1.idx];
+          const m2=series.macd[p2.idx], s2=series.signal[p2.idx];
+          const zeroOk = m1>0 && s1>0 && m2>0 && s2>0 && zeroAxisOk(peaks, p1.idx, p2.idx, true);
+          const priceHH = closes[p2.idx] > closes[p1.idx];
+          const macdLH = m2 < m1;
+          if(zeroOk && priceHH && macdLH) return { type:'bearish', p1, p2, confirmed:p2.confirmed };
+        }
+        if(valleys.length>=2){
+          const v1=valleys[valleys.length-2], v2=valleys[valleys.length-1];
+          const m1=series.macd[v1.idx], s1=series.signal[v1.idx];
+          const m2=series.macd[v2.idx], s2=series.signal[v2.idx];
+          const zeroOk = m1<0 && s1<0 && m2<0 && s2<0 && zeroAxisOk(valleys, v1.idx, v2.idx, false);
+          const priceLL = closes[v2.idx] < closes[v1.idx];
+          const macdHL = m2 > m1;
+          if(zeroOk && priceLL && macdHL) return { type:'bullish', p1:v1, p2:v2, confirmed:v2.confirmed };
+        }
+        return null;
+      }
+
+      function maAnalyzeTimeframe(tf){
+        const cached = maBaseCache[tf.base];
+        if(!cached) return { label:tf.label, status:'waiting', reason:'等待数据' };
+        const baseSec = MA_BASE_SPECS[tf.base].sec;
+        const buckets = maAggregate(cached.data, tf.minutes, baseSec).filter(b=>b.closed);
+        const minNeeded = MACD_SLOW + MACD_SIGNAL + maPivotStrength*2 + 6;
+        if(buckets.length < minNeeded) return { label:tf.label, status:'waiting', reason:'历史K线不足（'+buckets.length+'/'+minNeeded+'）' };
+        const closes = buckets.map(b=>b.c);
+        const series = maComputeMacdSeries(closes);
+        if(!series) return { label:tf.label, status:'waiting', reason:'数据不足' };
+        const cross = maDetectCross(series);
+        const div = maDetectDivergence(series, closes, maPivotStrength);
+        const lastIdx = closes.length-1;
+        return {
+          label:tf.label, status:'ok', closes, series, cross, div,
+          lastCandleTime: buckets[lastIdx].t,
+          macdNow: series.macd[lastIdx], sigNow: series.signal[lastIdx], histNow: series.hist[lastIdx],
+        };
+      }
+
+      // ---------- 声音 + 浏览器通知 + 页面高亮 ----------
+      function maBeep(){
+        try{
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if(!Ctx) return;
+          const ctx = new Ctx();
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 880; g.gain.value = 0.16;
+          o.start();
+          setTimeout(()=>{ try{ o.stop(); ctx.close(); }catch(e){} }, 220);
+        }catch(e){}
+      }
+      function maFlashCard(label){
+        const el = document.getElementById('ma-card-'+label);
+        if(!el) return;
+        el.classList.remove('flash');
+        void el.offsetWidth; // 触发重排，让动画能重新播放
+        el.classList.add('flash');
+      }
+      function maNotify(entry){
+        maBeep();
+        maFlashCard(entry.timeframe);
+        if('Notification' in window && Notification.permission==='granted'){
+          try{ new Notification('MACD Signal · ' + entry.symbol + ' ' + entry.timeframe, { body: entry.typeLabel + '  MACD ' + entry.macd.toFixed(3) }); }catch(e){}
+        }
+      }
+
+      function maPushHistory(entry){
+        maSignalHistory.unshift(entry);
+        if(maSignalHistory.length>200) maSignalHistory.length = 200;
+        maSaveHistory();
+        maRenderHistory();
+      }
+
+      function maRenderHistory(){
+        const mount = document.getElementById('ma-history-mount');
+        if(!mount) return;
+        if(!maSignalHistory.length){ mount.innerHTML = '<div class="empty-state">暂无信号记录</div>'; return; }
+        mount.innerHTML = maSignalHistory.slice(0,60).map(e=>
+          '<div class="ma-hist-row">' +
+            '<span class="ma-hist-time">' + new Date(e.time).toLocaleString('zh-CN',{hour12:false}) + '</span>' +
+            '<span class="ma-hist-sym">' + e.symbol + '</span>' +
+            '<span class="ma-hist-tf">' + e.timeframe + '</span>' +
+            '<span class="ma-hist-type ' + e.cls + '">' + e.typeLabel + '</span>' +
+            '<span class="ma-hist-vals">MACD ' + e.macd.toFixed(3) + ' · Sig ' + e.signal.toFixed(3) + ' · Hist ' + e.hist.toFixed(3) + '</span>' +
+          '</div>'
+        ).join('');
+      }
+
+      function maStatusParts(r){
+        if(!r || r.status!=='waiting' && r.status!=='ok') return { parts:['WAITING'], cls:'waiting' };
+        if(r.status==='waiting') return { parts:['WAITING'], cls:'waiting', reason:r.reason };
+        const parts = []; let cls = null;
+        const lastIdx = r.closes.length-1;
+        if(r.cross && r.cross.idx===lastIdx){
+          if(r.cross.type==='golden'){ parts.push('🟢 BULLISH / GOLDEN CROSS'); cls='long'; }
+          else { parts.push('🔴 BEARISH / DEATH CROSS'); cls='short'; }
+        }
+        if(r.div){
+          if(r.div.type==='bearish'){
+            parts.push(r.div.confirmed ? '🔴 CONFIRMED BEARISH DIVERGENCE' : '🟡 POTENTIAL BEARISH DIVERGENCE');
+            if(!cls) cls = r.div.confirmed ? 'short' : 'watch';
+          } else {
+            parts.push(r.div.confirmed ? '🟢 CONFIRMED BULLISH DIVERGENCE' : '🟡 POTENTIAL BULLISH DIVERGENCE');
+            if(!cls) cls = r.div.confirmed ? 'long' : 'watch';
+          }
+        }
+        if(!parts.length){ parts.push('WAITING'); cls = 'waiting'; }
+        return { parts, cls };
+      }
+
+      function maRenderGrid(){
+        const mount = document.getElementById('ma-grid-mount');
+        if(!mount) return;
+        mount.innerHTML = MA_TIMEFRAMES.map(tf=>{
+          const r = maResults[tf.label];
+          const { parts, cls, reason } = maStatusParts(r);
+          const trend = (r && r.macdNow!=null) ? (r.macdNow>=0 ? 'Trend: MACD > 0 轴上' : 'Trend: MACD < 0 轴下') : 'Trend: —';
+          const candleTxt = (r && r.lastCandleTime) ? ('Candle Closed: ' + new Date(r.lastCandleTime*1000).toISOString().slice(5,16).replace('T',' ')) : ('Candle Status: ' + (reason || '等待数据'));
+          return (
+            '<div class="ma-card ' + (cls||'waiting') + (tf.label===maSelectedTF?' active':'') + '" data-tf="' + tf.label + '" id="ma-card-' + tf.label + '">' +
+              '<div class="ma-card-tf">' + tf.label + '</div>' +
+              '<div class="ma-card-status">' + parts.join('<br>') + '</div>' +
+              '<div class="ma-card-meta">' + trend + '</div>' +
+              '<div class="ma-card-meta">' + candleTxt + '</div>' +
+            '</div>'
+          );
+        }).join('');
+        mount.querySelectorAll('.ma-card').forEach(el=>{
+          el.addEventListener('click', ()=>{
+            maSelectedTF = el.dataset.tf;
+            mount.querySelectorAll('.ma-card').forEach(c=>c.classList.remove('active'));
+            el.classList.add('active');
+            maRenderChart();
+          });
+        });
+      }
+
+      function maRenderChart(){
+        const labelEl = document.getElementById('ma-chart-tf-label');
+        if(labelEl) labelEl.textContent = maSelectedTF;
+        const mount = document.getElementById('ma-chart-mount');
+        if(!mount) return;
+        const r = maResults[maSelectedTF];
+        if(!r || r.status!=='ok' || !r.series){
+          mount.innerHTML = '<div class="empty-state">' + (r && r.reason ? r.reason : '暂无数据') + '</div>';
+          return;
+        }
+        const N = Math.min(90, r.closes.length);
+        const offset = r.closes.length - N;
+        const closes = r.closes.slice(-N);
+        const macd = r.series.macd.slice(-N);
+        const signal = r.series.signal.slice(-N);
+        const hist = r.series.hist.slice(-N);
+
+        const W = 720, PAD = 30, priceH = 90, macdH = 130, gap = 18;
+        const macdTop = 12 + priceH + gap;
+        const svgH = macdTop + macdH + 18;
+
+        const validCloses = closes.filter(v=>v!=null);
+        const cMin = Math.min(...validCloses), cMax = Math.max(...validCloses);
+        const cRange = (cMax - cMin) || 1;
+        const xAt = i => PAD + i * ((W - 2*PAD) / Math.max(1, N-1));
+        const yPrice = v => 12 + (1 - (v - cMin)/cRange) * priceH;
+
+        const macdVals = macd.filter(v=>v!=null).concat(signal.filter(v=>v!=null));
+        const mMin = Math.min(0, ...(macdVals.length?macdVals:[0]));
+        const mMax = Math.max(0, ...(macdVals.length?macdVals:[0]));
+        const mRange = (mMax - mMin) || 1;
+        const yMacd = v => macdTop + (1 - (v - mMin)/mRange) * macdH;
+        const zeroY = yMacd(0);
+
+        const priceLine = closes.map((v,i)=> v==null ? '' : (xAt(i)+','+yPrice(v))).filter(Boolean).join(' ');
+        const macdLine = macd.map((v,i)=> v==null ? '' : (xAt(i)+','+yMacd(v))).filter(Boolean).join(' ');
+        const sigLine = signal.map((v,i)=> v==null ? '' : (xAt(i)+','+yMacd(v))).filter(Boolean).join(' ');
+        const barW = Math.max(2, ((W-2*PAD)/N) * 0.6);
+        const histBars = hist.map((v,i)=>{
+          if(v==null) return '';
+          const y0=zeroY, y1=yMacd(v);
+          const y=Math.min(y0,y1), h=Math.max(Math.abs(y1-y0),1);
+          const color = v>=0 ? 'var(--long)' : 'var(--short)';
+          return '<rect x="'+(xAt(i)-barW/2)+'" y="'+y+'" width="'+barW+'" height="'+h+'" fill="'+color+'" opacity="0.55"></rect>';
+        }).join('');
+
+        let divMarkers = '', divNote = '';
+        if(r.div){
+          const i1 = r.div.p1.idx - offset, i2 = r.div.p2.idx - offset;
+          if(i1>=0 && i2>=0 && i1<N && i2<N){
+            const col = r.div.type==='bearish' ? 'var(--short)' : 'var(--long)';
+            const pY1=yPrice(closes[i1]), pY2=yPrice(closes[i2]);
+            const mY1=yMacd(macd[i1]), mY2=yMacd(macd[i2]);
+            divMarkers =
+              '<line x1="'+xAt(i1)+'" y1="'+pY1+'" x2="'+xAt(i2)+'" y2="'+pY2+'" stroke="'+col+'" stroke-width="1.6" stroke-dasharray="4 3"/>' +
+              '<circle cx="'+xAt(i1)+'" cy="'+pY1+'" r="3.5" fill="'+col+'"/><circle cx="'+xAt(i2)+'" cy="'+pY2+'" r="3.5" fill="'+col+'"/>' +
+              '<text x="'+xAt(i1)+'" y="'+(pY1-8)+'" fill="'+col+'" font-size="10" font-family="monospace">1</text>' +
+              '<text x="'+xAt(i2)+'" y="'+(pY2-8)+'" fill="'+col+'" font-size="10" font-family="monospace">2</text>' +
+              '<line x1="'+xAt(i1)+'" y1="'+mY1+'" x2="'+xAt(i2)+'" y2="'+mY2+'" stroke="'+col+'" stroke-width="1.6" stroke-dasharray="4 3"/>' +
+              '<circle cx="'+xAt(i1)+'" cy="'+mY1+'" r="3.5" fill="'+col+'"/><circle cx="'+xAt(i2)+'" cy="'+mY2+'" r="3.5" fill="'+col+'"/>' +
+              '<text x="'+xAt(i1)+'" y="'+(mY1-8)+'" fill="'+col+'" font-size="10" font-family="monospace">3</text>' +
+              '<text x="'+xAt(i2)+'" y="'+(mY2-8)+'" fill="'+col+'" font-size="10" font-family="monospace">4</text>';
+            divNote = '<div class="ma-div-note">' +
+              (r.div.type==='bearish' ? 'Price: Higher High ↗ (1→2)　MACD: Lower High ↘ (3→4)' : 'Price: Lower Low ↘ (1→2)　MACD: Higher Low ↗ (3→4)') +
+              ' — ' + (r.div.confirmed ? 'CONFIRMED' : 'POTENTIAL') +
+            '</div>';
+          }
+        }
+
+        mount.innerHTML =
+          '<svg viewBox="0 0 '+W+' '+svgH+'" style="width:100%;height:auto;display:block;">' +
+            '<polyline points="'+priceLine+'" fill="none" stroke="var(--accent)" stroke-width="1.6"/>' +
+            '<line x1="'+PAD+'" y1="'+zeroY+'" x2="'+(W-PAD)+'" y2="'+zeroY+'" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 3"/>' +
+            histBars +
+            '<polyline points="'+macdLine+'" fill="none" stroke="var(--accent)" stroke-width="1.6"/>' +
+            '<polyline points="'+sigLine+'" fill="none" stroke="#ff9f43" stroke-width="1.4"/>' +
+            divMarkers +
+          '</svg>' + divNote;
+      }
+
+      async function maRefreshAll(){
+        if(maIsLoading) return;
+        maIsLoading = true;
+        const errEl = document.getElementById('ma-error');
+        const refreshBtn = document.getElementById('ma-refresh-btn');
+        if(errEl) errEl.textContent = '';
+        if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.style.opacity='.6'; }
+        try{
+          const errors = await maFetchAllBases();
+          const symEl = document.getElementById('ma-symbol-label');
+          if(symEl) symEl.textContent = (activeSymbol.icon||'●') + ' ' + activeSymbol.label;
+
+          MA_TIMEFRAMES.forEach(tf=>{
+            const r = maAnalyzeTimeframe(tf);
+            maResults[tf.label] = r;
+            if(r.status!=='ok') return;
+            const lastIdx = r.closes.length-1;
+            if(r.cross && r.cross.idx===lastIdx){
+              const key = activeSymbol.label+'|'+tf.label+'|'+r.cross.type+'|'+r.lastCandleTime;
+              if(!maSeenKeys.has(key)){
+                maSeenKeys.add(key);
+                const entry = {
+                  time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
+                  typeLabel: r.cross.type==='golden' ? '🟢 Golden Cross' : '🔴 Death Cross',
+                  cls: r.cross.type==='golden' ? 'long' : 'short',
+                  macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
+                };
+                maPushHistory(entry);
+                maNotify(entry);
+              }
+            }
+            if(r.div && r.div.confirmed){
+              const key = activeSymbol.label+'|'+tf.label+'|div-'+r.div.type+'|'+r.div.p2.idx+'|'+r.lastCandleTime;
+              if(!maSeenKeys.has(key)){
+                maSeenKeys.add(key);
+                const entry = {
+                  time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
+                  typeLabel: r.div.type==='bearish' ? '🔴 Bearish Divergence' : '🟢 Bullish Divergence',
+                  cls: r.div.type==='bearish' ? 'short' : 'long',
+                  macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
+                };
+                maPushHistory(entry);
+                maNotify(entry);
+              }
+            }
+          });
+
+          const upEl = document.getElementById('ma-updated');
+          if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN',{hour12:true});
+          if(errEl && errors.length) errEl.textContent = 'MACD Analysis 部分周期获取失败：' + errors.join('；');
+          maRenderGrid();
+          maRenderChart();
+        }catch(e){
+          if(errEl) errEl.textContent = 'MACD Analysis 数据获取失败：' + e.message;
+        }finally{
+          maIsLoading = false;
+          if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.style.opacity=''; }
+        }
+      }
+
+      function maInit(){
+        maRenderHistory();
+        maRenderGrid();
+
+        const refreshBtn = document.getElementById('ma-refresh-btn');
+        if(refreshBtn) refreshBtn.addEventListener('click', ()=>maRefreshAll());
+
+        const pivotSel = document.getElementById('ma-pivot-select');
+        if(pivotSel){
+          pivotSel.value = String(maPivotStrength);
+          pivotSel.addEventListener('change', (e)=>{
+            maPivotStrength = parseInt(e.target.value) || 3;
+            try{ localStorage.setItem(MA_PIVOT_STORAGE, String(maPivotStrength)); }catch(err){}
+            MA_TIMEFRAMES.forEach(tf=>{ maResults[tf.label] = maAnalyzeTimeframe(tf); });
+            maRenderGrid();
+            maRenderChart();
+          });
+        }
+
+        const notifBtn = document.getElementById('ma-notif-btn');
+        if(notifBtn){
+          if('Notification' in window && Notification.permission==='granted') notifBtn.textContent = '🔔 提醒已开启';
+          notifBtn.addEventListener('click', ()=>{
+            if(!('Notification' in window)){ alert('此浏览器不支持桌面通知，但声音和页面高亮仍会正常提示。'); return; }
+            Notification.requestPermission().then(p=>{
+              notifBtn.textContent = (p==='granted') ? '🔔 提醒已开启' : '🔔 开启提醒';
+            });
+          });
+        }
+
+        // 页面打开后延迟启动，错开旧 MACD 扫描器（startMacdScanner）刚打开页面时的那一批请求，
+        // 避免瞬间超过 Twelve Data 免费额度的每分钟请求上限。
+        setTimeout(()=>{
+          maRefreshAll();
+          if(maRefreshTimer) clearInterval(maRefreshTimer);
+          maRefreshTimer = setInterval(maRefreshAll, MA_AUTO_REFRESH_MS);
+        }, MA_INITIAL_DELAY_MS);
+      }
+
+      if(document.getElementById('ma-section')) maInit();
+    })();
   })();
 
   /* =====================================================================================
