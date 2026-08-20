@@ -674,12 +674,19 @@
   .ma-div-note{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--text-dim);}
   .ma-hist-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line-soft);font-size:11.5px;}
   .ma-hist-row:last-child{border-bottom:none;}
+  .ma-hist-row.ma-hist-mega{background:linear-gradient(90deg, rgba(231,195,74,.14), transparent);border-bottom-color:#e7c34a;border-radius:8px;padding-left:8px;}
+  .ma-hist-row.ma-hist-mega .ma-hist-type{color:#e7c34a;}
   .ma-hist-time{font-family:var(--mono);color:var(--text-faint);min-width:120px;}
   .ma-hist-sym{font-weight:700;}
   .ma-hist-tf{font-family:var(--mono);color:var(--text-dim);}
   .ma-hist-type{font-weight:700;}
   .ma-hist-type.long{color:var(--long);} .ma-hist-type.short{color:var(--short);}
   .ma-hist-vals{font-family:var(--mono);color:var(--text-faint);}
+  .ma-tg-input{
+    background:var(--bg-chip);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    padding:8px 12px;font-family:var(--mono);font-size:12px;min-width:170px;flex:1;
+  }
+  .ma-tg-input:focus{outline:none;border-color:var(--accent);}
 
   /* ---------- modal ---------- */
   .modal-overlay{
@@ -1483,6 +1490,14 @@
           <option value="5">5</option>
         </select>
         <span class="macd-tz-hint">决定 MACD Swing Peak / Valley 的确认强度：左右各需要这么多根「已收盘」K 线的 MACD 值更高/更低，才算一个有效转折点，用于判断背离。默认 3（数字越大，认定的转折点越"大"、越少但越可靠；数字越小，转折点越多但可能是噪音）。</span>
+      </div>
+      <div class="ma-settings-row" id="ma-tg-row">
+        <span class="ma-settings-label">TELEGRAM 提醒</span>
+        <input type="text" id="ma-tg-token-input" class="ma-tg-input" placeholder="Bot Token（找 @BotFather 创建）" autocomplete="off">
+        <input type="text" id="ma-tg-chatid-input" class="ma-tg-input" placeholder="Chat ID（找 @userinfobot 获取）" autocomplete="off">
+        <button type="button" class="btn-save" id="ma-tg-save-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">保存</button>
+        <button type="button" class="btn-cancel" id="ma-tg-test-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">发送测试消息</button>
+        <span class="macd-tz-hint">配置后，出现新的 Golden/Death Cross 或 Confirmed Divergence 时会同时发一条 Telegram 消息，手机装了 Telegram 就能收到，不需要一直开着这个网页。Token 只存在这台设备浏览器本地，不会上传到其他服务器。当某个 timeframe 和它 ×2 或 ÷2 的次时间级别同时出现同方向的 Confirmed Divergence 时，会额外触发一条 🚨 主次共振大信号（连响 3 声提示音 + 单独的 Telegram 消息），历史记录里也会用金色高亮标出来。</span>
       </div>
       <div class="ma-error" id="ma-error"></div>
       <div class="ma-grid" id="ma-grid-mount"></div>
@@ -3550,15 +3565,21 @@
     (function(){
       const MA_PIVOT_STORAGE = 'emer_macd_analysis_pivot_v1';
       const MA_HISTORY_STORAGE = 'emer_macd_analysis_history_v1';
+      const MA_TG_TOKEN_STORAGE = 'emer_macd_analysis_tg_token_v1';
+      const MA_TG_CHATID_STORAGE = 'emer_macd_analysis_tg_chatid_v1';
 
       // 12 个需要分析的 timeframe：base 指向下面 MA_BASE_SPECS 里的原生周期，
       // minutes 是这个 timeframe 自己的分钟数，用来做固定时间边界合并（bucket = minutes*60 秒）。
       // 当 minutes 恰好等于 base 原生周期本身时（例如 15M←m15），合并等价于直接使用原生K线。
       const MA_TIMEFRAMES = [
+        {label:'3M',  minutes:3,   base:'m1'},
         {label:'5M',  minutes:5,   base:'m1'},
+        {label:'7M',  minutes:7,   base:'m1'},
         {label:'10M', minutes:10,  base:'m1'},
+        {label:'12M', minutes:12,  base:'m1'},
         {label:'15M', minutes:15,  base:'m15'},
         {label:'20M', minutes:20,  base:'m1'},
+        {label:'23M', minutes:23,  base:'m1'},
         {label:'30M', minutes:30,  base:'m30'},
         {label:'40M', minutes:40,  base:'m1'},
         {label:'45M', minutes:45,  base:'m45'},
@@ -3569,6 +3590,25 @@
         {label:'4H',  minutes:240, base:'h4'},
         {label:'6H',  minutes:360, base:'h2'},
       ];
+      const MA_TF_BY_LABEL = {};
+      MA_TIMEFRAMES.forEach(tf=>{ MA_TF_BY_LABEL[tf.label] = tf; });
+
+      // 主时间级别 / 次时间级别（×2 或 ÷2）配对表：只有当 ×2 或 ÷2 之后的分钟数
+      // 精确命中列表里另一个 timeframe 时才算一对「主/次」。新增的 3M/7M/12M/23M
+      // 目前在列表里没有精确的 ×2/÷2 搭档（比如 3M 的搭档 6M、1.5M 都不存在），
+      // 所以它们会照常显示、照常单独触发信号，只是暂时不参与"主次共振"判定——
+      // 这是分钟数决定的客观结果，不是遗漏。
+      function maSecondaryLabelsFor(label){
+        const tf = MA_TF_BY_LABEL[label];
+        if(!tf) return [];
+        const out = [];
+        const doubleMin = tf.minutes * 2, halfMin = tf.minutes / 2;
+        MA_TIMEFRAMES.forEach(other=>{
+          if(other.label===label) return;
+          if(other.minutes===doubleMin || other.minutes===halfMin) out.push(other.label);
+        });
+        return out;
+      }
 
       // 7 个原生周期请求：outputsize 尽量拉大，给合并出来的大周期（比如 6H）留够历史K线，
       // 才能做 Swing Peak/Valley 和背离判断；cacheMs 越大的周期缓存越久，减少重复请求。
@@ -3737,37 +3777,50 @@
         const peaks = pivots.filter(p=>p.type==='peak');
         const valleys = pivots.filter(p=>p.type==='valley');
 
-        function zeroAxisOk(list, i1, i2, wantPositive){
+        // "有效跌破 0 轴"才算破坏结构——短暂的一两根K线戳穿零轴（噪音/插针）不算。
+        // 容忍的根数固定给 2 根，够滤掉大部分噪音，又不会宽松到把真正的趋势反转也当成噪音。
+        const ZERO_AXIS_TOLERANCE_BARS = 2;
+        function zeroAxisOk(i1, i2, wantPositive){
+          let streak = 0, maxStreak = 0;
           for(let i=i1+1;i<i2;i++){
             const m = series.macd[i], s = series.signal[i];
-            if(wantPositive){
-              if(m!=null && m<0) return false;
-              if(s!=null && s<0) return false;
-            } else {
-              if(m!=null && m>0) return false;
-              if(s!=null && s>0) return false;
+            const breach = wantPositive
+              ? ((m!=null && m<0) || (s!=null && s<0))
+              : ((m!=null && m>0) || (s!=null && s>0));
+            if(breach){ streak++; maxStreak = Math.max(maxStreak, streak); } else { streak = 0; }
+          }
+          return maxStreak <= ZERO_AXIS_TOLERANCE_BARS;
+        }
+
+        // 不只比较「最后两个」Pivot——如果两者之间夹着一个不满足零轴条件的小 Pivot，
+        // 真正的背离结构可能是最新这个 Pivot 和更早一个 Pivot 配对。从最新往回找，
+        // 找到第一组同时满足 零轴 + Price/MACD 结构 的配对就采用（最多回溯最近 6 个 Pivot）。
+        function findPair(list, wantPositive, isBearish){
+          const recent = list.slice(-6);
+          for(let j=recent.length-1;j>=1;j--){
+            const p2 = recent[j];
+            const m2 = series.macd[p2.idx], s2 = series.signal[p2.idx];
+            if(wantPositive ? !(m2>0 && s2>0) : !(m2<0 && s2<0)) continue;
+            for(let i=j-1;i>=0;i--){
+              const p1 = recent[i];
+              const m1 = series.macd[p1.idx], s1 = series.signal[p1.idx];
+              if(wantPositive ? !(m1>0 && s1>0) : !(m1<0 && s1<0)) continue;
+              if(!zeroAxisOk(p1.idx, p2.idx, wantPositive)) continue;
+              const priceOk = isBearish ? (closes[p2.idx] > closes[p1.idx]) : (closes[p2.idx] < closes[p1.idx]);
+              const macdOk  = isBearish ? (m2 < m1) : (m2 > m1);
+              if(priceOk && macdOk) return { p1, p2 };
             }
           }
-          return true;
+          return null;
         }
 
         if(peaks.length>=2){
-          const p1=peaks[peaks.length-2], p2=peaks[peaks.length-1];
-          const m1=series.macd[p1.idx], s1=series.signal[p1.idx];
-          const m2=series.macd[p2.idx], s2=series.signal[p2.idx];
-          const zeroOk = m1>0 && s1>0 && m2>0 && s2>0 && zeroAxisOk(peaks, p1.idx, p2.idx, true);
-          const priceHH = closes[p2.idx] > closes[p1.idx];
-          const macdLH = m2 < m1;
-          if(zeroOk && priceHH && macdLH) return { type:'bearish', p1, p2, confirmed:p2.confirmed };
+          const pair = findPair(peaks, true, true);
+          if(pair) return { type:'bearish', p1:pair.p1, p2:pair.p2, confirmed:pair.p2.confirmed };
         }
         if(valleys.length>=2){
-          const v1=valleys[valleys.length-2], v2=valleys[valleys.length-1];
-          const m1=series.macd[v1.idx], s1=series.signal[v1.idx];
-          const m2=series.macd[v2.idx], s2=series.signal[v2.idx];
-          const zeroOk = m1<0 && s1<0 && m2<0 && s2<0 && zeroAxisOk(valleys, v1.idx, v2.idx, false);
-          const priceLL = closes[v2.idx] < closes[v1.idx];
-          const macdHL = m2 > m1;
-          if(zeroOk && priceLL && macdHL) return { type:'bullish', p1:v1, p2:v2, confirmed:v2.confirmed };
+          const pair = findPair(valleys, false, false);
+          if(pair) return { type:'bullish', p1:pair.p1, p2:pair.p2, confirmed:pair.p2.confirmed };
         }
         return null;
       }
@@ -3793,18 +3846,23 @@
       }
 
       // ---------- 声音 + 浏览器通知 + 页面高亮 ----------
-      function maBeep(){
+      // 用户提供的 Notification.mp3 直接以 base64 内嵌进这个 HTML 文件本身，
+      // 不需要另外把 mp3 传去 GitHub、也不需要额外的网络请求去加载它——
+      // 文件本来就在这个 <script> 里，浏览器打开网页时就已经有了。
+      const MA_NOTIF_SOUND_DATA_URI = 'data:audio/mp3;base64,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jI3N//////f///////////+kw3ICgAQJCYn6bmmWcEjJvB4V4Y+Os3GIBBGRhAwfkfszNjGbhlHBiOQL6YW6ErHTSpl6IYkAgIB4wOAMDQ8DDCACh4KYHAOJVtGhmXXgQ/3/7P//g9/s/0f5T/I/5z////Of5MHZQzbOTGCDTMyqsrCOQoGAzG4ODQwRcZoMDiFBzghdosw4kngPRH5NjVSN9CHMywYMWgIBQRGCg7HaAmjRiGH4DsocF/pbaGOR+v////X/q///d9H/aqn7P//1UfYiTEFNRTMuMTAxO3CmMbCXMFUP2TA4i0kzQwe8Mtja+zDjgVUww0lDOom8gTOtgvUxGwEFMCdAFzYgrNSjcyEKjA4fMQGo77kyK+GLRYBg6hE3s8En///b//8x////r//+/////f/kDkSizrvrDISDjo031MgN/hTwTnyWCU2UwMrM//uSZPUK8noNuOO+2YxWgXZwc/wIDJA0yA/vygF6BlmBz/QYdfDTz6YIJQzbopvOxXsNRC7NpzAMYhhMIQWLgmG84HCAoGDQFg4rigCVvxTMCC377P1f//xX/b//9N/5K/1W/u//+q2d/IH5QamDqgmGcE35kYoDuazoOBmjxGY5nMIfmYSkO7GP1/0xj/InabgxkanICalj0ZlAcYrhaAgQFUrNVUmMngICAtHgDZRBMasj3/////+Wf////s///////o/0hIcwc0zM+iMBwRGDFsRvk1tkpeNFul4TIxxW0wuQN0OAJOuDIUxLIgZDW0E307MyGDCwtpZnmsdgfgYrM9DkzWryA/p//2///lz3///+7/er54pR9q///6f11TCUgUQwwQHsMRTNjjGYyXs2xwtIM484qjVuR7IxCQcNMry/OTDlRBwxEgLHMGTAOziQrzN8IDFwChIcbSwd50ZEmaMC7z8zzlUf////8q7////b/0far///+1P+gxQICrMLZCODNACW0101eQPADcMzrgZAEyI0dnMNCFwj5YaVs//7kmT7D6LqDDKDv+BAYWGGQHf9BgtwMsoO/6DBaAXZ2c/sGAMQzCPkjlOnxMNVTdMQQMAQSCgNCFxz56Qj8y4ZRzCQgIAVLnVl2IYv99v7r///i3+z//vo/yN/7P3f//VZ/hsBwIAcwIAWTA9CfMGVUERkXGG8fibB57xmjDfGDkCoZZSiwQdQYIoExgpANAIGZKBWxIQRgoGBcAMCruW/8XysYDf//Z///////7/86I76XGSsty7jyjFtANIwVIKoMJ0X7jUhyts2xF1QP44rSzpgS7sx6cgnPeMXgDLRiD0xCEW9MQ3ESTBhQTkwO0AkMDEArjAWACQwHEEwML2B5TxUgecxoQSLfaW01hSz3jbP1///xW/9t3+79P75Kz023ev//6bZ71zyAAAEIIMLgUUxaUpDDWBYMkUnQwug3jLZIsM6kzA1Mw0jIhOLM0MLIw708zFrCNQ1MBUCEwIgKTAdBlMC0CcwDgFwMqKJkBjYO0DfDwMqbS0kFgZkGBpCwGKBe73C+gjoAAIAoI+/gY0GFsxkxGYNr/s3hZWAcAH/+5JE/4jy5Auxg/3SgGSBphB/u0QKwDLhNewAMcKGmEK/sABKMHoBZB/v8MYBfcrE4GRwufEA/+33xBhHjjDFAasFKDbGUFwf/7beGWxKY4ydFbi4w1QLgJwjBCn//v9vvFKCCZE3HLFBi4xOhqbitBQAyAyZQ/////////ycFBiyxxkgQMg4lAXIRAvDKDgEpkHK5TFzjjAAAAwAAASMAFvOL8fMGEdMgNtMuiqMM41NwDHM4gZFEWEYjmqLsGe4DCwCM6ZAWALMKQ1MHwTE/Q9xEALIBUCrUgsA4eBmiwGSGe7s4CgwLzAMAAMBPvtAx4cAoGHTikQbA/2bwsXAGGByhEA/QLCP7v8L6A2LHeaBkcLIw5f/t/hjAojjDFAXOCPBP45AuD/+zbeFz4fOLjHaITilwxIJ0IgRwhT//u/s3u8UoGqxxm45YguKXEeFo3FaCCgpQUuWP////////8iAguJTGTHggY4w+QWQOAnhlBkBBMZsnyVFbi4wAQEAwGBABNwqfgCeMb4lEXL4RA68bINvwfDpE3/UdGpx3/0G//uSZPqAB1yLuJZ6gADlEXeoztAAixFdAHkjgAGIqqGnJtAAw2Vv/zh0ajVFN//x4bDacNh0ajX//+aNTiRyDw2NN///+o1EU51HhsNlQeHRr//zq0y2JUAAEEMMEAAAEADWAiX4GbK/LpAfEmBbvC1MSX4JMJKC2iM/50S0J6O4c3/pGRJDiMTX/+iXS6qj//pF4vVJIoo///0TFJJKkZLR///+sxLqnWoyLyywK//86JREeBoSnQVI1UxBTUUzLjEwMSAoYmV0YSAyKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMSAoYmV0YSAyKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7kmRAj/AAAGkHAAAIAAANIOAAAQAAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+      function maPlaySound(times){
         try{
-          const Ctx = window.AudioContext || window.webkitAudioContext;
-          if(!Ctx) return;
-          const ctx = new Ctx();
-          const o = ctx.createOscillator(), g = ctx.createGain();
-          o.connect(g); g.connect(ctx.destination);
-          o.frequency.value = 880; g.gain.value = 0.16;
-          o.start();
-          setTimeout(()=>{ try{ o.stop(); ctx.close(); }catch(e){} }, 220);
+          const n = times || 1;
+          for(let i=0;i<n;i++){
+            setTimeout(()=>{
+              const a = new Audio(MA_NOTIF_SOUND_DATA_URI);
+              a.volume = 1.0;
+              a.play().catch(()=>{}); // 浏览器要求先有一次用户交互才允许自动播放，静默失败即可（声音关不掉也不报错打断流程）
+            }, i*650);
+          }
         }catch(e){}
       }
+      function maBeep(){ maPlaySound(1); }
       function maFlashCard(label){
         const el = document.getElementById('ma-card-'+label);
         if(!el) return;
@@ -3812,12 +3870,54 @@
         void el.offsetWidth; // 触发重排，让动画能重新播放
         el.classList.add('flash');
       }
-      function maNotify(entry){
-        maBeep();
-        maFlashCard(entry.timeframe);
-        if('Notification' in window && Notification.permission==='granted'){
-          try{ new Notification('MACD Signal · ' + entry.symbol + ' ' + entry.timeframe, { body: entry.typeLabel + '  MACD ' + entry.macd.toFixed(3) }); }catch(e){}
+
+      // ---------- Telegram 提醒：直接调用 Telegram Bot API 的 sendMessage，纯前端 fetch，
+      // 不需要自己的后端服务器。Token/Chat ID 只存本机 localStorage。----------
+      function maGetTgConfig(){
+        try{
+          return {
+            token: localStorage.getItem(MA_TG_TOKEN_STORAGE) || '',
+            chatId: localStorage.getItem(MA_TG_CHATID_STORAGE) || '',
+          };
+        }catch(e){ return { token:'', chatId:'' }; }
+      }
+      function maSaveTgConfig(token, chatId){
+        try{
+          localStorage.setItem(MA_TG_TOKEN_STORAGE, (token||'').trim());
+          localStorage.setItem(MA_TG_CHATID_STORAGE, (chatId||'').trim());
+        }catch(e){}
+      }
+      async function maSendTelegram(text){
+        const { token, chatId } = maGetTgConfig();
+        if(!token || !chatId) return false;
+        try{
+          const res = await fetch('https://api.telegram.org/bot' + encodeURIComponent(token) + '/sendMessage', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text })
+          });
+          const data = await res.json();
+          return !!data.ok;
+        }catch(e){ return false; }
+      }
+
+      function maNotify(entry, isMega){
+        maPlaySound(isMega ? 3 : 1); // 大信号连响 3 次，和普通单周期信号区分开，不用看屏幕也能听出来
+        if(isMega){
+          entry.timeframe.split(' + ').forEach(lbl=>maFlashCard(lbl));
+        } else {
+          maFlashCard(entry.timeframe);
         }
+        if('Notification' in window && Notification.permission==='granted'){
+          try{ new Notification((isMega?'🚨 MEGA · ':'MACD Signal · ') + entry.symbol + ' ' + entry.timeframe, { body: entry.typeLabel + '  MACD ' + entry.macd.toFixed(3) }); }catch(e){}
+        }
+        maSendTelegram(
+          (isMega ? '🚨🚨 主次共振大信号 MEGA SIGNAL 🚨🚨\n' : '📡 MACD Signal\n') +
+          entry.symbol + '  ' + entry.timeframe + '\n' +
+          entry.typeLabel + '\n' +
+          'MACD ' + entry.macd.toFixed(3) + '  Signal ' + entry.signal.toFixed(3) + '  Hist ' + entry.hist.toFixed(3) +
+          (isMega ? '\n\n（主时间级别与其 ×2/÷2 次时间级别同时出现同方向背离）' : '')
+        );
       }
 
       function maPushHistory(entry){
@@ -3832,7 +3932,7 @@
         if(!mount) return;
         if(!maSignalHistory.length){ mount.innerHTML = '<div class="empty-state">暂无信号记录</div>'; return; }
         mount.innerHTML = maSignalHistory.slice(0,60).map(e=>
-          '<div class="ma-hist-row">' +
+          '<div class="ma-hist-row' + (e.mega?' ma-hist-mega':'') + '">' +
             '<span class="ma-hist-time">' + new Date(e.time).toLocaleString('zh-CN',{hour12:false}) + '</span>' +
             '<span class="ma-hist-sym">' + e.symbol + '</span>' +
             '<span class="ma-hist-tf">' + e.timeframe + '</span>' +
@@ -3864,6 +3964,14 @@
         return { parts, cls };
       }
 
+      function maLastSignalFor(label){
+        // 从 Signal History 里找这个 timeframe 最近一次记录的信号，让"上一次信号"是永久保留的记录，
+        // 不会因为已经过了那根K线、卡片状态回到 WAITING，就看起来好像从来没侦测到过。
+        const e = maSignalHistory.find(x=>x.timeframe===label);
+        if(!e) return 'Last Signal: —';
+        return 'Last Signal: ' + e.typeLabel + ' @ ' + new Date(e.time).toLocaleString('zh-CN',{hour12:false, month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+      }
+
       function maRenderGrid(){
         const mount = document.getElementById('ma-grid-mount');
         if(!mount) return;
@@ -3872,12 +3980,14 @@
           const { parts, cls, reason } = maStatusParts(r);
           const trend = (r && r.macdNow!=null) ? (r.macdNow>=0 ? 'Trend: MACD > 0 轴上' : 'Trend: MACD < 0 轴下') : 'Trend: —';
           const candleTxt = (r && r.lastCandleTime) ? ('Candle Closed: ' + new Date(r.lastCandleTime*1000).toISOString().slice(5,16).replace('T',' ')) : ('Candle Status: ' + (reason || '等待数据'));
+          const lastSigTxt = maLastSignalFor(tf.label);
           return (
             '<div class="ma-card ' + (cls||'waiting') + (tf.label===maSelectedTF?' active':'') + '" data-tf="' + tf.label + '" id="ma-card-' + tf.label + '">' +
               '<div class="ma-card-tf">' + tf.label + '</div>' +
               '<div class="ma-card-status">' + parts.join('<br>') + '</div>' +
               '<div class="ma-card-meta">' + trend + '</div>' +
               '<div class="ma-card-meta">' + candleTxt + '</div>' +
+              '<div class="ma-card-meta">' + lastSigTxt + '</div>' +
             '</div>'
           );
         }).join('');
@@ -3929,12 +4039,22 @@
         const macdLine = macd.map((v,i)=> v==null ? '' : (xAt(i)+','+yMacd(v))).filter(Boolean).join(' ');
         const sigLine = signal.map((v,i)=> v==null ? '' : (xAt(i)+','+yMacd(v))).filter(Boolean).join(' ');
         const barW = Math.max(2, ((W-2*PAD)/N) * 0.6);
+        // TradingView 风格四色 Histogram：正值变大 = 深绿（动能增强），正值变小 = 浅绿（动能减弱）；
+        // 负值变大（更负）= 深红（下跌动能增强），负值变小（回缩）= 浅红（下跌动能减弱）。
         const histBars = hist.map((v,i)=>{
           if(v==null) return '';
           const y0=zeroY, y1=yMacd(v);
           const y=Math.min(y0,y1), h=Math.max(Math.abs(y1-y0),1);
-          const color = v>=0 ? 'var(--long)' : 'var(--short)';
-          return '<rect x="'+(xAt(i)-barW/2)+'" y="'+y+'" width="'+barW+'" height="'+h+'" fill="'+color+'" opacity="0.55"></rect>';
+          const prev = hist[i-1];
+          let color;
+          if(v>=0){
+            const rising = (prev==null) || (v>=prev);
+            color = rising ? 'var(--long)' : 'rgba(55,223,142,.4)';
+          } else {
+            const falling = (prev==null) || (v<=prev);
+            color = falling ? 'var(--short)' : 'rgba(246,79,79,.4)';
+          }
+          return '<rect x="'+(xAt(i)-barW/2)+'" y="'+y+'" width="'+barW+'" height="'+h+'" fill="'+color+'"></rect>';
         }).join('');
 
         let divMarkers = '', divNote = '';
@@ -3983,10 +4103,14 @@
           const symEl = document.getElementById('ma-symbol-label');
           if(symEl) symEl.textContent = (activeSymbol.icon||'●') + ' ' + activeSymbol.label;
 
+          // 第一遍：把所有 timeframe 都分析完、写进 maResults，
+          // 这样下面判断"主/次时间级别同时背离"时，无论数组顺序如何，
+          // 每个 timeframe 都能拿到它的 ×2/÷2 搭档「当前」的最新结果。
+          MA_TIMEFRAMES.forEach(tf=>{ maResults[tf.label] = maAnalyzeTimeframe(tf); });
+
           MA_TIMEFRAMES.forEach(tf=>{
-            const r = maAnalyzeTimeframe(tf);
-            maResults[tf.label] = r;
-            if(r.status!=='ok') return;
+            const r = maResults[tf.label];
+            if(!r || r.status!=='ok') return;
             const lastIdx = r.closes.length-1;
             if(r.cross && r.cross.idx===lastIdx){
               const key = activeSymbol.label+'|'+tf.label+'|'+r.cross.type+'|'+r.lastCandleTime;
@@ -4016,6 +4140,35 @@
                 maNotify(entry);
               }
             }
+          });
+
+          // 主时间级别 + 次时间级别（×2 / ÷2）同时背离 → 大信号（共振）。
+          // 每一对（比如 1H + 2H）只会在这次刷新里判定一次，用 sorted pair 做 key 去重，
+          // 避免 1H 触发一次、2H 又触发一次重复的大信号。
+          const megaSeenPairs = new Set();
+          MA_TIMEFRAMES.forEach(tf=>{
+            const r = maResults[tf.label];
+            if(!r || r.status!=='ok' || !r.div || !r.div.confirmed) return;
+            const partners = maSecondaryLabelsFor(tf.label);
+            partners.forEach(partnerLabel=>{
+              const pr = maResults[partnerLabel];
+              if(!pr || pr.status!=='ok' || !pr.div || !pr.div.confirmed) return;
+              if(pr.div.type !== r.div.type) return; // 类型要一致（同为看涨或同为看跌背离）才算共振
+              const pairKey = [tf.label, partnerLabel].sort().join('+');
+              if(megaSeenPairs.has(pairKey)) return;
+              megaSeenPairs.add(pairKey);
+              const dedupeKey = activeSymbol.label+'|MEGA|'+pairKey+'|'+r.div.type+'|'+r.div.p2.idx+'|'+pr.div.p2.idx+'|'+r.lastCandleTime+'|'+pr.lastCandleTime;
+              if(maSeenKeys.has(dedupeKey)) return;
+              maSeenKeys.add(dedupeKey);
+              const entry = {
+                time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label+' + '+partnerLabel,
+                typeLabel: (r.div.type==='bearish' ? '🚨 主次共振·看跌大信号' : '🚨 主次共振·看涨大信号'),
+                cls: r.div.type==='bearish' ? 'short' : 'long',
+                macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey, mega:true,
+              };
+              maPushHistory(entry);
+              maNotify(entry, true);
+            });
           });
 
           const upEl = document.getElementById('ma-updated');
@@ -4060,6 +4213,26 @@
             });
           });
         }
+
+        const tgTokenInput = document.getElementById('ma-tg-token-input');
+        const tgChatInput = document.getElementById('ma-tg-chatid-input');
+        const tgCfg = maGetTgConfig();
+        if(tgTokenInput) tgTokenInput.value = tgCfg.token;
+        if(tgChatInput) tgChatInput.value = tgCfg.chatId;
+        const tgSaveBtn = document.getElementById('ma-tg-save-btn');
+        if(tgSaveBtn) tgSaveBtn.addEventListener('click', ()=>{
+          maSaveTgConfig(tgTokenInput.value, tgChatInput.value);
+          alert('已保存 Telegram 设置。');
+        });
+        const tgTestBtn = document.getElementById('ma-tg-test-btn');
+        if(tgTestBtn) tgTestBtn.addEventListener('click', async ()=>{
+          const cfg = maGetTgConfig();
+          if(!cfg.token || !cfg.chatId){ alert('请先填写 Bot Token 和 Chat ID，再点保存。'); return; }
+          tgTestBtn.disabled = true; const oldTxt = tgTestBtn.textContent; tgTestBtn.textContent = '发送中...';
+          const ok = await maSendTelegram('✅ MACD Analysis Telegram 提醒测试成功！');
+          tgTestBtn.disabled = false; tgTestBtn.textContent = oldTxt;
+          alert(ok ? '已发送，请检查 Telegram。' : '发送失败，请检查 Bot Token / Chat ID 是否正确，以及是否已经在 Telegram 里跟这个 Bot 说过一句话（Bot 需要先被用户主动私聊过一次才能发消息）。');
+        });
 
         // 页面打开后延迟启动，错开旧 MACD 扫描器（startMacdScanner）刚打开页面时的那一批请求，
         // 避免瞬间超过 Twelve Data 免费额度的每分钟请求上限。
