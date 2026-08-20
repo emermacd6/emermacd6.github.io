@@ -3080,7 +3080,16 @@
 
     // 品种预设：queries 是一串按优先级排列的候选代码，第一个在 Twelve Data 查不到数据时
     // 会自动往下试，试到能用的为止，并记住结果（见 resolveQuery）。
+    // 主要货币对（Emer 指定的 7 个主要背离扫描标的）放最前面，XAUUSD 排在它们下面，
+    // 其余原有品种（加密/指数）保留在最后，不影响原本的使用习惯。
     const SYMBOL_PRESETS = [
+      {key:'AUDCHF', label:'AUDCHF', icon:'💱', queries:['AUD/CHF']},
+      {key:'AUDUSD', label:'AUDUSD', icon:'💱', queries:['AUD/USD']},
+      {key:'NZDUSD', label:'NZDUSD', icon:'💱', queries:['NZD/USD']},
+      {key:'GBPJPY', label:'GBPJPY', icon:'💱', queries:['GBP/JPY']},
+      {key:'GBPCAD', label:'GBPCAD', icon:'💱', queries:['GBP/CAD']},
+      {key:'GBPCHF', label:'GBPCHF', icon:'💱', queries:['GBP/CHF']},
+      {key:'EURUSD', label:'EURUSD', icon:'💱', queries:['EUR/USD']},
       {key:'XAUUSD', label:'XAUUSD', icon:'🥇', queries:['XAU/USD']},
       {key:'BTCUSD', label:'BTCUSD', icon:'₿',  queries:['BTC/USD']},
       {key:'ETHUSD', label:'ETHUSD', icon:'Ξ',  queries:['ETH/USD']},
@@ -3622,7 +3631,71 @@
     renderChecklistSummary();
 
     /* ===================================================================================
-       MACD ANALYSIS（新增独立模块）
+       背离扫描 · 交易规则知识库（Emer 口述，2026-08 记录 — 之后换别的 Claude 接手改代码前先读这里）
+       ---------------------------------------------------------------------------------
+       这一段只是"规则文档"，不是全部都已经写进下面的代码了！哪些已实现/哪些还没有，
+       在每条规则后面用【已实现】/【未实现-待开发】标注，改代码前先对照一遍，不要重复问 Emer。
+
+       【背离方向定义】
+       - 顶背离 = 熊市背离（看跌）。发生在 MACD 快慢线（DIF/DEA）都在零轴【上方】的时候。
+       - 底背离 = 牛市背离（看涨）。发生在 MACD 快慢线都在零轴【下方】的时候。
+         （上下逻辑完全对称，只是方向相反，判断时先看两条线在零轴上面还是下面。）
+
+       【确认背离（强势背离）需要同时满足】—— 目前代码【未实现，只做了 MACD Pivot 配对 + 零轴容忍，
+       完全没有用到价格和 EMA52】：
+       1. 价格靠近或触碰"当前时间级别"的 EMA52 线（比如看 15M 背离就要看 15M 图表自己的 EMA52，
+          不是更大周期的）。
+          - "靠近"的量化标准（Emer 给的）：价格与 EMA52 的距离 —— XAUUSD 用 ~15%，其他货币对用 8-10%。
+            ⚠️ 注：这个百分比看起来偏大（外汇/黄金短线很少偏离 EMA52 达到两位数百分比），
+            下次接手的 Claude 如果要写代码，先跟 Emer 确认这个百分比的计算基准是什么
+            （是 |price-EMA52|/EMA52 的价格百分比？还是别的相对量纲，比如相对 ATR），
+            不要直接假设就是"价格百分比"去实现，容易导致永远/几乎不触发。
+       2. MACD 两条线也要靠近零轴（不是远远地在零轴上方/下方晃）。
+       3. 慢线（橙色/信号线 signal，即 TradingView 里的 "Slow Length"）不能跌破零轴。
+          - 如果没跌破：两条线做了两次交叉，然后反弹，出现能量柱 —— 
+            两线在零轴【上方】时看【青色】能量柱（顶背离/看跌场景），
+            两线在零轴【下方】时看【红色】能量柱（底背离/看涨场景）。
+          - 只要慢线没有跌破零轴，就可以继续计算这个背离。
+
+       【潜在背离（弱势，不是强势背离，但仍可标记）】—— 目前代码【未实现】：
+       - 触发条件：价格还没回到 EMA52，或者 MACD 两条线离零轴还有一段距离（还没靠近）。
+       - 这种只标记为"潜在 potential"，不是"确认 confirmed"。
+
+       【背离失效 / 需要换周期看】—— 目前代码【部分已实现】：
+       - 现有的 maDetectDivergence() 已经有"零轴容忍"机制（ZERO_AXIS_TOLERANCE_BARS=2，
+         见下面 zeroAxisOk()）：如果两个 Pivot 之间 MACD/Signal 有超过 2 根K线的零轴穿越，
+         这一对 Pivot 就判定无效，会自动往回找更早的 Pivot 重新配对 —— 这部分逻辑已经大致符合
+         Emer 说的"两条线下穿零轴，背离就形成不了"的原则。
+       - 但"当前周期形成不了背离时提示去看更大/更小周期"这件事，Emer 确认不需要额外写自动跳转逻辑：
+         17 个周期本来就是并排独立扫描的，某个周期显示"无背离"，用户自己看旁边其他周期卡片即可。
+         所以这条【不需要开发】，维持现状。
+       - 判断背离是否"结束/失效"的主要依据：两条线有没有下穿零轴（不是看别的）。
+         EMA52 是用来看价格有没有"站稳"，要配合快慢线一起看，不是单独判断。
+
+       【时间级别分组】（用于多货币卡片按 小/中/大 时间分类展示）【已确认，未来做多货币网格时用】：
+       - 小时间：< 1H（例如 3M/5M/10M/15M/20M/30M/45M...）
+       - 中时间：1H ≤ x < 12H（例如 1H/90M/2H/3H/4H/6H/8H）
+       - 大时间：≥ 12H（例如 12H/1D/2D...；目前 MA_TIMEFRAMES 列表里最大只到 6H，还没有大时间档位）
+         这个分组和上面检查清单页的 TF_GROUPS（big/medium/small）定义边界一致，可以直接复用同一套分界。
+
+       【多货币扫描 —— 目前【完全未实现】，现状是单一 activeSymbol 扫描】：
+       - 目标货币列表：
+         主要（Primary）：AUDCHF, AUDUSD, NZDUSD, GBPJPY, GBPCAD, GBPCHF, EURUSD
+         次要（Secondary，放在主要下面）：XAUUSD
+       - Emer 是免费版 Twelve Data（8次/分钟，800次/天），要求：
+         (a) 在马来西亚时间 14:30 前后要能拿到"全部货币的背离数据"，用于伦敦开盘前判断；
+         (b) 伦敦到纽约开市这段时间（大马时间 14:30–次日00:00，约 9.5 小时）持续跑；
+         (c) 人不在电脑前、浏览器/网站没开着，也要能收到 Telegram 通知。
+       - (c) 这条和现在的架构冲突：现在整个网站是纯前端（浏览器 JS + localStorage），
+         浏览器/网页关掉就完全不会跑，无法在"网站没开"的情况下自己发 Telegram。
+         这件事已经在对话里跟 Emer 说明，等 Emer 确认托管方式（比如 GitHub Actions 定时任务）
+         之后再实现一个独立跑在服务器端、不依赖浏览器的抓取+背离判断+Telegram 推送脚本。
+       - 额度预算（8 货币 × 7 个原生周期请求 = 56 次/轮）：800/56 ≈ 每天最多约 14 轮完整扫描；
+         要覆盖 9.5 小时会话时间，大约每 40 分钟跑一轮比较安全（留一点余量给手动刷新/检查清单页
+         那边共用同一把 Key 的旧 MACD 扫描器）。
+
+       ---------------------------------------------------------------------------------
+       MACD ANALYSIS（新增独立模块，原有说明）
        ---------------------------------------------------------------------------------
        完全复用上面已经在用的 Twelve Data Key / 品种选择 / 时区设置（activeSymbol /
        activeTimezone / getApiKey / resolveQuery / emaSeries / MACD_FAST/SLOW/SIGNAL），
@@ -4021,11 +4094,14 @@
         if(!entries.length) return;
         if(maMuted) return; // 静音时：卡片高亮和历史记录照常，但没有声音/系统通知/Telegram
         maPlaySound(1);
+        // 每条消息都带上货币/品种名称（activeSymbol.label），这样切换品种扫描、
+        // 或者以后多品种同时跑的时候，Telegram 消息也能一眼看出是哪个货币的信号。
+        const symLabel = (activeSymbol.icon||'💱') + ' ' + activeSymbol.label;
         const lines = entries.map(e=>{
           const label = e.type==='bullish' ? '底背离(下跌结束)' : '顶背离(上涨结束)';
           const tag = e.sessionTag ? (e.sessionTag+' ') : '';
-          if(e.isMega) return '⚠️ 注意! ' + tag + e.tf1 + ' + ' + e.tf2 + ' 共振 ' + label;
-          return tag + e.tf1 + ' ' + label;
+          if(e.isMega) return '⚠️ 注意! ' + symLabel + ' ' + tag + e.tf1 + ' + ' + e.tf2 + ' 共振 ' + label;
+          return symLabel + ' ' + tag + e.tf1 + ' ' + label;
         });
         const text = lines.join('\n');
         if('Notification' in window && Notification.permission==='granted'){
