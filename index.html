@@ -688,6 +688,58 @@
   }
   .ma-tg-input:focus{outline:none;border-color:var(--accent);}
 
+  .ma-mute-off{border-color:var(--short) !important;color:var(--short) !important;background:var(--short-dim) !important;}
+
+  .ma-chart-sub{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:2px;}
+
+  .ma-history-more{
+    width:100%;margin-top:10px;padding:9px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg-chip);color:var(--text-dim);font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;
+  }
+  .ma-history-more:hover{color:var(--accent);border-color:var(--accent);}
+  .ma-hist-row.ma-hist-collapsed{display:none;}
+
+  /* ---------- 主次共振大横幅 ---------- */
+  .ma-mega-banner:empty{display:none;}
+  .ma-mega-item{
+    display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:14px;margin-bottom:12px;
+    border:1.5px solid #e7c34a;background:linear-gradient(90deg, rgba(231,195,74,.16), rgba(231,195,74,.04));
+    animation:maMegaPulse 1.8s ease-in-out infinite;
+  }
+  .ma-mega-item.short{border-color:var(--short);background:linear-gradient(90deg, rgba(246,79,79,.18), rgba(246,79,79,.04));}
+  .ma-mega-item.long{border-color:var(--long);background:linear-gradient(90deg, rgba(55,223,142,.18), rgba(55,223,142,.04));}
+  .ma-mega-icon{font-size:26px;flex-shrink:0;}
+  .ma-mega-text{display:flex;flex-direction:column;gap:2px;}
+  .ma-mega-tf{font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:.3px;}
+  .ma-mega-type{font-family:var(--sans);font-weight:700;font-size:13.5px;color:var(--text-dim);}
+  @keyframes maMegaPulse{0%,100%{box-shadow:0 0 0 0 rgba(231,195,74,.35);}50%{box-shadow:0 0 0 8px rgba(231,195,74,0);}}
+
+  /* ---------- 检查清单里的简化背离概览 ---------- */
+  .ma-simple-section{margin-bottom:22px;padding-bottom:18px;border-bottom:1px dashed var(--line-soft);}
+  .ma-simple-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .ma-simple-head h3{margin:0;font-family:var(--disp);font-size:15px;font-weight:800;color:var(--accent);}
+  .ma-simple-goto{
+    appearance:none;border:1px solid var(--line);background:var(--bg-chip);color:var(--text-dim);
+    font-family:var(--sans);font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:7px;cursor:pointer;transition:.15s;
+  }
+  .ma-simple-goto:hover{color:var(--accent);border-color:var(--accent);}
+  .ma-simple-mega{margin-bottom:10px;}
+  .ma-simple-mega:empty{display:none;}
+  .ma-simple-mega-chip{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;margin:0 6px 6px 0;
+    border:1.5px solid #e7c34a;background:rgba(231,195,74,.12);font-family:var(--disp);font-weight:700;font-size:12.5px;
+  }
+  .ma-simple-grid{display:flex;flex-wrap:wrap;gap:7px;}
+  .ma-simple-chip{
+    display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px;padding:7px 8px;border-radius:8px;
+    background:var(--bg-chip);border:1px solid var(--line);font-family:var(--mono);
+  }
+  .ma-simple-chip .tf{font-size:10px;color:var(--text-dim);}
+  .ma-simple-chip .dot{font-size:14px;line-height:1;}
+  .ma-simple-chip.long{border-color:var(--long);}
+  .ma-simple-chip.short{border-color:var(--short);}
+  .ma-simple-chip.waiting{opacity:.4;}
+
   /* ---------- modal ---------- */
   .modal-overlay{
     position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;
@@ -1444,6 +1496,7 @@
     <nav class="tabs">
       <button class="tab-btn" data-view="liquidity"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s7 7.6 7 12a7 7 0 0 1-14 0c0-4.4 7-12 7-12z"></path></svg> 市场流动性</button>
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
+      <button class="tab-btn" data-view="divscan"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> 背离扫描</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
       <button class="tab-btn" data-view="macd"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> MACD 扫描</button>
@@ -1470,45 +1523,14 @@
 
   <!-- ================= CHECKLIST VIEW ================= -->
   <section class="view active" id="view-checklist">
-    <!-- ================= MACD ANALYSIS（新增独立模块，放在页面最上面） ================= -->
-    <div class="ma-section" id="ma-section">
-      <div class="ma-header">
-        <h2>MACD ANALYSIS</h2>
-        <div class="ma-header-right">
-          <span class="ma-symbol" id="ma-symbol-label">—</span>
-          <span class="macd-updated" id="ma-updated">尚未更新</span>
-          <button type="button" class="btn-cancel" id="ma-refresh-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>
-          <button type="button" class="btn-cancel" id="ma-notif-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">🔔 开启提醒</button>
-        </div>
+    <!-- ================= 背离扫描 · 简化版（完整版在右上角"背离扫描"标签页） ================= -->
+    <div class="ma-simple-section" id="ma-simple-section">
+      <div class="ma-simple-head">
+        <h3>背离扫描 · 概览</h3>
+        <button type="button" class="ma-simple-goto" data-view-link="divscan">查看完整背离扫描 →</button>
       </div>
-      <div class="ma-settings-row">
-        <span class="ma-settings-label">PIVOT STRENGTH</span>
-        <select id="ma-pivot-select" class="macd-tz-select">
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-        <span class="macd-tz-hint">决定 MACD Swing Peak / Valley 的确认强度：左右各需要这么多根「已收盘」K 线的 MACD 值更高/更低，才算一个有效转折点，用于判断背离。默认 3（数字越大，认定的转折点越"大"、越少但越可靠；数字越小，转折点越多但可能是噪音）。</span>
-      </div>
-      <div class="ma-settings-row" id="ma-tg-row">
-        <span class="ma-settings-label">TELEGRAM 提醒</span>
-        <input type="text" id="ma-tg-token-input" class="ma-tg-input" placeholder="Bot Token（找 @BotFather 创建）" autocomplete="off">
-        <input type="text" id="ma-tg-chatid-input" class="ma-tg-input" placeholder="Chat ID（找 @userinfobot 获取）" autocomplete="off">
-        <button type="button" class="btn-save" id="ma-tg-save-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">保存</button>
-        <button type="button" class="btn-cancel" id="ma-tg-test-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">发送测试消息</button>
-        <span class="macd-tz-hint">配置后，出现新的 Golden/Death Cross 或 Confirmed Divergence 时会同时发一条 Telegram 消息，手机装了 Telegram 就能收到，不需要一直开着这个网页。Token 只存在这台设备浏览器本地，不会上传到其他服务器。当某个 timeframe 和它 ×2 或 ÷2 的次时间级别同时出现同方向的 Confirmed Divergence 时，会额外触发一条 🚨 主次共振大信号（连响 3 声提示音 + 单独的 Telegram 消息），历史记录里也会用金色高亮标出来。</span>
-      </div>
-      <div class="ma-error" id="ma-error"></div>
-      <div class="ma-grid" id="ma-grid-mount"></div>
-      <div class="card" id="ma-chart-card">
-        <div class="card-header"><h3 class="sub-h3">MACD Chart — <span id="ma-chart-tf-label">1H</span></h3></div>
-        <div class="card-body"><div id="ma-chart-mount"><div class="empty-state">加载中...</div></div></div>
-      </div>
-      <div class="card" id="ma-history-card">
-        <div class="card-header"><h3 class="sub-h3">MACD Signal History</h3></div>
-        <div class="card-body"><div id="ma-history-mount"><div class="empty-state">暂无信号记录</div></div></div>
-      </div>
+      <div class="ma-simple-mega" id="ma-simple-mega-mount"></div>
+      <div class="ma-simple-grid" id="ma-simple-grid-mount"></div>
     </div>
 
     <div class="direction-bar">
@@ -1692,7 +1714,58 @@
     </div>
   </section>
 
-  <!-- ================= HISTORY VIEW ================= -->
+  <!-- ================= 背离扫描 VIEW（完整版 MACD ANALYSIS 模块） ================= -->
+  <section class="view" id="view-divscan">
+    <div class="ma-section" id="ma-section">
+      <div class="ma-header">
+        <h2>背离扫描 DIVERGENCE SCAN</h2>
+        <div class="ma-header-right">
+          <span class="ma-symbol" id="ma-symbol-label">—</span>
+          <span class="macd-updated" id="ma-updated">尚未更新</span>
+          <button type="button" class="btn-cancel" id="ma-refresh-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>
+          <button type="button" class="btn-cancel" id="ma-notif-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">🔔 开启提醒</button>
+          <button type="button" class="btn-cancel" id="ma-mute-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">🔊 声音开启</button>
+        </div>
+      </div>
+      <div class="ma-settings-row">
+        <span class="ma-settings-label">PIVOT STRENGTH</span>
+        <select id="ma-pivot-select" class="macd-tz-select">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <span class="macd-tz-hint">决定 MACD Swing Peak / Valley 的确认强度：左右各需要这么多根「已收盘」K 线的 MACD 值更高/更低，才算一个有效转折点，用于判断背离。默认 3（数字越大，认定的转折点越"大"、越少但越可靠；数字越小，转折点越多但可能是噪音）。</span>
+      </div>
+      <div class="ma-settings-row" id="ma-tg-row">
+        <span class="ma-settings-label">TELEGRAM 提醒</span>
+        <input type="text" id="ma-tg-token-input" class="ma-tg-input" placeholder="Bot Token（找 @BotFather 创建）" autocomplete="off">
+        <input type="text" id="ma-tg-chatid-input" class="ma-tg-input" placeholder="Chat ID（找 @userinfobot 获取）" autocomplete="off">
+        <button type="button" class="btn-save" id="ma-tg-save-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">保存</button>
+        <button type="button" class="btn-cancel" id="ma-tg-test-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">发送测试消息</button>
+        <span class="macd-tz-hint">配置后，同一个 timeframe 出现新的 Confirmed Divergence（或某个配对进入主次共振）时会发一条 Telegram 消息，内容只有"哪个周期 + 底背离/顶背离"，干净不刷屏；同一个信号只要没变化就不会重复发。Token 只存在这台设备浏览器本地，不会上传到其他服务器。点 🔊 可以整体静音（不发声音/浏览器通知/Telegram，但卡片高亮和历史记录照常）。</span>
+      </div>
+      <div class="ma-error" id="ma-error"></div>
+      <div class="ma-mega-banner" id="ma-mega-banner"></div>
+      <div class="ma-grid" id="ma-grid-mount"></div>
+      <div class="card" id="ma-chart-card">
+        <div class="card-header">
+          <h3 class="sub-h3">MACD Chart — <span id="ma-chart-tf-label">1H</span></h3>
+          <div class="ma-chart-sub" id="ma-chart-sub"></div>
+        </div>
+        <div class="card-body"><div id="ma-chart-mount"><div class="empty-state">加载中...</div></div></div>
+      </div>
+      <div class="card" id="ma-history-card">
+        <div class="card-header"><h3 class="sub-h3">MACD Signal History</h3></div>
+        <div class="card-body">
+          <div id="ma-history-mount"><div class="empty-state">暂无信号记录</div></div>
+          <button type="button" class="ma-history-more" id="ma-history-more-btn" style="display:none;">展开更多 ▾</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
   <section class="view" id="view-history">
     <div id="history-profile-bar" class="hist-profile-bar"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:14px;">
@@ -3567,6 +3640,8 @@
       const MA_HISTORY_STORAGE = 'emer_macd_analysis_history_v1';
       const MA_TG_TOKEN_STORAGE = 'emer_macd_analysis_tg_token_v1';
       const MA_TG_CHATID_STORAGE = 'emer_macd_analysis_tg_chatid_v1';
+      const MA_MUTE_STORAGE = 'emer_macd_analysis_muted_v1';
+      const MA_LAST_NOTIFIED_STORAGE = 'emer_macd_analysis_last_notified_v1';
 
       // 12 个需要分析的 timeframe：base 指向下面 MA_BASE_SPECS 里的原生周期，
       // minutes 是这个 timeframe 自己的分钟数，用来做固定时间边界合并（bucket = minutes*60 秒）。
@@ -3628,6 +3703,7 @@
 
       const maBaseCache = {};   // key -> {data:[{t,c}], at}
       let maResults = {};       // label -> 分析结果
+      let maActiveMega = [];    // 当前正处于"主次共振"状态的配对列表，用于顶部大横幅
       let maSelectedTF = '1H';
       let maIsLoading = false;
       let maRefreshTimer = null;
@@ -3648,6 +3724,33 @@
 
       function maSaveHistory(){
         try{ localStorage.setItem(MA_HISTORY_STORAGE, JSON.stringify(maSignalHistory.slice(0,200))); }catch(e){}
+      }
+
+      // ---------- 静音开关 + "上一次已通知的信号"记录 ----------
+      // maLastNotified：{ 'div:1H':'bullish', 'mega:1H+2H':'bearish', ... }
+      // 只有当某个 timeframe（或某个共振配对）的信号类型和上次通知时不一样了，才会再次触发
+      // 声音 / 浏览器通知 / Telegram；同一个信号一直持续存在，不会每次刷新都重复提醒。
+      function maLoadMuted(){
+        try{ return localStorage.getItem(MA_MUTE_STORAGE)==='1'; }catch(e){ return false; }
+      }
+      let maMuted = maLoadMuted();
+      function maSaveMuted(){ try{ localStorage.setItem(MA_MUTE_STORAGE, maMuted?'1':'0'); }catch(e){} }
+
+      function maLoadLastNotified(){
+        try{ return JSON.parse(localStorage.getItem(MA_LAST_NOTIFIED_STORAGE) || '{}'); }catch(e){ return {}; }
+      }
+      let maLastNotified = maLoadLastNotified();
+      function maSaveLastNotified(){
+        try{ localStorage.setItem(MA_LAST_NOTIFIED_STORAGE, JSON.stringify(maLastNotified)); }catch(e){}
+      }
+
+      // 伦敦 / 纽约盘口标注：伦敦 15:00–19:59，纽约 20:00–02:59（用设备本地时间判断，
+      // 不显示具体时间，只在符合区间时在通知前面加 [LONDON] / [NY]）。
+      function maSessionTag(){
+        const h = new Date().getHours();
+        if(h>=15 && h<20) return '[LONDON]';
+        if(h>=20 || h<3) return '[NY]';
+        return '';
       }
 
       // 拉取一个原生周期（带时间戳），命中缓存直接返回，不产生新请求
@@ -3902,22 +4005,33 @@
       }
 
       function maNotify(entry, isMega){
-        maPlaySound(isMega ? 3 : 1); // 大信号连响 3 次，和普通单周期信号区分开，不用看屏幕也能听出来
+        // 只在有实际"事件"要提醒时调用（背离变化 / 共振变化），且只播一次声音、
+        // 只发一条 Telegram、只弹一条浏览器通知——多个信号会在 maRefreshAll 里
+        // 合并成一次调用，不会每个 timeframe 各响一次。
         if(isMega){
           entry.timeframe.split(' + ').forEach(lbl=>maFlashCard(lbl));
         } else {
           maFlashCard(entry.timeframe);
         }
+      }
+
+      // entries: [{ isMega, tf1, tf2, type, sessionTag }]  —— 本次刷新里所有"信号发生了变化"的条目，
+      // 打包成一次提醒（一次声音、一条浏览器通知、一条 Telegram 消息），干净不刷屏。
+      function maFireBatchNotify(entries){
+        if(!entries.length) return;
+        if(maMuted) return; // 静音时：卡片高亮和历史记录照常，但没有声音/系统通知/Telegram
+        maPlaySound(1);
+        const lines = entries.map(e=>{
+          const label = e.type==='bullish' ? '底背离(下跌结束)' : '顶背离(上涨结束)';
+          const tag = e.sessionTag ? (e.sessionTag+' ') : '';
+          if(e.isMega) return '⚠️ 注意! ' + tag + e.tf1 + ' + ' + e.tf2 + ' 共振 ' + label;
+          return tag + e.tf1 + ' ' + label;
+        });
+        const text = lines.join('\n');
         if('Notification' in window && Notification.permission==='granted'){
-          try{ new Notification((isMega?'🚨 MEGA · ':'MACD Signal · ') + entry.symbol + ' ' + entry.timeframe, { body: entry.typeLabel + '  MACD ' + entry.macd.toFixed(3) }); }catch(e){}
+          try{ new Notification('MACD 背离提醒', { body: text }); }catch(e){}
         }
-        maSendTelegram(
-          (isMega ? '🚨🚨 主次共振大信号 MEGA SIGNAL 🚨🚨\n' : '📡 MACD Signal\n') +
-          entry.symbol + '  ' + entry.timeframe + '\n' +
-          entry.typeLabel + '\n' +
-          'MACD ' + entry.macd.toFixed(3) + '  Signal ' + entry.signal.toFixed(3) + '  Hist ' + entry.hist.toFixed(3) +
-          (isMega ? '\n\n（主时间级别与其 ×2/÷2 次时间级别同时出现同方向背离）' : '')
-        );
+        maSendTelegram(text);
       }
 
       function maPushHistory(entry){
@@ -3927,12 +4041,20 @@
         maRenderHistory();
       }
 
+      const MA_HISTORY_VISIBLE = 4;
+      let maHistoryExpanded = false;
       function maRenderHistory(){
         const mount = document.getElementById('ma-history-mount');
+        const moreBtn = document.getElementById('ma-history-more-btn');
         if(!mount) return;
-        if(!maSignalHistory.length){ mount.innerHTML = '<div class="empty-state">暂无信号记录</div>'; return; }
-        mount.innerHTML = maSignalHistory.slice(0,60).map(e=>
-          '<div class="ma-hist-row' + (e.mega?' ma-hist-mega':'') + '">' +
+        if(!maSignalHistory.length){
+          mount.innerHTML = '<div class="empty-state">暂无信号记录</div>';
+          if(moreBtn) moreBtn.style.display = 'none';
+          return;
+        }
+        const list = maSignalHistory.slice(0,60);
+        mount.innerHTML = list.map((e,i)=>
+          '<div class="ma-hist-row' + (e.mega?' ma-hist-mega':'') + (i>=MA_HISTORY_VISIBLE && !maHistoryExpanded?' ma-hist-collapsed':'') + '">' +
             '<span class="ma-hist-time">' + new Date(e.time).toLocaleString('zh-CN',{hour12:false}) + '</span>' +
             '<span class="ma-hist-sym">' + e.symbol + '</span>' +
             '<span class="ma-hist-tf">' + e.timeframe + '</span>' +
@@ -3940,6 +4062,14 @@
             '<span class="ma-hist-vals">MACD ' + e.macd.toFixed(3) + ' · Sig ' + e.signal.toFixed(3) + ' · Hist ' + e.hist.toFixed(3) + '</span>' +
           '</div>'
         ).join('');
+        if(moreBtn){
+          if(list.length > MA_HISTORY_VISIBLE){
+            moreBtn.style.display = '';
+            moreBtn.textContent = maHistoryExpanded ? '收起 ▴' : ('展开更多（还有 ' + (list.length-MA_HISTORY_VISIBLE) + ' 条）▾');
+          } else {
+            moreBtn.style.display = 'none';
+          }
+        }
       }
 
       function maStatusParts(r){
@@ -3977,16 +4107,12 @@
         if(!mount) return;
         mount.innerHTML = MA_TIMEFRAMES.map(tf=>{
           const r = maResults[tf.label];
-          const { parts, cls, reason } = maStatusParts(r);
-          const trend = (r && r.macdNow!=null) ? (r.macdNow>=0 ? 'Trend: MACD > 0 轴上' : 'Trend: MACD < 0 轴下') : 'Trend: —';
-          const candleTxt = (r && r.lastCandleTime) ? ('Candle Closed: ' + new Date(r.lastCandleTime*1000).toISOString().slice(5,16).replace('T',' ')) : ('Candle Status: ' + (reason || '等待数据'));
+          const { parts, cls } = maStatusParts(r);
           const lastSigTxt = maLastSignalFor(tf.label);
           return (
             '<div class="ma-card ' + (cls||'waiting') + (tf.label===maSelectedTF?' active':'') + '" data-tf="' + tf.label + '" id="ma-card-' + tf.label + '">' +
               '<div class="ma-card-tf">' + tf.label + '</div>' +
               '<div class="ma-card-status">' + parts.join('<br>') + '</div>' +
-              '<div class="ma-card-meta">' + trend + '</div>' +
-              '<div class="ma-card-meta">' + candleTxt + '</div>' +
               '<div class="ma-card-meta">' + lastSigTxt + '</div>' +
             '</div>'
           );
@@ -4005,8 +4131,18 @@
         const labelEl = document.getElementById('ma-chart-tf-label');
         if(labelEl) labelEl.textContent = maSelectedTF;
         const mount = document.getElementById('ma-chart-mount');
+        const subEl = document.getElementById('ma-chart-sub');
         if(!mount) return;
         const r = maResults[maSelectedTF];
+        if(subEl){
+          if(r && r.status==='ok'){
+            const trend = r.macdNow!=null ? (r.macdNow>=0 ? 'Trend: MACD > 0 轴上' : 'Trend: MACD < 0 轴下') : 'Trend: —';
+            const candleTxt = r.lastCandleTime ? ('Candle Closed: ' + new Date(r.lastCandleTime*1000).toISOString().slice(5,16).replace('T',' ')) : '';
+            subEl.textContent = trend + (candleTxt ? '　·　' + candleTxt : '');
+          } else {
+            subEl.textContent = (r && r.reason) ? r.reason : '';
+          }
+        }
         if(!r || r.status!=='ok' || !r.series){
           mount.innerHTML = '<div class="empty-state">' + (r && r.reason ? r.reason : '暂无数据') + '</div>';
           return;
@@ -4108,6 +4244,10 @@
           // 每个 timeframe 都能拿到它的 ×2/÷2 搭档「当前」的最新结果。
           MA_TIMEFRAMES.forEach(tf=>{ maResults[tf.label] = maAnalyzeTimeframe(tf); });
 
+          const sessionTag = maSessionTag();
+          const toNotify = []; // 本次刷新里"信号变了"、需要打包进这一次提醒的条目
+
+          // ---------- Cross：只记录历史，不发提醒（提醒只留给背离，按你的要求）----------
           MA_TIMEFRAMES.forEach(tf=>{
             const r = maResults[tf.label];
             if(!r || r.status!=='ok') return;
@@ -4116,35 +4256,45 @@
               const key = activeSymbol.label+'|'+tf.label+'|'+r.cross.type+'|'+r.lastCandleTime;
               if(!maSeenKeys.has(key)){
                 maSeenKeys.add(key);
-                const entry = {
+                maPushHistory({
                   time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
                   typeLabel: r.cross.type==='golden' ? '🟢 Golden Cross' : '🔴 Death Cross',
                   cls: r.cross.type==='golden' ? 'long' : 'short',
                   macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
-                };
-                maPushHistory(entry);
-                maNotify(entry);
-              }
-            }
-            if(r.div && r.div.confirmed){
-              const key = activeSymbol.label+'|'+tf.label+'|div-'+r.div.type+'|'+r.div.p2.idx+'|'+r.lastCandleTime;
-              if(!maSeenKeys.has(key)){
-                maSeenKeys.add(key);
-                const entry = {
-                  time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
-                  typeLabel: r.div.type==='bearish' ? '🔴 Bearish Divergence' : '🟢 Bullish Divergence',
-                  cls: r.div.type==='bearish' ? 'short' : 'long',
-                  macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
-                };
-                maPushHistory(entry);
-                maNotify(entry);
+                });
               }
             }
           });
 
-          // 主时间级别 + 次时间级别（×2 / ÷2）同时背离 → 大信号（共振）。
-          // 每一对（比如 1H + 2H）只会在这次刷新里判定一次，用 sorted pair 做 key 去重，
-          // 避免 1H 触发一次、2H 又触发一次重复的大信号。
+          // ---------- 背离：记历史（细粒度去重） + 判断是否要提醒（粗粒度："信号变了才提醒"）----------
+          MA_TIMEFRAMES.forEach(tf=>{
+            const r = maResults[tf.label];
+            const notifyKey = 'div:'+tf.label;
+            if(!r || r.status!=='ok' || !r.div || !r.div.confirmed){
+              // 当前没有已确认的背离了 → 清掉"上次通知"的记录，下次再出现同类型信号会重新提醒一次
+              if(maLastNotified[notifyKey]) delete maLastNotified[notifyKey];
+              return;
+            }
+            const key = activeSymbol.label+'|'+tf.label+'|div-'+r.div.type+'|'+r.div.p2.idx+'|'+r.lastCandleTime;
+            if(!maSeenKeys.has(key)){
+              maSeenKeys.add(key);
+              maPushHistory({
+                time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
+                typeLabel: r.div.type==='bearish' ? '🔴 Bearish Divergence' : '🟢 Bullish Divergence',
+                cls: r.div.type==='bearish' ? 'short' : 'long',
+                macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
+              });
+            }
+            if(maLastNotified[notifyKey] !== r.div.type){
+              maLastNotified[notifyKey] = r.div.type;
+              toNotify.push({ isMega:false, tf1:tf.label, type:r.div.type, sessionTag });
+            }
+          });
+
+          // ---------- 主时间级别 + 次时间级别（×2/÷2）同时背离 → 共振 ----------
+          // maActiveMega：这次刷新里"当前正处于共振状态"的所有配对，用于顶部大横幅展示，
+          // 和"信号变了才提醒"的 toNotify 是两回事——横幅只要共振还在就一直显示。
+          maActiveMega = [];
           const megaSeenPairs = new Set();
           MA_TIMEFRAMES.forEach(tf=>{
             const r = maResults[tf.label];
@@ -4157,25 +4307,45 @@
               const pairKey = [tf.label, partnerLabel].sort().join('+');
               if(megaSeenPairs.has(pairKey)) return;
               megaSeenPairs.add(pairKey);
+              maActiveMega.push({ tf1:tf.label, tf2:partnerLabel, type:r.div.type });
+
               const dedupeKey = activeSymbol.label+'|MEGA|'+pairKey+'|'+r.div.type+'|'+r.div.p2.idx+'|'+pr.div.p2.idx+'|'+r.lastCandleTime+'|'+pr.lastCandleTime;
-              if(maSeenKeys.has(dedupeKey)) return;
-              maSeenKeys.add(dedupeKey);
-              const entry = {
-                time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label+' + '+partnerLabel,
-                typeLabel: (r.div.type==='bearish' ? '🚨 主次共振·看跌大信号' : '🚨 主次共振·看涨大信号'),
-                cls: r.div.type==='bearish' ? 'short' : 'long',
-                macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey, mega:true,
-              };
-              maPushHistory(entry);
-              maNotify(entry, true);
+              if(!maSeenKeys.has(dedupeKey)){
+                maSeenKeys.add(dedupeKey);
+                maPushHistory({
+                  time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label+' + '+partnerLabel,
+                  typeLabel: (r.div.type==='bearish' ? '🚨 主次共振·看跌大信号' : '🚨 主次共振·看涨大信号'),
+                  cls: r.div.type==='bearish' ? 'short' : 'long',
+                  macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey, mega:true,
+                });
+              }
+              const notifyKey = 'mega:'+pairKey;
+              if(maLastNotified[notifyKey] !== r.div.type){
+                maLastNotified[notifyKey] = r.div.type;
+                toNotify.push({ isMega:true, tf1:tf.label, tf2:partnerLabel, type:r.div.type, sessionTag });
+              }
             });
           });
+          // 清掉已经不再共振的配对的"上次通知"记录，方便它下次重新触发时能再提醒一次
+          Object.keys(maLastNotified).forEach(k=>{
+            if(k.startsWith('mega:') && !megaSeenPairs.has(k.slice(5))) delete maLastNotified[k];
+          });
+          maSaveLastNotified();
+
+          // 所有 flash + 一次性的声音/浏览器通知/Telegram，打包一起发，不刷屏
+          toNotify.forEach(e=> maNotify(
+            e.isMega ? { timeframe:e.tf1+' + '+e.tf2 } : { timeframe:e.tf1 },
+            e.isMega
+          ));
+          maFireBatchNotify(toNotify);
 
           const upEl = document.getElementById('ma-updated');
           if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN',{hour12:true});
           if(errEl && errors.length) errEl.textContent = 'MACD Analysis 部分周期获取失败：' + errors.join('；');
           maRenderGrid();
           maRenderChart();
+          maRenderMegaBanner();
+          maRenderSimple();
         }catch(e){
           if(errEl) errEl.textContent = 'MACD Analysis 数据获取失败：' + e.message;
         }finally{
@@ -4184,12 +4354,83 @@
         }
       }
 
+      // ---------- 主次共振大横幅（当前正处于共振状态才显示，横幅内容随每次刷新更新） ----------
+      function maRenderMegaBanner(){
+        const mount = document.getElementById('ma-mega-banner');
+        if(!mount) return;
+        if(!maActiveMega.length){ mount.innerHTML = ''; return; }
+        mount.innerHTML = maActiveMega.map(m=>{
+          const isBear = m.type==='bearish';
+          const label = isBear ? '顶背离共振(上涨结束)' : '底背离共振(下跌结束)';
+          return '<div class="ma-mega-item ' + (isBear?'short':'long') + '">' +
+            '<div class="ma-mega-icon">' + (isBear?'🔴':'🟢') + '🚨</div>' +
+            '<div class="ma-mega-text">' +
+              '<div class="ma-mega-tf">' + m.tf1 + ' + ' + m.tf2 + '</div>' +
+              '<div class="ma-mega-type">主次共振 · ' + label + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      // ---------- 检查清单里的简化概览：小色块网格 + 共振提示，不含设置/图表/历史 ----------
+      function maRenderSimple(){
+        const megaMount = document.getElementById('ma-simple-mega-mount');
+        const gridMount = document.getElementById('ma-simple-grid-mount');
+        if(megaMount){
+          megaMount.innerHTML = maActiveMega.map(m=>{
+            const isBear = m.type==='bearish';
+            return '<span class="ma-simple-mega-chip" style="color:' + (isBear?'var(--short)':'var(--long)') + '">' +
+              '🚨 ' + m.tf1 + '+' + m.tf2 + ' ' + (isBear?'顶背离共振':'底背离共振') +
+            '</span>';
+          }).join('');
+        }
+        if(gridMount){
+          gridMount.innerHTML = MA_TIMEFRAMES.map(tf=>{
+            const r = maResults[tf.label];
+            let dot = '⚪', cls = 'waiting';
+            if(r && r.status==='ok' && r.div && r.div.confirmed){
+              if(r.div.type==='bearish'){ dot='🔴'; cls='short'; }
+              else { dot='🟢'; cls='long'; }
+            }
+            return '<div class="ma-simple-chip ' + cls + '"><span class="dot">' + dot + '</span><span class="tf">' + tf.label + '</span></div>';
+          }).join('');
+        }
+      }
+
       function maInit(){
         maRenderHistory();
         maRenderGrid();
+        maRenderMegaBanner();
+        maRenderSimple();
 
         const refreshBtn = document.getElementById('ma-refresh-btn');
         if(refreshBtn) refreshBtn.addEventListener('click', ()=>maRefreshAll());
+
+        const historyMoreBtn = document.getElementById('ma-history-more-btn');
+        if(historyMoreBtn) historyMoreBtn.addEventListener('click', ()=>{
+          maHistoryExpanded = !maHistoryExpanded;
+          maRenderHistory();
+        });
+
+        const muteBtn = document.getElementById('ma-mute-btn');
+        function syncMuteBtn(){
+          if(!muteBtn) return;
+          muteBtn.textContent = maMuted ? '🔇 声音已关闭' : '🔊 声音开启';
+          muteBtn.classList.toggle('ma-mute-off', maMuted);
+        }
+        syncMuteBtn();
+        if(muteBtn) muteBtn.addEventListener('click', ()=>{
+          maMuted = !maMuted;
+          maSaveMuted();
+          syncMuteBtn();
+        });
+
+        document.querySelectorAll('[data-view-link]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const targetBtn = document.querySelector('.tab-btn[data-view="'+btn.dataset.viewLink+'"]');
+            if(targetBtn) targetBtn.click();
+          });
+        });
 
         const pivotSel = document.getElementById('ma-pivot-select');
         if(pivotSel){
@@ -4200,6 +4441,7 @@
             MA_TIMEFRAMES.forEach(tf=>{ maResults[tf.label] = maAnalyzeTimeframe(tf); });
             maRenderGrid();
             maRenderChart();
+            maRenderSimple();
           });
         }
 
@@ -4229,7 +4471,7 @@
           const cfg = maGetTgConfig();
           if(!cfg.token || !cfg.chatId){ alert('请先填写 Bot Token 和 Chat ID，再点保存。'); return; }
           tgTestBtn.disabled = true; const oldTxt = tgTestBtn.textContent; tgTestBtn.textContent = '发送中...';
-          const ok = await maSendTelegram('✅ MACD Analysis Telegram 提醒测试成功！');
+          const ok = await maSendTelegram('✅ 背离扫描 Telegram 提醒测试成功！');
           tgTestBtn.disabled = false; tgTestBtn.textContent = oldTxt;
           alert(ok ? '已发送，请检查 Telegram。' : '发送失败，请检查 Bot Token / Chat ID 是否正确，以及是否已经在 Telegram 里跟这个 Bot 说过一句话（Bot 需要先被用户主动私聊过一次才能发消息）。');
         });
