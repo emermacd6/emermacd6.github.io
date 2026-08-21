@@ -1,0 +1,357 @@
+// ============================================================================
+// 背离扫描 · 服务器端定时任务（配合 GitHub Actions 使用）
+// ----------------------------------------------------------------------------
+// 这是把 index_v3.html 里"背离扫描 DIVERGENCE SCAN"模块的判断逻辑搬到 Node.js，
+// 让 GitHub Actions 按固定时间表自动跑，而不依赖你浏览器网页开着。
+//
+// 每次运行只扫 1 个货币（round-robin 轮流，7 个请求），配合 Twelve Data 免费额度
+// （8 次/分钟、800 次/天）。symbolIndex / 上次已通知的信号 保存在 data/scan-state.json
+// 里，每次运行结束后由 workflow 提交回仓库，下次运行读取，这样才知道"信号有没有变化"。
+//
+// 环境变量（在 GitHub 仓库 Settings → Secrets and variables → Actions 里设置）：
+//   TWELVEDATA_API_KEY   Twelve Data 的 API Key（复用你网页上已经在用的那把）
+//   TELEGRAM_BOT_TOKEN   Telegram Bot Token
+//   TELEGRAM_CHAT_ID     Telegram Chat ID
+// ============================================================================
+
+import fs from 'node:fs';
+
+const STATE_PATH = 'data/scan-state.json';
+
+const TD_KEY = process.env.TWELVEDATA_API_KEY;
+const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
+
+// ---------- 推送时间窗口：马来西亚时间 14:30–22:00，其余时间只扫描不推送（也可以直接跳过扫描省额度）----------
+const WINDOW_START_MIN = 14 * 60 + 30; // 14:30
+const WINDOW_END_MIN = 22 * 60;        // 22:00
+
+const MACD_FAST = 12, MACD_SLOW = 26, MACD_SIGNAL = 9;
+const EMA_TREND_PERIOD = 50;
+const EMA_NEAR_PCT = 0.0015;
+const ZERO_AXIS_NEAR_FRAC = 0.18;
+const ZERO_AXIS_TOLERANCE_BARS = 2;
+const PIVOT_STRENGTH = 3;
+
+const MA_SYMBOLS = [
+  { key: 'XAUUSD', label: 'XAUUSD', icon: '🥇', query: 'XAU/USD' },
+  { key: 'EURUSD', label: 'EURUSD', icon: '💶', query: 'EUR/USD' },
+  { key: 'GBPJPY', label: 'GBPJPY', icon: '💷', query: 'GBP/JPY' },
+  { key: 'GBPCAD', label: 'GBPCAD', icon: '💷', query: 'GBP/CAD' },
+  { key: 'GBPCHF', label: 'GBPCHF', icon: '💷', query: 'GBP/CHF' },
+  { key: 'AUDUSD', label: 'AUDUSD', icon: '🇦🇺', query: 'AUD/USD' },
+  { key: 'AUDCHF', label: 'AUDCHF', icon: '🇦🇺', query: 'AUD/CHF' },
+  { key: 'NZDUSD', label: 'NZDUSD', icon: '🇳🇿', query: 'NZD/USD' },
+];
+
+const MA_BASE_SPECS = {
+  m1:  { interval: '1min',  outputsize: 5000, sec: 60 },
+  m15: { interval: '15min', outputsize: 2000, sec: 900 },
+  m30: { interval: '30min', outputsize: 2000, sec: 1800 },
+  m45: { interval: '45min', outputsize: 2000, sec: 2700 },
+  h1:  { interval: '1h',    outputsize: 2000, sec: 3600 },
+  h2:  { interval: '2h',    outputsize: 1500, sec: 7200 },
+  h4:  { interval: '4h',    outputsize: 1200, sec: 14400 },
+};
+
+const MA_TIMEFRAMES = [
+  { label: '3M',  minutes: 3,   base: 'm1' },
+  { label: '5M',  minutes: 5,   base: 'm1' },
+  { label: '7M',  minutes: 7,   base: 'm1' },
+  { label: '10M', minutes: 10,  base: 'm1' },
+  { label: '12M', minutes: 12,  base: 'm1' },
+  { label: '15M', minutes: 15,  base: 'm15' },
+  { label: '20M', minutes: 20,  base: 'm1' },
+  { label: '23M', minutes: 23,  base: 'm1' },
+  { label: '30M', minutes: 30,  base: 'm30' },
+  { label: '40M', minutes: 40,  base: 'm1' },
+  { label: '45M', minutes: 45,  base: 'm45' },
+  { label: '1H',  minutes: 60,  base: 'h1' },
+  { label: '90M', minutes: 90,  base: 'm45' },
+  { label: '2H',  minutes: 120, base: 'h2' },
+  { label: '3H',  minutes: 180, base: 'h1' },
+  { label: '4H',  minutes: 240, base: 'h4' },
+  { label: '6H',  minutes: 360, base: 'h2' },
+];
+const MA_TF_BY_LABEL = Object.fromEntries(MA_TIMEFRAMES.map(tf => [tf.label, tf]));
+
+function secondaryLabelsFor(label) {
+  const tf = MA_TF_BY_LABEL[label];
+  if (!tf) return [];
+  const double = tf.minutes * 2, half = tf.minutes / 2;
+  return MA_TIMEFRAMES.filter(o => o.label !== label && (o.minutes === double || o.minutes === half)).map(o => o.label);
+}
+
+function nowInMYT() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kuala_Lumpur', hour12: false, hour: '2-digit', minute: '2-digit',
+  }).formatToParts(new Date());
+  const h = parseInt(parts.find(p => p.type === 'hour').value, 10);
+  const m = parseInt(parts.find(p => p.type === 'minute').value, 10);
+  return { mins: h * 60 + m, h, m };
+}
+function sessionTag(mins) {
+  if (mins >= 14 * 60 + 30 && mins < 20 * 60) return '[LONDON]';
+  if (mins >= 20 * 60 && mins < 24 * 60) return '[NY]';
+  return '';
+}
+
+function emaSeries(values, period) {
+  if (values.length < period) return [];
+  const k = 2 / (period + 1);
+  const out = new Array(values.length).fill(null);
+  let sum = 0;
+  for (let i = 0; i < period; i++) sum += values[i];
+  let prev = sum / period;
+  out[period - 1] = prev;
+  for (let i = period; i < values.length; i++) { prev = values[i] * k + prev * (1 - k); out[i] = prev; }
+  return out;
+}
+
+function computeMacdSeries(closes) {
+  if (closes.length < MACD_SLOW + MACD_SIGNAL + 5) return null;
+  const fastE = emaSeries(closes, MACD_FAST);
+  const slowE = emaSeries(closes, MACD_SLOW);
+  const macdFull = closes.map((_, i) => (fastE[i] != null && slowE[i] != null) ? fastE[i] - slowE[i] : null);
+  const vals = [], idxMap = [];
+  macdFull.forEach((v, i) => { if (v != null) { vals.push(v); idxMap.push(i); } });
+  if (!vals.length) return null;
+  const sigE = emaSeries(vals, MACD_SIGNAL);
+  const signalFull = new Array(closes.length).fill(null);
+  const histFull = new Array(closes.length).fill(null);
+  sigE.forEach((v, j) => { if (v != null) { const oi = idxMap[j]; signalFull[oi] = v; histFull[oi] = macdFull[oi] - v; } });
+  return { macd: macdFull, signal: signalFull, hist: histFull };
+}
+
+function findPivots(macd, strength) {
+  const n = macd.length, pivots = [];
+  for (let i = strength; i < n; i++) {
+    if (macd[i] == null) continue;
+    let isPeak = true, isValley = true;
+    for (let k = 1; k <= strength; k++) {
+      const l = macd[i - k];
+      if (l == null) { isPeak = false; isValley = false; break; }
+      if (l >= macd[i]) isPeak = false;
+      if (l <= macd[i]) isValley = false;
+    }
+    if (!isPeak && !isValley) continue;
+    const rightAvailable = (i + strength) < n;
+    for (let k = 1; k <= strength && rightAvailable; k++) {
+      const r = macd[i + k];
+      if (r == null) { isPeak = false; isValley = false; break; }
+      if (r >= macd[i]) isPeak = false;
+      if (r <= macd[i]) isValley = false;
+    }
+    if (isPeak) pivots.push({ idx: i, type: 'peak', value: macd[i], confirmed: rightAvailable });
+    if (isValley) pivots.push({ idx: i, type: 'valley', value: macd[i], confirmed: rightAvailable });
+  }
+  return pivots;
+}
+
+function histColorAt(hist, i) {
+  const v = hist[i];
+  if (v == null) return null;
+  const prev = hist[i - 1];
+  if (v >= 0) return ((prev == null) || (v >= prev)) ? 'up-strong' : 'up-fade';
+  return ((prev == null) || (v <= prev)) ? 'down-strong' : 'down-fade';
+}
+
+// 和网页版 maDetectDivergence 完全一致的规则，见 index_v3.html 里的详细注释
+function detectDivergence(series, closes, ema50, strength) {
+  const pivots = findPivots(series.macd, strength);
+  const peaks = pivots.filter(p => p.type === 'peak');
+  const valleys = pivots.filter(p => p.type === 'valley');
+  const lastIdx = closes.length - 1;
+
+  function zeroAxisOk(i1, i2, wantPositive) {
+    let streak = 0, maxStreak = 0;
+    for (let i = i1 + 1; i < i2; i++) {
+      const m = series.macd[i], s = series.signal[i];
+      const breach = wantPositive ? ((m != null && m < 0) || (s != null && s < 0)) : ((m != null && m > 0) || (s != null && s > 0));
+      if (breach) { streak++; maxStreak = Math.max(maxStreak, streak); } else streak = 0;
+    }
+    return maxStreak <= ZERO_AXIS_TOLERANCE_BARS;
+  }
+
+  function findPair(list, wantPositive, isBearish) {
+    const recent = list.slice(-6);
+    for (let j = recent.length - 1; j >= 1; j--) {
+      const p2 = recent[j];
+      const m2 = series.macd[p2.idx], s2 = series.signal[p2.idx];
+      if (wantPositive ? !(m2 > 0 && s2 > 0) : !(m2 < 0 && s2 < 0)) continue;
+      for (let i = j - 1; i >= 0; i--) {
+        const p1 = recent[i];
+        const m1 = series.macd[p1.idx], s1 = series.signal[p1.idx];
+        if (wantPositive ? !(m1 > 0 && s1 > 0) : !(m1 < 0 && s1 < 0)) continue;
+        if (!zeroAxisOk(p1.idx, p2.idx, wantPositive)) continue;
+        const priceOk = isBearish ? (closes[p2.idx] > closes[p1.idx]) : (closes[p2.idx] < closes[p1.idx]);
+        const macdOk = isBearish ? (m2 < m1) : (m2 > m1);
+        if (priceOk && macdOk) return { p1, p2 };
+      }
+    }
+    return null;
+  }
+
+  function classifyStrength(p2, wantPositive) {
+    const from = p2.idx, to = lastIdx;
+    let emaNear = false, zeroNear = false, histOk = false;
+    for (let i = from; i <= to; i++) {
+      const c = closes[i], e = ema50[i];
+      if (c != null && e != null && Math.abs(c - e) / e <= EMA_NEAR_PCT) emaNear = true;
+      const m = series.macd[i], s = series.signal[i];
+      if (m != null && s != null) {
+        const recentAbs = series.macd.slice(Math.max(0, i - 30), i + 1).filter(v => v != null).map(Math.abs);
+        const scale = recentAbs.length ? Math.max(...recentAbs, 1e-9) : 1e-9;
+        if (Math.abs(m) / scale <= ZERO_AXIS_NEAR_FRAC && Math.abs(s) / scale <= ZERO_AXIS_NEAR_FRAC) zeroNear = true;
+      }
+      const col = histColorAt(series.hist, i);
+      if (wantPositive && col === 'up-strong') histOk = true;
+      if (!wantPositive && col === 'down-strong') histOk = true;
+    }
+    return { strong: p2.confirmed && emaNear && zeroNear && histOk };
+  }
+
+  if (peaks.length >= 2) {
+    const pair = findPair(peaks, true, true);
+    if (pair) { const cls = classifyStrength(pair.p2, true); return { type: 'bearish', p2: pair.p2, confirmed: cls.strong }; }
+  }
+  if (valleys.length >= 2) {
+    const pair = findPair(valleys, false, false);
+    if (pair) { const cls = classifyStrength(pair.p2, false); return { type: 'bullish', p2: pair.p2, confirmed: cls.strong }; }
+  }
+  return null;
+}
+
+function aggregate(baseArr, minutes, baseIntervalSec) {
+  if (!baseArr || !baseArr.length) return [];
+  const bucketSec = minutes * 60;
+  const map = new Map();
+  for (const pt of baseArr) { const bStart = Math.floor(pt.t / bucketSec) * bucketSec; map.set(bStart, pt.c); }
+  const keys = [...map.keys()].sort((a, b) => a - b);
+  const lastBaseTime = baseArr[baseArr.length - 1].t;
+  const coverageEnd = lastBaseTime + baseIntervalSec;
+  return keys.map(k => ({ t: k, c: map.get(k), closed: (k + bucketSec) <= coverageEnd }));
+}
+
+async function fetchBase(query, key, spec) {
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(query)}&interval=${spec.interval}&outputsize=${spec.outputsize}&timezone=UTC&apikey=${encodeURIComponent(key)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status === 'error' || !data.values) throw new Error(data.message || `${query} ${spec.interval} 请求失败`);
+  return data.values.map(v => {
+    const s = v.datetime;
+    const t = Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10), s.length > 10 ? +s.slice(11, 13) : 0, s.length > 10 ? +s.slice(14, 16) : 0) / 1000;
+    return { t, c: parseFloat(v.close) };
+  }).reverse();
+}
+
+async function sendTelegram(text) {
+  if (!TG_TOKEN || !TG_CHAT) { console.log('未配置 Telegram，跳过发送。内容：\n' + text); return; }
+  const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: TG_CHAT, text }),
+  });
+  const data = await res.json();
+  if (!data.ok) console.error('Telegram 发送失败：', data);
+}
+
+function loadState() {
+  try { return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8')); }
+  catch { return { symbolIndex: 0, lastNotified: {} }; }
+}
+function saveState(state) {
+  fs.mkdirSync('data', { recursive: true });
+  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
+}
+
+async function main() {
+  const { mins, h, m } = nowInMYT();
+  const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  if (mins < WINDOW_START_MIN || mins >= WINDOW_END_MIN) {
+    console.log(`当前 ${timeStr} MYT，不在 14:30–22:00 推送窗口内，跳过本次扫描。`);
+    return;
+  }
+  if (!TD_KEY) { console.error('缺少 TWELVEDATA_API_KEY，无法扫描。'); process.exit(1); }
+
+  const state = loadState();
+  const sym = MA_SYMBOLS[state.symbolIndex % MA_SYMBOLS.length];
+  state.symbolIndex = (state.symbolIndex + 1) % MA_SYMBOLS.length;
+
+  console.log(`扫描 ${sym.label}（${timeStr} MYT）...`);
+  const baseData = {};
+  for (const key of Object.keys(MA_BASE_SPECS)) {
+    try { baseData[key] = await fetchBase(sym.query, TD_KEY, MA_BASE_SPECS[key]); }
+    catch (e) { console.error(`${sym.label} ${key} 拉取失败：${e.message}`); }
+    await new Promise(r => setTimeout(r, 400)); // 错峰，避免瞬间打满 Twelve Data 每分钟额度
+  }
+
+  const results = {};
+  for (const tf of MA_TIMEFRAMES) {
+    const base = baseData[tf.base];
+    if (!base) { results[tf.label] = null; continue; }
+    const buckets = aggregate(base, tf.minutes, MA_BASE_SPECS[tf.base].sec).filter(b => b.closed);
+    const minNeeded = Math.max(MACD_SLOW + MACD_SIGNAL, EMA_TREND_PERIOD) + PIVOT_STRENGTH * 2 + 6;
+    if (buckets.length < minNeeded) { results[tf.label] = null; continue; }
+    const closes = buckets.map(b => b.c);
+    const series = computeMacdSeries(closes);
+    if (!series) { results[tf.label] = null; continue; }
+    const ema50 = emaSeries(closes, EMA_TREND_PERIOD);
+    const div = detectDivergence(series, closes, ema50, PIVOT_STRENGTH);
+    results[tf.label] = div;
+  }
+
+  const tag = sessionTag(mins);
+  const toNotify = [];
+
+  // ---------- 单一时间级别的强势背离 ----------
+  MA_TIMEFRAMES.forEach(tf => {
+    const div = results[tf.label];
+    const key = `div:${sym.key}:${tf.label}`;
+    if (!div || !div.confirmed) { delete state.lastNotified[key]; return; }
+    if (state.lastNotified[key] !== div.type) {
+      state.lastNotified[key] = div.type;
+      toNotify.push({ mega: false, tf: tf.label, type: div.type });
+    }
+  });
+
+  // ---------- 主/次时间级别共振 ----------
+  const megaSeen = new Set();
+  MA_TIMEFRAMES.forEach(tf => {
+    const div = results[tf.label];
+    if (!div || !div.confirmed) return;
+    secondaryLabelsFor(tf.label).forEach(partnerLabel => {
+      const pDiv = results[partnerLabel];
+      if (!pDiv || !pDiv.confirmed || pDiv.type !== div.type) return;
+      const pairKey = [tf.label, partnerLabel].sort().join('+');
+      if (megaSeen.has(pairKey)) return;
+      megaSeen.add(pairKey);
+      const key = `mega:${sym.key}:${pairKey}`;
+      if (state.lastNotified[key] !== div.type) {
+        state.lastNotified[key] = div.type;
+        toNotify.push({ mega: true, tf1: tf.label, tf2: partnerLabel, type: div.type });
+      }
+    });
+  });
+  Object.keys(state.lastNotified).forEach(k => {
+    if (k.startsWith(`mega:${sym.key}:`) && !megaSeen.has(k.slice(`mega:${sym.key}:`.length))) delete state.lastNotified[k];
+  });
+
+  if (toNotify.length) {
+    const lines = toNotify.map(e => {
+      const label = e.type === 'bullish' ? '底背离(下跌结束)' : '顶背离(上涨结束)';
+      const t = tag ? tag + ' ' : '';
+      return e.mega
+        ? `⚠️ ${t}${sym.icon} ${sym.label} ${e.tf1} + ${e.tf2} 共振 ${label}`
+        : `${t}${sym.icon} ${sym.label} ${e.tf} ${label}`;
+    });
+    const text = `📊 背离扫描 · ${timeStr} MYT\n` + lines.join('\n');
+    await sendTelegram(text);
+    console.log('已发送：\n' + text);
+  } else {
+    console.log(`${sym.label} 本次没有信号变化，不发送。`);
+  }
+
+  saveState(state);
+}
+
+main().catch(e => { console.error(e); process.exit(1); });
