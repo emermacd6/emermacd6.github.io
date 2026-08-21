@@ -1,5 +1,5 @@
 {
-  "symbolIndex": 0,
+  "symbolIndex": 1,
   "lastNotified": {
     "div:XAUUSD:30M": "bearish",
     "div:EURUSD:7M": "bearish",
@@ -43,7 +43,7 @@
         "p2": {
           "idx": 1666,
           "type": "peak",
-          "value": 0.6444409067889865,
+          "value": 2.2685287336853435,
           "confirmed": false
         },
         "confirmed": false
@@ -51,20 +51,29 @@
       "5M": {
         "type": "bearish",
         "p2": {
-          "idx": 928,
+          "idx": 999,
           "type": "peak",
-          "value": 3.6660538780733987,
-          "confirmed": true
+          "value": 3.8466945864656736,
+          "confirmed": false
         },
         "confirmed": false
       },
-      "7M": null,
+      "7M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 714,
+          "type": "peak",
+          "value": 6.101110368230366,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
       "10M": null,
       "12M": null,
       "15M": {
         "type": "bearish",
         "p2": {
-          "idx": 1977,
+          "idx": 1975,
           "type": "peak",
           "value": 5.650545456779582,
           "confirmed": true
@@ -74,9 +83,9 @@
       "20M": {
         "type": "bearish",
         "p2": {
-          "idx": 216,
+          "idx": 215,
           "type": "peak",
-          "value": 5.662035263807411,
+          "value": 5.66203533233238,
           "confirmed": true
         },
         "confirmed": false
@@ -85,7 +94,7 @@
       "30M": {
         "type": "bearish",
         "p2": {
-          "idx": 1924,
+          "idx": 1923,
           "type": "peak",
           "value": 35.276376561567304,
           "confirmed": true
@@ -97,7 +106,7 @@
         "p2": {
           "idx": 124,
           "type": "peak",
-          "value": 19.53377774557339,
+          "value": 20.595046257891227,
           "confirmed": false
         },
         "confirmed": false
@@ -107,7 +116,7 @@
         "p2": {
           "idx": 1999,
           "type": "peak",
-          "value": 20.675466787090954,
+          "value": 21.714463622184667,
           "confirmed": false
         },
         "confirmed": false
@@ -117,7 +126,7 @@
         "p2": {
           "idx": 1999,
           "type": "peak",
-          "value": 23.95185731137917,
+          "value": 24.422232582033757,
           "confirmed": false
         },
         "confirmed": false
