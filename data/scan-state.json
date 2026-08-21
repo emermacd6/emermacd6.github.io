@@ -1,6 +1,9 @@
 {
-  "symbolIndex": 1,
+  "symbolIndex": 2,
   "lastNotified": {
-    "div:XAUUSD:30M": "bearish"
+    "div:XAUUSD:30M": "bearish",
+    "div:EURUSD:7M": "bearish",
+    "div:EURUSD:2H": "bearish",
+    "div:EURUSD:6H": "bearish"
   }
 }
