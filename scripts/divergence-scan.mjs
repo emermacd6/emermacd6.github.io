@@ -4,9 +4,15 @@
 // 这是把 index_v3.html 里"背离扫描 DIVERGENCE SCAN"模块的判断逻辑搬到 Node.js，
 // 让 GitHub Actions 按固定时间表自动跑，而不依赖你浏览器网页开着。
 //
-// 每次运行只扫 1 个货币（round-robin 轮流，7 个请求），配合 Twelve Data 免费额度
-// （8 次/分钟、800 次/天）。symbolIndex / 上次已通知的信号 保存在 data/scan-state.json
-// 里，每次运行结束后由 workflow 提交回仓库，下次运行读取，这样才知道"信号有没有变化"。
+// 平时（14:30 之后）每次运行只扫 1 个货币（round-robin 轮流，7 个请求），
+// 配合 Twelve Data 免费额度（8 次/分钟、800 次/天）。
+// 但每天窗口刚打开的第一次运行（14:30 那一下），会把 8 个货币一次性全部扫完，
+// 这样"开盘总览"里的数据才是真正 14:30 这一刻的，而不是提前攒的旧数据——
+// 代价是这一次运行会跑得比较久（受 Twelve Data 每分钟请求限制，大约 7–8 分钟），
+// 之后每次只扫 1 个货币，就恢复很快。
+//
+// symbolIndex / 上次已通知的信号 保存在 data/scan-state.json 里，每次运行结束后
+// 由 workflow 提交回仓库，下次运行读取，这样才知道"信号有没有变化"。
 //
 // 环境变量（在 GitHub 仓库 Settings → Secrets and variables → Actions 里设置）：
 //   TWELVEDATA_API_KEY   Twelve Data 的 API Key（复用你网页上已经在用的那把）
@@ -22,9 +28,15 @@ const TD_KEY = process.env.TWELVEDATA_API_KEY;
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
 
-// ---------- 推送时间窗口：马来西亚时间 14:30–22:00，其余时间只扫描不推送（也可以直接跳过扫描省额度）----------
-const WINDOW_START_MIN = 14 * 60 + 30; // 14:30
+// ---------- 时间窗口：马来西亚时间 14:30–22:00 ----------
+const NOTIFY_START_MIN = 14 * 60 + 30; // 14:30（当天第一次到这个点：全量扫 8 个货币 + 发总览）
 const WINDOW_END_MIN = 22 * 60;        // 22:00
+
+// 全量扫描时，每个 Twelve Data 请求之间的间隔——8 个货币 × 7 个周期 = 56 个请求，
+// 免费额度是 8 次/分钟，用 8 秒间隔（约 7.5 次/分钟）留一点安全余量，全部跑完约 7.5 分钟。
+const FULL_SCAN_DELAY_MS = 8000;
+// 平时 round-robin 单个货币只有 7 个请求，远低于 8 次/分钟，用短间隔就够。
+const SINGLE_SCAN_DELAY_MS = 400;
 
 const MACD_FAST = 12, MACD_SLOW = 26, MACD_SIGNAL = 9;
 const EMA_TREND_PERIOD = 50;
@@ -255,36 +267,31 @@ async function sendTelegram(text) {
   if (!data.ok) console.error('Telegram 发送失败：', data);
 }
 
+function todayInMYT() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kuala_Lumpur' }).format(new Date()); // "YYYY-MM-DD"
+}
+
 function loadState() {
-  try { return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8')); }
-  catch { return { symbolIndex: 0, lastNotified: {} }; }
+  try {
+    const s = JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));
+    if (!s.currentSignals) s.currentSignals = {};
+    if (!s.snapshotSentDate) s.snapshotSentDate = '';
+    return s;
+  } catch { return { symbolIndex: 0, lastNotified: {}, currentSignals: {}, snapshotSentDate: '' }; }
 }
 function saveState(state) {
   fs.mkdirSync('data', { recursive: true });
   fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
 }
 
-async function main() {
-  const { mins, h, m } = nowInMYT();
-  const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  if (mins < WINDOW_START_MIN || mins >= WINDOW_END_MIN) {
-    console.log(`当前 ${timeStr} MYT，不在 14:30–22:00 推送窗口内，跳过本次扫描。`);
-    return;
-  }
-  if (!TD_KEY) { console.error('缺少 TWELVEDATA_API_KEY，无法扫描。'); process.exit(1); }
-
-  const state = loadState();
-  const sym = MA_SYMBOLS[state.symbolIndex % MA_SYMBOLS.length];
-  state.symbolIndex = (state.symbolIndex + 1) % MA_SYMBOLS.length;
-
-  console.log(`扫描 ${sym.label}（${timeStr} MYT）...`);
+// 扫描一个货币的 7 个原生周期 + 17 个 timeframe 的背离判断，delayMs 控制请求间隔
+async function scanOneSymbol(sym, delayMs) {
   const baseData = {};
   for (const key of Object.keys(MA_BASE_SPECS)) {
     try { baseData[key] = await fetchBase(sym.query, TD_KEY, MA_BASE_SPECS[key]); }
     catch (e) { console.error(`${sym.label} ${key} 拉取失败：${e.message}`); }
-    await new Promise(r => setTimeout(r, 400)); // 错峰，避免瞬间打满 Twelve Data 每分钟额度
+    await new Promise(r => setTimeout(r, delayMs));
   }
-
   const results = {};
   for (const tf of MA_TIMEFRAMES) {
     const base = baseData[tf.base];
@@ -296,14 +303,84 @@ async function main() {
     const series = computeMacdSeries(closes);
     if (!series) { results[tf.label] = null; continue; }
     const ema50 = emaSeries(closes, EMA_TREND_PERIOD);
-    const div = detectDivergence(series, closes, ema50, PIVOT_STRENGTH);
-    results[tf.label] = div;
+    results[tf.label] = detectDivergence(series, closes, ema50, PIVOT_STRENGTH);
+  }
+  return results;
+}
+
+// 找出某个货币当前"确认(CONFIRMED)"的单一时间级别信号 + 主/次共振
+function collectSignals(symResults) {
+  const singles = [], megas = [];
+  if (!symResults) return { singles, megas };
+  const megaSeen = new Set();
+  MA_TIMEFRAMES.forEach(tf => {
+    const div = symResults[tf.label];
+    if (!div || !div.confirmed) return;
+    singles.push({ tf: tf.label, type: div.type });
+    secondaryLabelsFor(tf.label).forEach(partnerLabel => {
+      const pDiv = symResults[partnerLabel];
+      if (!pDiv || !pDiv.confirmed || pDiv.type !== div.type) return;
+      const pairKey = [tf.label, partnerLabel].sort().join('+');
+      if (megaSeen.has(pairKey)) return;
+      megaSeen.add(pairKey);
+      megas.push({ tf1: tf.label, tf2: partnerLabel, type: div.type });
+    });
+  });
+  return { singles, megas };
+}
+
+async function main() {
+  const { mins, h, m } = nowInMYT();
+  const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  if (mins < NOTIFY_START_MIN || mins >= WINDOW_END_MIN) {
+    console.log(`当前 ${timeStr} MYT，不在 14:30–22:00 窗口内，跳过本次运行。`);
+    return;
+  }
+  if (!TD_KEY) { console.error('缺少 TWELVEDATA_API_KEY，无法扫描。'); process.exit(1); }
+
+  const state = loadState();
+  const today = todayInMYT();
+  const tag = sessionTag(mins);
+
+  // ---------- 今天第一次进入 14:30–22:00 窗口：8 个货币一次性全部扫完，发"开盘总览"----------
+  if (state.snapshotSentDate !== today) {
+    console.log(`今天第一次运行（${timeStr} MYT），全量扫描 8 个货币（大约需要 7–8 分钟）...`);
+    const overviewLines = [];
+    for (const s of MA_SYMBOLS) {
+      console.log(`扫描 ${s.label} ...`);
+      const results = await scanOneSymbol(s, FULL_SCAN_DELAY_MS);
+      state.currentSignals[s.key] = results;
+      const { singles, megas } = collectSignals(results);
+      singles.forEach(e => {
+        state.lastNotified[`div:${s.key}:${e.tf}`] = e.type; // 标记已通知，避免之后 round-robin 重复发一次
+        const label = e.type === 'bullish' ? '底背离(下跌结束)' : '顶背离(上涨结束)';
+        overviewLines.push(`${s.icon} ${s.label} ${e.tf} ${label}`);
+      });
+      megas.forEach(e => {
+        state.lastNotified[`mega:${s.key}:${[e.tf1, e.tf2].sort().join('+')}`] = e.type;
+        const label = e.type === 'bullish' ? '底背离(下跌结束)' : '顶背离(上涨结束)';
+        overviewLines.push(`⚠️ ${s.icon} ${s.label} ${e.tf1} + ${e.tf2} 共振 ${label}`);
+      });
+    }
+    const overviewText = overviewLines.length
+      ? `📊 背离扫描 · ${timeStr} MYT 开盘总览\n` + overviewLines.join('\n')
+      : `📊 背离扫描 · ${timeStr} MYT 开盘总览\n目前 8 个货币都没有强势信号。`;
+    await sendTelegram(overviewText);
+    console.log('已发送开盘总览：\n' + overviewText);
+    state.snapshotSentDate = today;
+    state.symbolIndex = 0; // 全部刚扫过，之后 round-robin 从头开始轮
+    saveState(state);
+    return;
   }
 
-  const tag = sessionTag(mins);
-  const toNotify = [];
+  // ---------- 总览已经发过：恢复老规矩，每次只扫 1 个货币，只有信号变化才发 ----------
+  const sym = MA_SYMBOLS[state.symbolIndex % MA_SYMBOLS.length];
+  state.symbolIndex = (state.symbolIndex + 1) % MA_SYMBOLS.length;
+  console.log(`扫描 ${sym.label}（${timeStr} MYT）...`);
+  const results = await scanOneSymbol(sym, SINGLE_SCAN_DELAY_MS);
+  state.currentSignals[sym.key] = results;
 
-  // ---------- 单一时间级别的强势背离 ----------
+  const toNotify = [];
   MA_TIMEFRAMES.forEach(tf => {
     const div = results[tf.label];
     const key = `div:${sym.key}:${tf.label}`;
@@ -313,8 +390,6 @@ async function main() {
       toNotify.push({ mega: false, tf: tf.label, type: div.type });
     }
   });
-
-  // ---------- 主/次时间级别共振 ----------
   const megaSeen = new Set();
   MA_TIMEFRAMES.forEach(tf => {
     const div = results[tf.label];
@@ -355,3 +430,4 @@ async function main() {
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
+
