@@ -492,186 +492,60 @@
   .about-card p:last-child{margin-bottom:0;}
   .about-card .about-highlight{color:var(--text);font-weight:600;}
 
-  /* ---------- MACD 多周期扫描 ---------- */
-  .macd-key-card{
-    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:24px 26px;max-width:480px;
-  }
-  .macd-key-card h3{margin:0 0 8px;font-family:var(--disp);font-size:18px;font-weight:700;color:var(--accent);}
-  .macd-key-card .sub{margin:0 0 16px;color:var(--text-dim);font-size:13px;line-height:1.7;}
-  .macd-key-card input{
-    width:100%;background:var(--bg-raise);border:1px solid var(--line);border-radius:8px;
-    padding:11px 13px;color:var(--text);font-family:var(--mono);font-size:13.5px;margin-bottom:12px;
-  }
-  .macd-key-card input:focus{outline:none;border-color:var(--accent);}
-  .macd-key-hint{margin:14px 0 0 !important;font-size:11px !important;color:var(--text-faint) !important;line-height:1.7 !important;}
-
-  .macd-scan-head{
-    display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;
-    margin-bottom:18px;
-  }
-  .macd-scan-head .sub{color:var(--text-dim);font-size:13px;}
-  .macd-scan-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  /* ---------- 背离扫描共用样式（原属 MACD 多周期扫描，现为背离扫描沿用） ---------- */
   .macd-updated{font-family:var(--mono);font-size:11px;color:var(--text-faint);}
-  .macd-error{color:var(--short);font-size:12.5px;margin-bottom:14px;}
-  .macd-error:empty{display:none;}
-
-  .macd-sym-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-  .macd-sym-btn{
-    background:var(--bg-chip);border:1px solid var(--line);color:var(--text-dim);
-    font-family:var(--mono);font-size:12.5px;font-weight:700;padding:8px 14px;
-    border-radius:20px;cursor:pointer;transition:.15s ease;
-  }
-  .macd-sym-btn:hover{border-color:var(--text-dim);color:var(--text);}
-  .macd-sym-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
-  .macd-sym-custom-btn{border-style:dashed;}
-  .macd-sym-custom{
-    display:flex;gap:8px;margin-bottom:16px;max-width:420px;
-  }
-  .macd-sym-custom input{
-    flex:1;background:var(--bg-raise);border:1px solid var(--line);border-radius:8px;
-    padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;
-  }
-  .macd-sym-custom input:focus{outline:none;border-color:var(--accent);}
-
-  .macd-group{margin-bottom:22px;}
-  .macd-group-title{
-    font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-faint);
-    text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;
-  }
-  .macd-badge-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;
-  }
-  .macd-badge{
-    background:var(--bg-card);border:1px solid var(--line);border-radius:10px;
-    padding:11px 8px;text-align:center;transition:.2s ease;
-  }
-  .macd-badge-tf{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);letter-spacing:.3px;}
-  .macd-badge-signal{font-family:var(--disp);font-size:14.5px;font-weight:700;margin:5px 0 2px;color:var(--text-faint);}
-  .macd-badge-val{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);line-height:1.5;}
-  .macd-badge-tag{
-    display:inline-block;margin-top:5px;font-family:var(--mono);font-size:9.5px;font-weight:700;
-    letter-spacing:.4px;padding:2px 6px;border-radius:5px;
-  }
-  .macd-badge.long{border-color:var(--long);background:var(--long-dim);}
-  .macd-badge.long .macd-badge-signal{color:var(--long);}
-  .macd-badge.short{border-color:var(--short);background:var(--short-dim);}
-  .macd-badge.short .macd-badge-signal{color:var(--short);}
-  .macd-badge.pending{opacity:.55;}
-  /* 确认信号（零轴同向 + Histogram 同向）：加粗边框 + 发光，一眼区分"已确认"和"仅过零轴" */
-  .macd-badge.confirmed{box-shadow:0 0 0 1px currentColor inset, 0 0 14px -2px currentColor;}
-  .macd-badge.long.confirmed{border-color:var(--long);color:var(--long);}
-  .macd-badge.short.confirmed{border-color:var(--short);color:var(--short);}
-  .macd-badge.confirmed .macd-badge-tag{background:var(--long-dim);color:var(--long);}
-  .macd-badge.short.confirmed .macd-badge-tag{background:var(--short-dim);color:var(--short);}
-  .macd-badge.long:not(.confirmed) .macd-badge-tag{background:var(--bg-chip);color:var(--text-faint);}
-  .macd-badge.short:not(.confirmed) .macd-badge-tag{background:var(--bg-chip);color:var(--text-faint);}
-  .macd-sym-note{
-    font-size:11.5px;color:var(--text-faint);margin:-6px 0 14px;line-height:1.6;
-  }
-  .macd-tz-row{
-    display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;
-    margin:-4px 0 14px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:9px;background:var(--bg-raise);
-  }
-  .macd-tz-label{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-dim);flex-shrink:0;}
   .macd-tz-select{
     background:var(--bg-chip);border:1px solid var(--line);color:var(--text);
     padding:6px 9px;border-radius:7px;font-family:var(--sans);font-size:12.5px;flex-shrink:0;
   }
   .macd-tz-select:focus{outline:none;border-color:var(--accent);}
   .macd-tz-hint{font-size:11px;color:var(--text-faint);line-height:1.6;flex:1;min-width:220px;}
-  @media (max-width:560px){
-    .macd-badge-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));}
-  }
 
-  /* ---------- 检查清单页：MACD 扫描摘要（分钟/小时显眼，日线做小字） ---------- */
-  .macd-sum-mount{display:flex;flex-direction:column;gap:16px;}
-  .c-long{color:var(--long);}
-  .c-short{color:var(--short);}
-  .c-pending{color:var(--text-faint);font-weight:400;}
-
-  /* 工具条：货币品种（圆环强调）+ 更新时间 + 刷新按钮 */
-  .macd-sum-toolbar{
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
-    margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed var(--line-soft);
-  }
-  .macd-sum-symbol-badge{display:flex;align-items:center;gap:10px;}
-  .macd-sum-symbol-badge>span:last-child{font-family:var(--disp);font-weight:800;font-size:16px;letter-spacing:.3px;}
-  .macd-sum-symbol-ring{
-    width:36px;height:36px;border-radius:50%;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-size:17px;
-    border:2px solid var(--accent);background:var(--accent-dim);color:var(--accent);
-    box-shadow:0 0 0 4px rgba(39,221,223,.10);
-  }
-  .macd-sum-toolbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .macd-sum-refresh-btn{padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12.5px;white-space:nowrap;}
-
-  .macd-sum-row-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px;flex-wrap:wrap;}
-  .macd-sum-name{font-family:var(--disp);font-weight:700;font-size:14px;}
-  .macd-sum-count{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);}
-  .macd-sum-bar{height:7px;border-radius:4px;background:var(--short);overflow:hidden;margin-bottom:10px;}
-  .macd-sum-bar-fill{height:100%;background:var(--long);border-radius:4px 0 0 4px;transition:width .3s ease;}
-  .macd-sum-chips{display:flex;flex-wrap:wrap;gap:6px;}
-  .macd-sum-chip{
-    font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;
-    border:1px solid var(--line);color:var(--text-faint);background:var(--bg-chip);
-  }
-  .macd-sum-chip.long{border-color:var(--long);color:var(--long);background:var(--long-dim);}
-  .macd-sum-chip.short{border-color:var(--short);color:var(--short);background:var(--short-dim);}
-  .macd-sum-chip.confirmed{box-shadow:0 0 0 1px currentColor inset;font-weight:800;}
-  .macd-sum-chip.pending{opacity:.5;}
-
-  /* 确认反弹 / 确认反抽 / 仅过零轴 汇总数据行（分钟、小时级别显示） */
-  .macd-sum-breakdown{
-    display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;
-    font-family:var(--mono);font-size:11px;color:var(--text-faint);
-  }
-  .macd-sum-breakdown b{font-weight:800;}
-  .macd-sum-breakdown .grp{display:inline-flex;align-items:center;gap:5px;}
-  .macd-sum-breakdown .grp.lg b{color:var(--long);}
-  .macd-sum-breakdown .grp.sh b{color:var(--short);}
-  .macd-sum-breakdown .tag-confirmed{color:var(--text-dim);}
-  .macd-sum-breakdown .tag-zero{color:var(--text-faint);}
-
-  .macd-sum-small{
-    font-size:12px;color:var(--text-faint);padding-top:10px;border-top:1px dashed var(--line-soft);
-  }
-  .macd-sum-small b{font-family:var(--mono);}
-
-  /* 日线级别：改成能量条样式，但整体尺寸比分钟/小时级别更收敛（不抢主视觉） */
-  .macd-sum-row.compact{padding-top:10px;border-top:1px dashed var(--line-soft);}
-  .macd-sum-row.compact .macd-sum-name{font-size:12.5px;color:var(--text-dim);font-weight:600;}
-  .macd-sum-row.compact .macd-sum-count{font-size:11px;}
-  .macd-sum-row.compact .macd-sum-bar{height:4px;margin-bottom:8px;}
-  .macd-sum-row.compact .macd-sum-chip{font-size:9.5px;padding:3px 6px;}
-
-  /* ---------- MACD ANALYSIS (new, additive module) ---------- */
+  /* ---------- MACD ANALYSIS（背离扫描模块） ---------- */
   .ma-section{margin-bottom:26px;padding-bottom:20px;border-bottom:1px dashed var(--line-soft);}
   .ma-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
   .ma-header h2{margin:0;font-family:var(--disp);font-size:20px;font-weight:800;letter-spacing:.3px;color:var(--accent);}
   .ma-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .ma-symbol{font-family:var(--mono);font-size:12px;color:var(--text-dim);}
+  .ma-intro{font-size:12.5px;color:var(--text-dim);line-height:1.7;margin:-4px 0 14px;}
   .ma-settings-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .ma-settings-label{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-dim);flex-shrink:0;}
   .ma-error{color:var(--short);font-size:12.5px;margin-bottom:12px;}
   .ma-error:empty{display:none;}
-  .ma-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+  .ma-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px;}
   .ma-card{
     background:var(--bg-chip);border:1px solid var(--line);border-radius:10px;padding:12px 12px 10px;cursor:pointer;
     transition:border-color .15s, box-shadow .15s;
   }
   .ma-card:hover{border-color:var(--text-dim);}
   .ma-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
-  .ma-card-tf{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);letter-spacing:.4px;margin-bottom:6px;}
-  .ma-card-status{font-family:var(--disp);font-weight:700;font-size:13px;margin-bottom:6px;line-height:1.4;}
+  .ma-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;}
+  .ma-card-sym{font-family:var(--disp);font-weight:800;font-size:12.5px;letter-spacing:.2px;}
+  .ma-card-tf{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.4px;}
+  .ma-card-status{font-family:var(--disp);font-weight:700;font-size:12.5px;margin-bottom:6px;line-height:1.4;}
   .ma-card-meta{font-family:var(--mono);font-size:10px;color:var(--text-faint);line-height:1.6;}
   .ma-card.long{border-color:var(--long);} .ma-card.long .ma-card-status{color:var(--long);}
   .ma-card.short{border-color:var(--short);} .ma-card.short .ma-card-status{color:var(--short);}
-  .ma-card.watch{border-color:#e7c34a;} .ma-card.watch .ma-card-status{color:#e7c34a;}
-  .ma-card.waiting{opacity:.55;}
+  .ma-card.weak{opacity:.7;border-style:dashed;}
+  .ma-tag-strong{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:800;letter-spacing:.3px;background:var(--long-dim);color:var(--long);}
+  .ma-card.short .ma-tag-strong{background:var(--short-dim);color:var(--short);}
+  .ma-tag-weak{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:800;letter-spacing:.3px;background:var(--bg-raise);color:var(--text-faint);border:1px dashed var(--line);}
   .ma-card.flash{animation:maFlash 1.4s ease 2;}
   @keyframes maFlash{0%,100%{box-shadow:none;}50%{box-shadow:0 0 0 2px currentColor, 0 0 18px -2px currentColor;}}
   .ma-div-note{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--text-dim);}
+  .ma-chart-legend{display:flex;gap:14px;margin-top:6px;font-size:10.5px;color:var(--text-faint);font-family:var(--mono);}
+  .ma-chart-legend i{display:inline-block;width:10px;height:3px;margin-right:4px;vertical-align:middle;border-radius:2px;}
+  .ma-anno-dot{fill:rgba(157,123,255,.25);stroke:#9d7bff;stroke-width:1.4;cursor:pointer;}
+  .ma-anno-hint{font-size:11.5px;color:var(--text-faint);line-height:1.6;margin:0 0 12px;}
+  .ma-anno-empty{font-size:12px;color:var(--text-faint);padding:8px 0;}
+  .ma-anno-item{padding:10px 0;border-bottom:1px dashed var(--line-soft);}
+  .ma-anno-item:last-child{border-bottom:none;}
+  .ma-anno-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .ma-anno-item-head span{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+  .ma-anno-del{background:none;border:none;color:var(--short);font-size:11px;cursor:pointer;padding:2px 6px;}
+  .ma-anno-del:hover{text-decoration:underline;}
+  .ma-anno-item-note{font-size:12.5px;color:var(--text);line-height:1.6;white-space:pre-wrap;}
+
   .ma-hist-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line-soft);font-size:11.5px;}
   .ma-hist-row:last-child{border-bottom:none;}
   .ma-hist-row.ma-hist-mega{background:linear-gradient(90deg, rgba(231,195,74,.14), transparent);border-bottom-color:#e7c34a;border-radius:8px;padding-left:8px;}
@@ -729,13 +603,17 @@
     display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;margin:0 6px 6px 0;
     border:1.5px solid #e7c34a;background:rgba(231,195,74,.12);font-family:var(--disp);font-weight:700;font-size:12.5px;
   }
-  .ma-simple-grid{display:flex;flex-wrap:wrap;gap:7px;}
+  .ma-simple-grid{display:flex;flex-direction:column;gap:8px;}
+  .ma-simple-symrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed var(--line-soft);}
+  .ma-simple-symrow:last-child{border-bottom:none;}
+  .ma-simple-symname{font-family:var(--disp);font-weight:700;font-size:11.5px;min-width:76px;color:var(--text-dim);}
+  .ma-simple-symdots{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
   .ma-simple-chip{
-    display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px;padding:7px 8px;border-radius:8px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;min-width:44px;padding:5px 6px;border-radius:7px;
     background:var(--bg-chip);border:1px solid var(--line);font-family:var(--mono);
   }
-  .ma-simple-chip .tf{font-size:10px;color:var(--text-dim);}
-  .ma-simple-chip .dot{font-size:14px;line-height:1;}
+  .ma-simple-chip .tf{font-size:9px;color:var(--text-dim);}
+  .ma-simple-chip .dot{font-size:12px;line-height:1;}
   .ma-simple-chip.long{border-color:var(--long);}
   .ma-simple-chip.short{border-color:var(--short);}
   .ma-simple-chip.waiting{opacity:.4;}
@@ -1499,7 +1377,6 @@
       <button class="tab-btn" data-view="divscan"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> 背离扫描</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
-      <button class="tab-btn" data-view="macd"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> MACD 扫描</button>
       <button class="tab-btn" data-view="wall"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 留言墙</button>
       <button class="tab-btn" data-view="about"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5"></path><path d="M12 8h.01"></path></svg> 介绍</button>
       <span class="tabs-scroll-hint" id="tabs-scroll-hint">›</span>
@@ -1541,27 +1418,6 @@
 
     <div class="layout">
       <div class="cards-col">
-
-        <!-- MACD 多周期扫描摘要：分钟/小时级别显眼，日线级别做成小字（走得慢，仅供参考） -->
-        <div class="card" id="card-macd-summary">
-          <button class="card-header" data-toggle-card="card-macd-summary">
-            <h3 class="sub-h3">MACD 多周期扫描</h3>
-            <span class="chevron">▾</span>
-          </button>
-          <div class="card-body">
-            <div class="macd-sum-toolbar">
-              <div class="macd-sum-symbol-badge">
-                <span class="macd-sum-symbol-ring"><span id="macd-sum-symbol-icon">—</span></span>
-                <span id="macd-sum-symbol">—</span>
-              </div>
-              <div class="macd-sum-toolbar-actions">
-                <span class="macd-updated" id="macd-sum-updated">尚未更新</span>
-                <button type="button" class="btn-cancel macd-sum-refresh-btn" id="macd-sum-refresh-btn">⟳ 刷新</button>
-              </div>
-            </div>
-            <div id="macd-checklist-mount" class="macd-sum-mount"><div class="empty-state" style="padding:20px 0;">加载中...</div></div>
-          </div>
-        </div>
 
         <!-- entry factors -->
         <div class="card" id="card-entry">
@@ -1720,13 +1576,14 @@
       <div class="ma-header">
         <h2>背离扫描 DIVERGENCE SCAN</h2>
         <div class="ma-header-right">
-          <span class="ma-symbol" id="ma-symbol-label">—</span>
           <span class="macd-updated" id="ma-updated">尚未更新</span>
           <button type="button" class="btn-cancel" id="ma-refresh-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>
           <button type="button" class="btn-cancel" id="ma-notif-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">🔔 开启提醒</button>
           <button type="button" class="btn-cancel" id="ma-mute-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">🔊 声音开启</button>
+          <button type="button" class="btn-cancel" id="ma-session-only-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⏰ 只在 14:30–24:00 提醒</button>
         </div>
       </div>
+      <p class="ma-intro">背景轮流扫描 8 个货币（XAUUSD / EURUSD / GBPJPY / GBPCAD / GBPCHF / AUDUSD / AUDCHF / NZDUSD），不用手动切换——下面只列出目前有信号（强势 CONFIRMED 或潜在 POTENTIAL）的货币和时间级别，没信号的不显示。点一张卡片可以在下面看它的图表，并在图上点一下给某根K线打标注/写备注反馈给我。</p>
       <div class="ma-settings-row">
         <span class="ma-settings-label">PIVOT STRENGTH</span>
         <select id="ma-pivot-select" class="macd-tz-select">
@@ -1743,20 +1600,27 @@
         <input type="text" id="ma-tg-chatid-input" class="ma-tg-input" placeholder="Chat ID（找 @userinfobot 获取）" autocomplete="off">
         <button type="button" class="btn-save" id="ma-tg-save-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">保存</button>
         <button type="button" class="btn-cancel" id="ma-tg-test-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">发送测试消息</button>
-        <span class="macd-tz-hint">配置后，同一个 timeframe 出现新的 Confirmed Divergence（或某个配对进入主次共振）时会发一条 Telegram 消息，内容只有"哪个周期 + 底背离/顶背离"，干净不刷屏；同一个信号只要没变化就不会重复发。Token 只存在这台设备浏览器本地，不会上传到其他服务器。点 🔊 可以整体静音（不发声音/浏览器通知/Telegram，但卡片高亮和历史记录照常）。</span>
+        <span class="macd-tz-hint">配置后，某个货币+周期出现新的强势(CONFIRMED)背离（或某个配对进入主次共振）时会发一条 Telegram 消息，内容是"货币 + 哪个周期 + 底背离/顶背离"，干净不刷屏；潜在(POTENTIAL)背离不会推送，只会出现在下面的列表里。<b>重要限制：这只能在你这台设备的浏览器网页开着（哪怕是后台标签页）时才会工作</b>——如果整个浏览器关掉、或手机太久没开被系统杀掉网页进程，就不会再收到消息了。纯静态网页做不到"网站完全没开也能推送"，那需要另外部署一个服务器/云端定时任务才行，这个还没做。Token 只存在这台设备浏览器本地，不会上传到其他服务器。点 🔊 可以整体静音（不发声音/浏览器通知/Telegram，但卡片高亮和历史记录照常）；点 ⏰ 可以切换成"全天都提醒"（默认只在马来西亚时间 14:30–24:00 的伦敦/纽约盘时段推送，其余时间只记录不打扰）。</span>
       </div>
       <div class="ma-error" id="ma-error"></div>
       <div class="ma-mega-banner" id="ma-mega-banner"></div>
       <div class="ma-grid" id="ma-grid-mount"></div>
       <div class="card" id="ma-chart-card">
         <div class="card-header">
-          <h3 class="sub-h3">MACD Chart — <span id="ma-chart-tf-label">1H</span></h3>
+          <h3 class="sub-h3">Chart — <span id="ma-chart-tf-label">XAUUSD · 1H</span></h3>
           <div class="ma-chart-sub" id="ma-chart-sub"></div>
         </div>
         <div class="card-body"><div id="ma-chart-mount"><div class="empty-state">加载中...</div></div></div>
       </div>
+      <div class="card" id="ma-anno-card">
+        <div class="card-header"><h3 class="sub-h3">背离标注 / 反馈记录</h3></div>
+        <div class="card-body">
+          <p class="ma-anno-hint">在上面图表上点一下，就能给当前选中的货币+周期的某根K线打一个标注（比如"这里其实没有背离，系统判断错了，MACD两条线已经跌破零轴"）。这些记录会一直留着，我下次分析这个货币这个周期时会参考，你也可以在这里直接看到、删除。</p>
+          <div id="ma-anno-list-mount"></div>
+        </div>
+      </div>
       <div class="card" id="ma-history-card">
-        <div class="card-header"><h3 class="sub-h3">MACD Signal History</h3></div>
+        <div class="card-header"><h3 class="sub-h3">Signal History</h3></div>
         <div class="card-body">
           <div id="ma-history-mount"><div class="empty-state">暂无信号记录</div></div>
           <button type="button" class="ma-history-more" id="ma-history-more-btn" style="display:none;">展开更多 ▾</button>
@@ -1792,11 +1656,6 @@
       <p>每一笔交易都代表一次判断，每一次执行都会影响未来的成长。</p>
       <p class="about-highlight">认真对待每一笔交易，尊重市场，遵守计划，持续进步。</p>
     </div>
-  </section>
-
-  <!-- ================= MACD 多周期扫描 VIEW ================= -->
-  <section class="view" id="view-macd">
-    <div id="macd-scan-mount"></div>
   </section>
 
   <!-- ================= 留言墙 VIEW ================= -->
@@ -2323,7 +2182,6 @@
       document.getElementById('view-'+btn.dataset.view).classList.add('active');
       if(btn.dataset.view==='history') renderHistory();
       if(btn.dataset.view==='dashboard') renderDashboard();
-      if(btn.dataset.view==='macd' && window.initMacdScanner) window.initMacdScanner();
       if(btn.dataset.view==='wall') renderWall();
       if(btn.dataset.view==='liquidity' && window.initLiquidity) window.initLiquidity();
     });
@@ -3078,38 +2936,19 @@
 
     function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
-    // 品种预设：queries 是一串按优先级排列的候选代码，第一个在 Twelve Data 查不到数据时
-    // 会自动往下试，试到能用的为止，并记住结果（见 resolveQuery）。
-    // 主要货币对（Emer 指定的 7 个主要背离扫描标的）放最前面，XAUUSD 排在它们下面，
-    // 其余原有品种（加密/指数）保留在最后，不影响原本的使用习惯。
-    const SYMBOL_PRESETS = [
-      {key:'AUDCHF', label:'AUDCHF', icon:'💱', queries:['AUD/CHF']},
-      {key:'AUDUSD', label:'AUDUSD', icon:'💱', queries:['AUD/USD']},
-      {key:'NZDUSD', label:'NZDUSD', icon:'💱', queries:['NZD/USD']},
-      {key:'GBPJPY', label:'GBPJPY', icon:'💱', queries:['GBP/JPY']},
-      {key:'GBPCAD', label:'GBPCAD', icon:'💱', queries:['GBP/CAD']},
-      {key:'GBPCHF', label:'GBPCHF', icon:'💱', queries:['GBP/CHF']},
-      {key:'EURUSD', label:'EURUSD', icon:'💱', queries:['EUR/USD']},
+    // 背离扫描要盯的货币清单：queries 是按优先级排列的候选代码，第一个在 Twelve Data
+    // 查不到数据时会自动往下试，试到能用的为止，并记住结果（见 resolveQuery）。
+    // 这份清单会被"背离扫描"以背景轮流扫描的方式全部覆盖（不用手动切换品种）。
+    const MA_SYMBOLS = [
       {key:'XAUUSD', label:'XAUUSD', icon:'🥇', queries:['XAU/USD']},
-      {key:'BTCUSD', label:'BTCUSD', icon:'₿',  queries:['BTC/USD']},
-      {key:'ETHUSD', label:'ETHUSD', icon:'Ξ',  queries:['ETH/USD']},
-      {key:'DJ30',   label:'DJ30',   icon:'🇺🇸', queries:['DJI','US30/USD','US30','DIA']},
-      {key:'UK100',  label:'UK100',  icon:'🇬🇧', queries:['UKX','UK100/GBP','GB100/GBP','FTSE','EWU']},
+      {key:'EURUSD', label:'EURUSD', icon:'💶', queries:['EUR/USD']},
+      {key:'GBPJPY', label:'GBPJPY', icon:'💷', queries:['GBP/JPY']},
+      {key:'GBPCAD', label:'GBPCAD', icon:'💷', queries:['GBP/CAD']},
+      {key:'GBPCHF', label:'GBPCHF', icon:'💷', queries:['GBP/CHF']},
+      {key:'AUDUSD', label:'AUDUSD', icon:'🇦🇺', queries:['AUD/USD']},
+      {key:'AUDCHF', label:'AUDCHF', icon:'🇦🇺', queries:['AUD/CHF']},
+      {key:'NZDUSD', label:'NZDUSD', icon:'🇳🇿', queries:['NZD/USD']},
     ];
-
-    function getSavedSymbol(){
-      try{
-        const raw = localStorage.getItem(TD_SYMBOL_STORAGE);
-        if(!raw) return SYMBOL_PRESETS[0];
-        const data = JSON.parse(raw);
-        if(data && data.key && data.queries) return data;
-        if(data && data.query) return {key:'CUSTOM:'+data.query.toUpperCase(), label:data.label||data.query, icon:'✎', queries:[data.query]};
-      }catch(e){}
-      return SYMBOL_PRESETS[0];
-    }
-    function saveSymbol(sym){
-      try{ localStorage.setItem(TD_SYMBOL_STORAGE, JSON.stringify(sym)); }catch(e){}
-    }
 
     // K线切割对齐时区：Twelve Data 的 2h/4h/日线 等原生周期是按「哪个时区的 0 点」切割 K 线的，
     // 默认用 UTC。但大多数外汇/黄金经纪商（也就是你在 TradingView 上看到的那条线）用的是
@@ -3132,7 +2971,6 @@
       try{ localStorage.setItem(TD_TIMEZONE_STORAGE, JSON.stringify(preset)); }catch(e){}
     }
     let activeTimezone = getTimezone();
-    let activeSymbol = getSavedSymbol();
 
     // TF_GROUPS：base 指向下面 NATIVE_INTERVALS / 'd1' 里对应的原始收盘价数组，
     // mult=1 表示直接使用原生周期（不合并，精度最高）；mult>1 表示从「最新一根」往回合并。
@@ -3265,437 +3103,8 @@
       return out;
     }
 
-    // 计算最新一根的 MACD 线数值、信号线（9 周期 EMA）数值、Histogram（MACD - 信号线）
-    function computeMacd(closes){
-      if(closes.length < MACD_SLOW + MACD_SIGNAL + 5) return null;
-      const fastE = emaSeries(closes, MACD_FAST);
-      const slowE = emaSeries(closes, MACD_SLOW);
-      const macdValsOnly = [];
-      for(let i=0;i<closes.length;i++){
-        if(fastE[i]!=null && slowE[i]!=null) macdValsOnly.push(fastE[i]-slowE[i]);
-      }
-      if(!macdValsOnly.length) return null;
-      const sigE = emaSeries(macdValsOnly, MACD_SIGNAL);
-      const macd = macdValsOnly[macdValsOnly.length-1];
-      const signal = sigE.length ? sigE[sigE.length-1] : null;
-      const histogram = (signal!=null) ? (macd - signal) : null;
-      return { macd, signal, histogram };
-    }
-
-    let refreshTimer = null;
-    let dailyTimer = null;
-    let isLoading = false;
-    let lastRefreshAt = 0;
-    let autoRetryTimer = null;
-    let dailyCache = null;
-    let dailyCacheAt = 0;
-    let latestByLabel = {}; // label -> {macd,signal,histogram} | null，供下面检查清单摘要小组件统计用
-
-    // 统计一个分组里有多少 LONG / SHORT / 还没数据，供检查清单摘要小组件用
-    // 同时细分「确认反弹 / 确认反抽 / 仅过零轴」的数量，供摘要里的数据行展示
-    function countGroup(group){
-      let long=0, short=0, pending=0;
-      let longConfirmed=0, longZeroOnly=0, shortConfirmed=0, shortZeroOnly=0;
-      const detail = [];
-      group.items.forEach(it=>{
-        const r = latestByLabel[it.label];
-        if(!r){ pending++; detail.push({label:it.label, cls:'pending', title:it.label+'：等待数据'}); return; }
-        const isLong = r.macd >= 0;
-        if(isLong) long++; else short++;
-        let cls = isLong ? 'long' : 'short';
-        let tagTxt = isLong ? 'LONG' : 'SHORT';
-        if(group.showConfirm && r.histogram!=null){
-          const confirmed = isLong ? r.histogram > 0 : r.histogram < 0;
-          if(confirmed){
-            cls += ' confirmed';
-            tagTxt = isLong ? '确认反弹' : '确认反抽';
-            if(isLong) longConfirmed++; else shortConfirmed++;
-          } else {
-            tagTxt = '仅过零轴';
-            if(isLong) longZeroOnly++; else shortZeroOnly++;
-          }
-        }
-        detail.push({label:it.label, cls, title:it.label+'：'+tagTxt});
-      });
-      return { long, short, pending, total:group.items.length, detail, longConfirmed, longZeroOnly, shortConfirmed, shortZeroOnly };
-    }
-
-    // 检查清单页的 MACD 摘要小组件：分钟/小时级别做成显眼的大区块（数量 + 每个周期的小色块），
-    // 日线级别按要求做成不起眼的一行小字（走得慢，仅供参考，不需要占很大版面）。
-    function renderChecklistSummary(){
-      const mount = document.getElementById('macd-checklist-mount');
-      if(!mount) return;
-      const symEl = document.getElementById('macd-sum-symbol');
-      if(symEl) symEl.textContent = activeSymbol.label;
-      const symIconEl = document.getElementById('macd-sum-symbol-icon');
-      if(symIconEl) symIconEl.textContent = activeSymbol.icon || '●';
-
-      const minuteG = TF_GROUPS.find(g=>g.title==='分钟级别');
-      const hourG   = TF_GROUPS.find(g=>g.title==='小时级别');
-      const dayG    = TF_GROUPS.find(g=>g.title==='日线级别');
-      const mStat = countGroup(minuteG);
-      const hStat = countGroup(hourG);
-      const dStat = countGroup(dayG);
-
-      // compact=true 用于日线级别：能量条/字号都比分钟、小时级别小一号，不抢主视觉
-      function bigRow(name, group, stat, compact){
-        const decided = stat.long+stat.short;
-        const longPct = decided ? (stat.long/decided*100) : 0;
-        const breakdown = group.showConfirm ? (
-          '<div class="macd-sum-breakdown">' +
-            '<span class="grp lg">' +
-              '<b>'+stat.longConfirmed+'</b><span class="tag-confirmed">确认反弹</span>' +
-              ' · <b>'+stat.longZeroOnly+'</b><span class="tag-zero">仅过零轴</span>' +
-            '</span>' +
-            '<span class="grp sh">' +
-              '<b>'+stat.shortConfirmed+'</b><span class="tag-confirmed">确认反抽</span>' +
-              ' · <b>'+stat.shortZeroOnly+'</b><span class="tag-zero">仅过零轴</span>' +
-            '</span>' +
-          '</div>'
-        ) : '';
-        return '' +
-          '<div class="macd-sum-row'+(compact?' compact':'')+'">' +
-            '<div class="macd-sum-row-top">' +
-              '<span class="macd-sum-name">'+name+'</span>' +
-              '<span class="macd-sum-count"><b class="c-long">'+stat.long+' LONG</b> · <b class="c-short">'+stat.short+' SHORT</b>' +
-                (stat.pending ? ' · <span class="c-pending">'+stat.pending+' 待数据</span>' : '') +
-              '</span>' +
-            '</div>' +
-            '<div class="macd-sum-bar"><div class="macd-sum-bar-fill" style="width:'+longPct+'%"></div></div>' +
-            '<div class="macd-sum-chips">' +
-              stat.detail.map(d=>'<span class="macd-sum-chip '+d.cls+'" title="'+d.title+'">'+d.label+'</span>').join('') +
-            '</div>' +
-            breakdown +
-          '</div>';
-      }
-
-      mount.innerHTML = bigRow('分钟级别', minuteG, mStat, false) + bigRow('小时级别', hourG, hStat, false) + bigRow('日线级别', dayG, dStat, true);
-    }
-
-    function renderKeyForm(){
-      const mount = document.getElementById('macd-scan-mount');
-      if(!mount) return;
-      mount.innerHTML =
-        '<div class="macd-key-card">' +
-          '<h3>🥇 连接 Twelve Data</h3>' +
-          '<p class="sub">需要一个免费的 Twelve Data API Key 才能拉取行情，用来实时计算各周期的 MACD。前往 <a href="https://twelvedata.com/pricing" target="_blank" rel="noopener">twelvedata.com</a> 免费注册获取 Key，或直接用默认 Key 开始。</p>' +
-          '<input type="text" id="macd-key-input" placeholder="粘贴你的 API Key（留空则使用默认 Key）" autocomplete="off">' +
-          '<button type="button" class="btn-save" id="macd-key-save" style="padding:10px 18px;border-radius:8px;cursor:pointer;width:100%;">保存并连接</button>' +
-          '<p class="macd-key-hint">Key 只保存在这台设备浏览器的本地存储里，不会上传到任何服务器；但因为是纯前端网页，Key 会出现在页面源码中——请只使用免费额度的 Key，不要绑定支付方式。</p>' +
-        '</div>';
-      document.getElementById('macd-key-save').addEventListener('click', ()=>{
-        const v = document.getElementById('macd-key-input').value.trim();
-        saveApiKey(v || DEFAULT_API_KEY);
-        startMacdScanner();
-      });
-    }
-
-    function renderGrid(){
-      const mount = document.getElementById('macd-scan-mount');
-      if(!mount) return;
-      const groupsHtml = TF_GROUPS.map(g=>
-        '<div class="macd-group">' +
-          '<div class="macd-group-title">'+g.title+'</div>' +
-          '<div class="macd-badge-grid">' +
-            g.items.map(it=>
-              '<div class="macd-badge pending" id="macd-badge-'+it.label+'">' +
-                '<div class="macd-badge-tf">'+it.label+'</div>' +
-                '<div class="macd-badge-signal">…</div>' +
-                '<div class="macd-badge-val"></div>' +
-              '</div>'
-            ).join('') +
-          '</div>' +
-        '</div>'
-      ).join('');
-      const symBtnsHtml = SYMBOL_PRESETS.map(s=>
-        '<button type="button" class="macd-sym-btn'+(s.key===activeSymbol.key?' active':'')+'" data-sym-key="'+s.key+'">'+s.icon+' '+s.label+'</button>'
-      ).join('');
-      const tzOptsHtml = TIMEZONE_PRESETS.map(t=>
-        '<option value="'+t.key+'"'+(t.key===activeTimezone.key?' selected':'')+'>'+t.label+'</option>'
-      ).join('');
-      mount.innerHTML =
-        '<div class="macd-scan-head">' +
-          '<div>' +
-            '<h3 style="margin:0;font-family:var(--disp);font-size:18px;font-weight:700;" id="macd-title">'+activeSymbol.icon+' '+activeSymbol.label+' MACD 多周期扫描</h3>' +
-            '<p class="sub" style="margin:4px 0 0;">标准参数 12/26/9 · 零轴以上 = LONG，零轴以下 = SHORT · 分钟/小时级别额外看 Histogram 确认</p>' +
-          '</div>' +
-          '<div class="macd-scan-actions">' +
-            '<span class="macd-updated" id="macd-updated">尚未更新</span>' +
-            '<button type="button" class="btn-cancel" id="macd-refresh-btn" style="padding:9px 16px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>' +
-            '<button type="button" class="btn-cancel" id="macd-key-change-btn" style="padding:9px 16px;border-radius:8px;cursor:pointer;">更改 Key</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="macd-sym-row">' +
-          symBtnsHtml +
-          '<button type="button" class="macd-sym-btn macd-sym-custom-btn" id="macd-sym-custom-btn">✎ 自定义代码</button>' +
-        '</div>' +
-        '<div class="macd-sym-custom" id="macd-sym-custom" style="display:none;">' +
-          '<input type="text" id="macd-sym-custom-input" placeholder="例如 DE30 / US500，需与 Twelve Data 上的代码一致">' +
-          '<button type="button" class="btn-save" id="macd-sym-custom-save" style="padding:9px 16px;border-radius:8px;cursor:pointer;">使用</button>' +
-        '</div>' +
-        '<div class="macd-tz-row">' +
-          '<span class="macd-tz-label">K线对齐</span>' +
-          '<select id="macd-tz-select" class="macd-tz-select">'+tzOptsHtml+'</select>' +
-          '<span class="macd-tz-hint">2H / 4H 等周期和 TradingView 对不上，通常是经纪商服务器时区不同、K线切割位置不一样导致的，不是算错了——试着切换这里的对齐时区去匹配你常看的平台</span>' +
-        '</div>' +
-        '<div class="macd-sym-note" id="macd-sym-note"></div>' +
-        '<div class="macd-error" id="macd-error"></div>' +
-        groupsHtml;
-      document.getElementById('macd-refresh-btn').addEventListener('click', ()=>refreshMacdScanner());
-      document.getElementById('macd-tz-select').addEventListener('change', (e)=>{
-        const preset = TIMEZONE_PRESETS.find(t=>t.key===e.target.value);
-        if(!preset) return;
-        activeTimezone = preset;
-        saveTimezone(preset);
-        dailyCache = null; dailyCacheAt = 0; // 对齐时区变了，日线的切割点也变了，缓存要作废重拉
-        latestByLabel = {};
-        renderGrid(); // 所有徽章回到「加载中」，重新按新时区拉一遍
-        refreshMacdScanner();
-      });
-      document.getElementById('macd-key-change-btn').addEventListener('click', ()=>{
-        if(refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; }
-        if(dailyTimer){ clearInterval(dailyTimer); dailyTimer = null; }
-        if(autoRetryTimer){ clearTimeout(autoRetryTimer); autoRetryTimer = null; }
-        clearApiKey();
-        renderKeyForm();
-      });
-      document.querySelectorAll('.macd-sym-btn[data-sym-key]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const preset = SYMBOL_PRESETS.find(s=>s.key===btn.dataset.symKey);
-          if(preset) switchSymbol(preset);
-        });
-      });
-      document.getElementById('macd-sym-custom-btn').addEventListener('click', ()=>{
-        const box = document.getElementById('macd-sym-custom');
-        box.style.display = box.style.display==='none' ? 'flex' : 'none';
-      });
-      document.getElementById('macd-sym-custom-save').addEventListener('click', ()=>{
-        const v = document.getElementById('macd-sym-custom-input').value.trim();
-        if(!v) return;
-        switchSymbol({ key:'CUSTOM:'+v.toUpperCase(), label:v.toUpperCase(), queries:[v], icon:'✎' });
-      });
-      renderChecklistSummary(); // 检查清单页的摘要小组件也同步刷新成「加载中」状态
-    }
-
-    function switchSymbol(sym){
-      activeSymbol = sym;
-      saveSymbol(sym);
-      dailyCache = null; dailyCacheAt = 0; // 换品种后日线缓存作废，下次刷新会重新拉
-      latestByLabel = {}; // 旧品种的统计数字也一并清空，避免摘要小组件短暂显示错的品种数据
-      renderGrid(); // 重新渲染，所有徽章回到「加载中」状态
-      refreshMacdScanner();
-    }
-
-    function setBadge(label, result, showConfirm){
-      const el = document.getElementById('macd-badge-'+label);
-      if(!el) return;
-      el.classList.remove('long','short','pending','confirmed');
-      const sigEl = el.querySelector('.macd-badge-signal');
-      const valEl = el.querySelector('.macd-badge-val');
-      if(!result){
-        el.classList.add('pending');
-        sigEl.textContent = '—';
-        valEl.innerHTML = '待扫描';
-        return;
-      }
-      const { macd, histogram } = result;
-      const isLong = macd >= 0;
-      el.classList.add(isLong ? 'long' : 'short');
-      sigEl.textContent = isLong ? 'LONG' : 'SHORT';
-      const histTxt = histogram!=null ? ((histogram>=0?'+':'')+histogram.toFixed(3)) : '—';
-      let html = 'MACD '+macd.toFixed(3)+'<br>Hist '+histTxt;
-      if(showConfirm && histogram!=null){
-        const confirmed = isLong ? histogram > 0 : histogram < 0;
-        if(confirmed){
-          el.classList.add('confirmed');
-          html += '<div class="macd-badge-tag">'+(isLong?'确认反弹':'确认反抽')+'</div>';
-        } else {
-          html += '<div class="macd-badge-tag">仅过零轴</div>';
-        }
-      }
-      valEl.innerHTML = html;
-    }
-
-    async function refreshMacdScanner(){
-      const now = Date.now();
-      if(isLoading) return;
-      if(now - lastRefreshAt < MIN_REFRESH_GAP_MS){
-        scheduleAutoRetry(MIN_REFRESH_GAP_MS - (now - lastRefreshAt));
-        return;
-      }
-      isLoading = true;
-      lastRefreshAt = now;
-      const errEl = document.getElementById('macd-error');
-      const noteEl = document.getElementById('macd-sym-note');
-      const refreshBtn = document.getElementById('macd-refresh-btn');
-      const sumRefreshBtn = document.getElementById('macd-sum-refresh-btn');
-      setSymBtnsDisabled(true);
-      if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.style.opacity='.6'; refreshBtn.textContent = '⟳ 更新中...'; }
-      if(sumRefreshBtn){ sumRefreshBtn.disabled = true; sumRefreshBtn.style.opacity='.6'; sumRefreshBtn.textContent = '⟳ 更新中...'; }
-      if(errEl) errEl.textContent = '';
-      try{
-        const query = await resolveQuery(activeSymbol);
-        if(noteEl){
-          const idealIdx = activeSymbol.queries.indexOf(query);
-          noteEl.innerHTML = (idealIdx > 0)
-            ? '⚠ Twelve Data 上没查到首选代码，目前自动使用备用代码「'+query+'」，走势方向仅供参考，数值可能与其他平台的原生指数不完全一致。 <a href="#" id="macd-recheck-code">重新检测代码</a>'
-            : '';
-          const recheck = document.getElementById('macd-recheck-code');
-          if(recheck) recheck.addEventListener('click', (e)=>{ e.preventDefault(); clearResolvedQuery(activeSymbol.key); refreshMacdScanner(); });
-        }
-
-        const base = {};
-        for(const spec of NATIVE_INTERVALS){
-          base[spec.key] = await fetchSeries(query, spec.interval, spec.outputsize);
-          await sleep(STAGGER_MS);
-        }
-        base['d1'] = dailyCache; // 可能是 null（还没拉过），日线独立定时器负责填充
-
-        TF_GROUPS.forEach(g=>{
-          g.items.forEach(it=>{
-            const src = base[it.base];
-            const result = src ? computeMacd(resampleFromLatest(src, it.mult)) : null;
-            latestByLabel[it.label] = result;
-            setBadge(it.label, result, g.showConfirm);
-          });
-        });
-        const nowTxt = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour12:true});
-        const upEl = document.getElementById('macd-updated');
-        if(upEl) upEl.textContent = nowTxt;
-        const sumUpEl = document.getElementById('macd-sum-updated');
-        if(sumUpEl) sumUpEl.textContent = nowTxt;
-        renderChecklistSummary(); // 分钟/小时级别数据已是最新，先更新一次检查清单摘要
-
-        // 日线数据：60 分钟内没拉过才顺带拉一次（不占用主刷新之外的额外分钟额度冲突，
-        // 因为这里是紧跟在 8 个原生请求之后顺序执行，仍在同一批错峰节奏里）
-        if(!dailyCache || (now - dailyCacheAt) > DAILY_REFRESH_MS){
-          try{
-            await sleep(STAGGER_MS);
-            dailyCache = await fetchSeries(query, DAILY_INTERVAL.interval, DAILY_INTERVAL.outputsize);
-            dailyCacheAt = now;
-            TF_GROUPS.find(g=>g.title==='日线级别').items.forEach(it=>{
-              const result = computeMacd(resampleFromLatest(dailyCache, it.mult));
-              latestByLabel[it.label] = result;
-              setBadge(it.label, result, false);
-            });
-            renderChecklistSummary(); // 日线也拉到了，再更新一次（补上摘要里的日线小字部分）
-          }catch(e){ /* 日线拉取失败不影响分钟/小时级别，静默跳过，等下一次 */ }
-        }
-      }catch(e){
-        const isRateLimit = /credit|429/i.test(e.message);
-        if(errEl){
-          errEl.textContent = isRateLimit
-            ? '获取「'+activeSymbol.label+'」数据失败：超出 Twelve Data 每分钟额度限制，65 秒后会自动重试一次。'
-            : '获取「'+activeSymbol.label+'」数据失败：' + e.message + '（可能是该代码在 Twelve Data 上不叫这个名字、Key 无效，或网络问题——可以试试上面的"自定义代码"输入准确代码）';
-        }
-        if(isRateLimit) scheduleAutoRetry(RATE_LIMIT_COOLDOWN_MS);
-      }finally{
-        isLoading = false;
-        setSymBtnsDisabled(false);
-        if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.style.opacity=''; refreshBtn.textContent = '⟳ 刷新'; }
-        if(sumRefreshBtn){ sumRefreshBtn.disabled = false; sumRefreshBtn.style.opacity=''; sumRefreshBtn.textContent = '⟳ 刷新'; }
-      }
-    }
-
-    function setSymBtnsDisabled(disabled){
-      document.querySelectorAll('.macd-sym-btn').forEach(b=>{ b.disabled = disabled; b.style.opacity = disabled ? '.5' : ''; });
-    }
-
-    function scheduleAutoRetry(delayMs){
-      if(autoRetryTimer) clearTimeout(autoRetryTimer);
-      autoRetryTimer = setTimeout(()=>{ autoRetryTimer = null; refreshMacdScanner(); }, Math.max(delayMs, 1000));
-    }
-
-    // 按要求改成纯手动：只做一次扫描（渲染+拉数据），不再设置自动定时刷新（原本的 refreshTimer /
-    // AUTO_REFRESH_MS 定时器已移除）。之后要更新数据，只能靠用户自己点"⟳ 刷新"按钮。
-    function startMacdScanner(){
-      renderGrid();
-      refreshMacdScanner();
-    }
-
-    window.initMacdScanner = function(){
-      if(document.getElementById('macd-scan-mount').childElementCount > 0) return; // 已初始化过，不重复渲染
-      renderGrid(); // 只画出周期网格骨架（都是"待扫描"状态），不自动发请求
-    };
-
-    // 检查清单页摘要卡片里的刷新按钮是静态 HTML（不会被 renderGrid 重新渲染），
-    // 所以只在这里绑定一次，点击时和"MACD 扫描"页的刷新按钮一样直接触发同一个刷新流程
-    // （这也是唯一会真正发出请求的入口之一——按需扫描，不占用免费额度）。
-    const sumRefreshBtnInit = document.getElementById('macd-sum-refresh-btn');
-    if(sumRefreshBtnInit) sumRefreshBtnInit.addEventListener('click', ()=>refreshMacdScanner());
-
-    // 按要求：MACD 扫描（右上角"MACD 扫描"标签页 + 检查清单页顶部摘要小组件共用同一份数据）
-    // 改成纯手动——页面打开时只渲染"待扫描"的空壳状态，不自动发请求、也没有任何自动定时刷新，
-    // 只有用户主动点击"⟳ 刷新"（或切换品种/时区/首次填 Key）时才会真正去拉 Twelve Data 额度。
-    renderGrid();
-    renderChecklistSummary();
-
     /* ===================================================================================
-       背离扫描 · 交易规则知识库（Emer 口述，2026-08 记录 — 之后换别的 Claude 接手改代码前先读这里）
-       ---------------------------------------------------------------------------------
-       这一段只是"规则文档"，不是全部都已经写进下面的代码了！哪些已实现/哪些还没有，
-       在每条规则后面用【已实现】/【未实现-待开发】标注，改代码前先对照一遍，不要重复问 Emer。
-
-       【背离方向定义】
-       - 顶背离 = 熊市背离（看跌）。发生在 MACD 快慢线（DIF/DEA）都在零轴【上方】的时候。
-       - 底背离 = 牛市背离（看涨）。发生在 MACD 快慢线都在零轴【下方】的时候。
-         （上下逻辑完全对称，只是方向相反，判断时先看两条线在零轴上面还是下面。）
-
-       【确认背离（强势背离）需要同时满足】—— 目前代码【未实现，只做了 MACD Pivot 配对 + 零轴容忍，
-       完全没有用到价格和 EMA52】：
-       1. 价格靠近或触碰"当前时间级别"的 EMA52 线（比如看 15M 背离就要看 15M 图表自己的 EMA52，
-          不是更大周期的）。
-          - "靠近"的量化标准（Emer 给的）：价格与 EMA52 的距离 —— XAUUSD 用 ~15%，其他货币对用 8-10%。
-            ⚠️ 注：这个百分比看起来偏大（外汇/黄金短线很少偏离 EMA52 达到两位数百分比），
-            下次接手的 Claude 如果要写代码，先跟 Emer 确认这个百分比的计算基准是什么
-            （是 |price-EMA52|/EMA52 的价格百分比？还是别的相对量纲，比如相对 ATR），
-            不要直接假设就是"价格百分比"去实现，容易导致永远/几乎不触发。
-       2. MACD 两条线也要靠近零轴（不是远远地在零轴上方/下方晃）。
-       3. 慢线（橙色/信号线 signal，即 TradingView 里的 "Slow Length"）不能跌破零轴。
-          - 如果没跌破：两条线做了两次交叉，然后反弹，出现能量柱 —— 
-            两线在零轴【上方】时看【青色】能量柱（顶背离/看跌场景），
-            两线在零轴【下方】时看【红色】能量柱（底背离/看涨场景）。
-          - 只要慢线没有跌破零轴，就可以继续计算这个背离。
-
-       【潜在背离（弱势，不是强势背离，但仍可标记）】—— 目前代码【未实现】：
-       - 触发条件：价格还没回到 EMA52，或者 MACD 两条线离零轴还有一段距离（还没靠近）。
-       - 这种只标记为"潜在 potential"，不是"确认 confirmed"。
-
-       【背离失效 / 需要换周期看】—— 目前代码【部分已实现】：
-       - 现有的 maDetectDivergence() 已经有"零轴容忍"机制（ZERO_AXIS_TOLERANCE_BARS=2，
-         见下面 zeroAxisOk()）：如果两个 Pivot 之间 MACD/Signal 有超过 2 根K线的零轴穿越，
-         这一对 Pivot 就判定无效，会自动往回找更早的 Pivot 重新配对 —— 这部分逻辑已经大致符合
-         Emer 说的"两条线下穿零轴，背离就形成不了"的原则。
-       - 但"当前周期形成不了背离时提示去看更大/更小周期"这件事，Emer 确认不需要额外写自动跳转逻辑：
-         17 个周期本来就是并排独立扫描的，某个周期显示"无背离"，用户自己看旁边其他周期卡片即可。
-         所以这条【不需要开发】，维持现状。
-       - 判断背离是否"结束/失效"的主要依据：两条线有没有下穿零轴（不是看别的）。
-         EMA52 是用来看价格有没有"站稳"，要配合快慢线一起看，不是单独判断。
-
-       【时间级别分组】（用于多货币卡片按 小/中/大 时间分类展示）【已确认，未来做多货币网格时用】：
-       - 小时间：< 1H（例如 3M/5M/10M/15M/20M/30M/45M...）
-       - 中时间：1H ≤ x < 12H（例如 1H/90M/2H/3H/4H/6H/8H）
-       - 大时间：≥ 12H（例如 12H/1D/2D...；目前 MA_TIMEFRAMES 列表里最大只到 6H，还没有大时间档位）
-         这个分组和上面检查清单页的 TF_GROUPS（big/medium/small）定义边界一致，可以直接复用同一套分界。
-
-       【多货币扫描 —— 目前【完全未实现】，现状是单一 activeSymbol 扫描】：
-       - 目标货币列表：
-         主要（Primary）：AUDCHF, AUDUSD, NZDUSD, GBPJPY, GBPCAD, GBPCHF, EURUSD
-         次要（Secondary，放在主要下面）：XAUUSD
-       - Emer 是免费版 Twelve Data（8次/分钟，800次/天），要求：
-         (a) 在马来西亚时间 14:30 前后要能拿到"全部货币的背离数据"，用于伦敦开盘前判断；
-         (b) 伦敦到纽约开市这段时间（大马时间 14:30–次日00:00，约 9.5 小时）持续跑；
-         (c) 人不在电脑前、浏览器/网站没开着，也要能收到 Telegram 通知。
-       - (c) 这条和现在的架构冲突：现在整个网站是纯前端（浏览器 JS + localStorage），
-         浏览器/网页关掉就完全不会跑，无法在"网站没开"的情况下自己发 Telegram。
-         这件事已经在对话里跟 Emer 说明，等 Emer 确认托管方式（比如 GitHub Actions 定时任务）
-         之后再实现一个独立跑在服务器端、不依赖浏览器的抓取+背离判断+Telegram 推送脚本。
-       - 额度预算（8 货币 × 7 个原生周期请求 = 56 次/轮）：800/56 ≈ 每天最多约 14 轮完整扫描；
-         要覆盖 9.5 小时会话时间，大约每 40 分钟跑一轮比较安全（留一点余量给手动刷新/检查清单页
-         那边共用同一把 Key 的旧 MACD 扫描器）。
-
-       ---------------------------------------------------------------------------------
-       MACD ANALYSIS（新增独立模块，原有说明）
+       MACD ANALYSIS（新增独立模块）
        ---------------------------------------------------------------------------------
        完全复用上面已经在用的 Twelve Data Key / 品种选择 / 时区设置（activeSymbol /
        activeTimezone / getApiKey / resolveQuery / emaSeries / MACD_FAST/SLOW/SIGNAL），
@@ -3715,6 +3124,8 @@
       const MA_TG_CHATID_STORAGE = 'emer_macd_analysis_tg_chatid_v1';
       const MA_MUTE_STORAGE = 'emer_macd_analysis_muted_v1';
       const MA_LAST_NOTIFIED_STORAGE = 'emer_macd_analysis_last_notified_v1';
+      const MA_SESSION_ONLY_STORAGE = 'emer_macd_analysis_session_only_v1';
+      const MA_ANNOTATIONS_STORAGE = 'emer_macd_analysis_annotations_v1';
 
       // 12 个需要分析的 timeframe：base 指向下面 MA_BASE_SPECS 里的原生周期，
       // minutes 是这个 timeframe 自己的分钟数，用来做固定时间边界合并（bucket = minutes*60 秒）。
@@ -3774,12 +3185,28 @@
       const MA_AUTO_REFRESH_MS = 5*60*1000;  // 之后每 5 分钟检查一次（各周期是否需要重新拉取由各自 cacheMs 决定）
       const MA_BASE_STAGGER_MS = STAGGER_MS * 3; // 7 个原生请求之间错峰更久一点
 
-      const maBaseCache = {};   // key -> {data:[{t,c}], at}
-      let maResults = {};       // label -> 分析结果
-      let maActiveMega = [];    // 当前正处于"主次共振"状态的配对列表，用于顶部大横幅
-      let maSelectedTF = '1H';
+      const maBaseCache = {};        // "SYMKEY|base" -> {data, at}
+      let maResultsBySymbol = {};    // symKey -> { tfLabel: 分析结果 }
+      let maActiveMegaBySymbol = {}; // symKey -> [{tf1,tf2,type}]（当前正处于"主次共振"状态）
+      let maSymbolIndex = 0;         // 轮到第几个货币（round-robin，每次刷新只扫一个货币，省额度）
+      let maSelected = { symKey: MA_SYMBOLS[0].key, tf: '1H' }; // 当前图表 / 标注聚焦的 货币+时间级别
       let maIsLoading = false;
       let maRefreshTimer = null;
+
+      // 交易时段（马来西亚时间 14:30–24:00 = 伦敦盘 + 纽约盘重叠时段，用户的主要盯盘时间）。
+      // 用 Intl 按 Asia/Kuala_Lumpur 时区取当下时间，不依赖设备本身时区设置是否正确。
+      function maNowInMYT(){
+        const parts = new Intl.DateTimeFormat('en-US', {
+          timeZone:'Asia/Kuala_Lumpur', hour12:false, hour:'2-digit', minute:'2-digit'
+        }).formatToParts(new Date());
+        const h = parseInt(parts.find(p=>p.type==='hour').value, 10);
+        const m = parseInt(parts.find(p=>p.type==='minute').value, 10);
+        return h*60+m;
+      }
+      function maInSessionWindow(){
+        const mins = maNowInMYT();
+        return mins >= (14*60+30) && mins < (24*60); // 14:30–24:00
+      }
 
       function maLoadPivot(){
         try{
@@ -3796,7 +3223,7 @@
       let maSeenKeys = new Set(maSignalHistory.map(e=>e.dedupeKey).filter(Boolean));
 
       function maSaveHistory(){
-        try{ localStorage.setItem(MA_HISTORY_STORAGE, JSON.stringify(maSignalHistory.slice(0,200))); }catch(e){}
+        try{ localStorage.setItem(MA_HISTORY_STORAGE, JSON.stringify(maSignalHistory.slice(0,400))); }catch(e){}
       }
 
       // ---------- 静音开关 + "上一次已通知的信号"记录 ----------
@@ -3817,29 +3244,97 @@
         try{ localStorage.setItem(MA_LAST_NOTIFIED_STORAGE, JSON.stringify(maLastNotified)); }catch(e){}
       }
 
-      // 伦敦 / 纽约盘口标注：伦敦 15:00–19:59，纽约 20:00–02:59（用设备本地时间判断，
-      // 不显示具体时间，只在符合区间时在通知前面加 [LONDON] / [NY]）。
+      // 只在 14:30–24:00 MYT（伦敦+纽约盘）推送提醒，默认开启（可在设置里关掉，改成全天都推）。
+      function maOnlySessionNotify(){
+        try{ return localStorage.getItem(MA_SESSION_ONLY_STORAGE) !== '0'; }catch(e){ return true; }
+      }
+      function maSaveOnlySessionNotify(v){ try{ localStorage.setItem(MA_SESSION_ONLY_STORAGE, v?'1':'0'); }catch(e){} }
+
+      // ---------- 图表标注 / 反馈知识库 ----------
+      // 你在图上点一下就能给某根K线打一个标注（比如"这里其实没有背离，是系统判断错了"），
+      // 存起来之后：(1) 我自己在这次对话里可以马上读到、根据你的说明调整判断逻辑；
+      // (2) 之后你开新对话让别的 Claude 改这个文件时，这些标注也还留在这个网站里（存在
+      // localStorage，不是存在这个 HTML 源码里，所以不会因为改代码就消失），可以让它先读一遍
+      // 你标注过的内容，当作"训练数据"来理解你的背离判断标准，越用越准。
+      function maLoadAnnotations(){
+        try{ return JSON.parse(localStorage.getItem(MA_ANNOTATIONS_STORAGE) || '[]'); }catch(e){ return []; }
+      }
+      let maAnnotations = maLoadAnnotations();
+      function maSaveAnnotations(){
+        try{ localStorage.setItem(MA_ANNOTATIONS_STORAGE, JSON.stringify(maAnnotations.slice(0,500))); }catch(e){}
+      }
+      function maGetAnnotations(symKey, tf){
+        return maAnnotations.filter(a=>a.symKey===symKey && a.tf===tf);
+      }
+      function maAddAnnotation(symKey, symLabel, tf, idx, candleTime, note){
+        const entry = {
+          id: 'anno_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+          symKey, symLabel, tf, idx, candleTime, note, createdAt: Date.now(),
+        };
+        maAnnotations.unshift(entry);
+        maSaveAnnotations();
+        return entry;
+      }
+      function maDeleteAnnotation(id){
+        maAnnotations = maAnnotations.filter(a=>a.id!==id);
+        maSaveAnnotations();
+      }
+
+      function maOpenAnnotationForm(sym, tf, idx){
+        const note = window.prompt('这根K线的背离判断哪里不对？把你看到的情况写下来（比如"这里其实没有背离，MACD两条线已经跌破零轴了"），我会存起来，下次分析会参考：');
+        if(note === null || !note.trim()) return; // 取消或空内容不存
+        const bySymbol = maResultsBySymbol[sym.key];
+        const r = bySymbol && bySymbol[tf];
+        const candleTime = (r && r.closes && r.lastCandleTime) ? r.lastCandleTime : null;
+        maAddAnnotation(sym.key, sym.label, tf, idx, candleTime, note.trim());
+        maRenderChart();
+      }
+
+      function maRenderAnnotationList(){
+        const mount = document.getElementById('ma-anno-list-mount');
+        if(!mount) return;
+        const notes = maGetAnnotations(maSelected.symKey, maSelected.tf);
+        if(!notes.length){
+          mount.innerHTML = '<div class="ma-anno-empty">还没有标注。在上面图表上点一下就能给某根K线写备注（比如背离判断错了、哪里看起来不对），这些记录会一直留着给我参考。</div>';
+          return;
+        }
+        mount.innerHTML = notes.map(n=>{
+          const t = n.candleTime ? new Date(n.candleTime*1000).toISOString().slice(5,16).replace('T',' ') : '';
+          return '<div class="ma-anno-item">' +
+            '<div class="ma-anno-item-head"><span>' + (t||'—') + '</span><button class="ma-anno-del" data-id="' + n.id + '">删除</button></div>' +
+            '<div class="ma-anno-item-note">' + n.note.replace(/</g,'&lt;') + '</div>' +
+          '</div>';
+        }).join('');
+        mount.querySelectorAll('.ma-anno-del').forEach(btn=>{
+          btn.addEventListener('click', ()=>{ maDeleteAnnotation(btn.dataset.id); maRenderChart(); });
+        });
+      }
+
+      // 伦敦 / 纽约盘口标注：改成用马来西亚时间(MYT)判断，不依赖设备本地时区设置。
+      // 伦敦盘 14:30–19:59，纽约盘 20:00–23:59（用户的主要盯盘时段 14:30–24:00 MYT）。
       function maSessionTag(){
-        const h = new Date().getHours();
-        if(h>=15 && h<20) return '[LONDON]';
-        if(h>=20 || h<3) return '[NY]';
+        const mins = maNowInMYT();
+        if(mins>=(14*60+30) && mins<(20*60)) return '[LONDON]';
+        if(mins>=(20*60) && mins<(24*60)) return '[NY]';
         return '';
       }
 
-      // 拉取一个原生周期（带时间戳），命中缓存直接返回，不产生新请求
-      async function maFetchBase(key){
+      // 拉取「某个货币」的某个原生周期（带时间戳），命中缓存直接返回，不产生新请求。
+      // 缓存 key 现在带上货币代码（sym.key + base），因为要同时盯 8 个货币，互相不能共用缓存。
+      async function maFetchBase(sym, key){
         const now = Date.now();
         const spec = MA_BASE_SPECS[key];
-        const cached = maBaseCache[key];
+        const cacheKey = sym.key + '|' + key;
+        const cached = maBaseCache[cacheKey];
         if(cached && (now - cached.at) < spec.cacheMs) return cached.data;
-        const query = await resolveQuery(activeSymbol);
+        const query = await resolveQuery(sym);
         const apiKey = getApiKey();
         const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(query) +
           '&interval=' + spec.interval + '&outputsize=' + spec.outputsize +
           '&timezone=' + encodeURIComponent(activeTimezone.tz) + '&apikey=' + encodeURIComponent(apiKey);
         const res = await fetch(url);
         const data = await res.json();
-        if(data.status === 'error' || !data.values) throw new Error(data.message || ('Twelve Data 请求失败：' + key));
+        if(data.status === 'error' || !data.values) throw new Error(data.message || (sym.label+' '+key+' 请求失败'));
         // datetime 字符串按「activeTimezone 的挂钟时间」直接当成时间戳用（不做时区换算），
         // 只用来做固定时间边界的合并与排序，不需要真实 UTC 绝对值。
         const arr = data.values.map(v=>{
@@ -3850,15 +3345,17 @@
           ) / 1000;
           return { t, c: parseFloat(v.close) };
         }).reverse(); // 转成按时间正序（旧→新）
-        maBaseCache[key] = { data: arr, at: now };
+        maBaseCache[cacheKey] = { data: arr, at: now };
         return arr;
       }
 
-      async function maFetchAllBases(){
+      // 一次只拉「一个货币」的 7 个原生周期（=7 个请求），配合下面的轮流扫描（round-robin），
+      // 避免 8 个货币同时拉爆 Twelve Data 免费额度（8 次/分钟、800 次/天）。
+      async function maFetchAllBases(sym){
         const errors = [];
         for(const key of Object.keys(MA_BASE_SPECS)){
-          try{ await maFetchBase(key); }
-          catch(e){ errors.push(key + '：' + e.message); }
+          try{ await maFetchBase(sym, key); }
+          catch(e){ errors.push(sym.label+' '+key + '：' + e.message); }
           await sleep(MA_BASE_STAGGER_MS);
         }
         return errors;
@@ -3947,11 +3444,46 @@
         return pivots;
       }
 
+      // ============================================================================
+      // 背离判断规则（2026-08 按用户的实盘经验重写，取代旧版"只看 Pivot+零轴"的粗略版本）：
+      //
+      // 1. 顶背离（熊市/看跌）＝ 价格 Higher High，MACD Lower High；底背离（牛市/看涨）＝
+      //    价格 Lower Low，MACD Higher Low（注：用户口述里把底背离也说成"熊市的背离"，
+      //    这里按标准定义理解为"牛市/看涨"，如果理解错了请直接在图上标注告诉我）。
+      // 2. 判断在两条线（MACD 快线 + Signal 慢线）目前是在零轴上方还是下方，两者必须
+      //    同侧（都在零轴上或都在零轴下）才算数——这一步决定接下来看哪种颜色的能量柱。
+      // 3. 慢线（信号线）不能有效跌破零轴：从 p1 到 p2 之间，只要没有连续超过
+      //    ZERO_AXIS_TOLERANCE_BARS 根K线戳到零轴对面，就还算"没跌破"，背离结构有效；
+      //    一旦有效跌破零轴，这个时间级别的背离就作废（此时应该去看更大或更小的时间级别，
+      //    这一步目前需要你自己手动切换时间级别看，还没有自动化）。
+      // 4. 强势 / 潜在 的区分（新增）：
+      //    a) 价格是否回到 EMA50 附近站稳（EMA_NEAR_PCT 容差内），
+      //    b) MACD/Signal 是否已经靠近零轴（不是还离零轴很远的地方就掉头），
+      //    c) 出现了"两次交叉"后，对应颜色的能量柱是否已经出现（零轴上方看青色/深绿强柱，
+      //       零轴下方看红色强柱——颜色只由零轴哪一侧决定，和顶/底背离类型无关）。
+      //    三者都满足 → CONFIRMED（强势背离）；只满足结构但缺 a/b/c 其中之一 → POTENTIAL
+      //    （潜在背离，可以标记但不是强信号，提醒力度更低）。
+      // ============================================================================
+      const EMA_TREND_PERIOD = 50;      // 用户指定：价格 EMA50，用来判断"有没有回踩/站稳"
+      const EMA_NEAR_PCT = 0.0015;      // 价格距 EMA50 在 0.15% 以内算"碰到/靠近"（经验值，可通过下面的"标注反馈"持续校准）
+      const ZERO_AXIS_NEAR_FRAC = 0.18; // MACD/Signal 距零轴 <= 近期振幅的 18% 算"贴近零轴"
+
+      // 能量柱颜色（和图表 maRenderChart 画的四色逻辑一致）：正值走高=强（青/深绿），
+      // 正值走低=弱（浅绿）；负值走低（更负）=强（红），负值走高（回缩）=弱（浅红）。
+      function maHistColorAt(hist, i){
+        const v = hist[i];
+        if(v==null) return null;
+        const prev = hist[i-1];
+        if(v>=0) return ((prev==null)||(v>=prev)) ? 'up-strong' : 'up-fade';
+        return ((prev==null)||(v<=prev)) ? 'down-strong' : 'down-fade';
+      }
+
       // 背离检测：用收盘价代表 Price Swing（和网站现有的 MACD 逻辑一致，都是只看收盘价，不额外拉 OHLC）
-      function maDetectDivergence(series, closes, strength){
+      function maDetectDivergence(series, closes, ema50, strength){
         const pivots = maFindPivots(series.macd, strength);
         const peaks = pivots.filter(p=>p.type==='peak');
         const valleys = pivots.filter(p=>p.type==='valley');
+        const lastIdx = closes.length - 1;
 
         // "有效跌破 0 轴"才算破坏结构——短暂的一两根K线戳穿零轴（噪音/插针）不算。
         // 容忍的根数固定给 2 根，够滤掉大部分噪音，又不会宽松到把真正的趋势反转也当成噪音。
@@ -3990,34 +3522,63 @@
           return null;
         }
 
+        // 判断"强势 vs 潜在"：三个条件（价格回踩EMA50 / MACD贴近零轴 / 对应颜色能量柱已出现）
+        // 在 p2 到最新K线之间任意一根满足即可算数（给反弹留一点时间，不用刚好卡在 p2 那一根）。
+        function classifyStrength(p2, wantPositive){
+          const from = p2.idx, to = lastIdx;
+          let emaNear = false, zeroNear = false, histOk = false;
+          for(let i=from;i<=to;i++){
+            const c = closes[i], e = ema50[i];
+            if(c!=null && e!=null && Math.abs(c-e)/e <= EMA_NEAR_PCT) emaNear = true;
+            const m = series.macd[i], s = series.signal[i];
+            if(m!=null && s!=null){
+              const recentAbs = series.macd.slice(Math.max(0,i-30), i+1).filter(v=>v!=null).map(Math.abs);
+              const scale = recentAbs.length ? Math.max(...recentAbs, 1e-9) : 1e-9;
+              if(Math.abs(m)/scale <= ZERO_AXIS_NEAR_FRAC && Math.abs(s)/scale <= ZERO_AXIS_NEAR_FRAC) zeroNear = true;
+            }
+            const col = maHistColorAt(series.hist, i);
+            if(wantPositive && col==='up-strong') histOk = true;
+            if(!wantPositive && col==='down-strong') histOk = true;
+          }
+          return { strong: p2.confirmed && emaNear && zeroNear && histOk, emaNear, zeroNear, histOk };
+        }
+
         if(peaks.length>=2){
           const pair = findPair(peaks, true, true);
-          if(pair) return { type:'bearish', p1:pair.p1, p2:pair.p2, confirmed:pair.p2.confirmed };
+          if(pair){
+            const cls = classifyStrength(pair.p2, true);
+            return { type:'bearish', p1:pair.p1, p2:pair.p2, confirmed:cls.strong, potential:!cls.strong, detail:cls };
+          }
         }
         if(valleys.length>=2){
           const pair = findPair(valleys, false, false);
-          if(pair) return { type:'bullish', p1:pair.p1, p2:pair.p2, confirmed:pair.p2.confirmed };
+          if(pair){
+            const cls = classifyStrength(pair.p2, false);
+            return { type:'bullish', p1:pair.p1, p2:pair.p2, confirmed:cls.strong, potential:!cls.strong, detail:cls };
+          }
         }
         return null;
       }
 
-      function maAnalyzeTimeframe(tf){
-        const cached = maBaseCache[tf.base];
+      function maAnalyzeTimeframe(sym, tf){
+        const cached = maBaseCache[sym.key + '|' + tf.base];
         if(!cached) return { label:tf.label, status:'waiting', reason:'等待数据' };
         const baseSec = MA_BASE_SPECS[tf.base].sec;
         const buckets = maAggregate(cached.data, tf.minutes, baseSec).filter(b=>b.closed);
-        const minNeeded = MACD_SLOW + MACD_SIGNAL + maPivotStrength*2 + 6;
+        const minNeeded = Math.max(MACD_SLOW + MACD_SIGNAL, EMA_TREND_PERIOD) + maPivotStrength*2 + 6;
         if(buckets.length < minNeeded) return { label:tf.label, status:'waiting', reason:'历史K线不足（'+buckets.length+'/'+minNeeded+'）' };
         const closes = buckets.map(b=>b.c);
         const series = maComputeMacdSeries(closes);
         if(!series) return { label:tf.label, status:'waiting', reason:'数据不足' };
+        const ema50 = emaSeries(closes, EMA_TREND_PERIOD); // 用户规则：价格EMA50，判断价格有没有回踩/站稳
         const cross = maDetectCross(series);
-        const div = maDetectDivergence(series, closes, maPivotStrength);
+        const div = maDetectDivergence(series, closes, ema50, maPivotStrength);
         const lastIdx = closes.length-1;
         return {
-          label:tf.label, status:'ok', closes, series, cross, div,
+          label:tf.label, status:'ok', closes, series, ema50, cross, div,
           lastCandleTime: buckets[lastIdx].t,
           macdNow: series.macd[lastIdx], sigNow: series.signal[lastIdx], histNow: series.hist[lastIdx],
+          ema50Now: ema50[lastIdx],
         };
       }
 
@@ -4039,16 +3600,21 @@
         }catch(e){}
       }
       function maBeep(){ maPlaySound(1); }
-      function maFlashCard(label){
-        const el = document.getElementById('ma-card-'+label);
-        if(!el) return;
+      function maFlashCard(symKey, tfLabel){
+        const el = document.getElementById('ma-card-'+symKey+'-'+tfLabel);
+        if(!el) return; // 该组合当前没有在信号列表里显示（比如已经不是信号了），静默跳过即可
         el.classList.remove('flash');
         void el.offsetWidth; // 触发重排，让动画能重新播放
         el.classList.add('flash');
       }
 
       // ---------- Telegram 提醒：直接调用 Telegram Bot API 的 sendMessage，纯前端 fetch，
-      // 不需要自己的后端服务器。Token/Chat ID 只存本机 localStorage。----------
+      // 不需要自己的后端服务器。Token/Chat ID 只存本机 localStorage。
+      // 重要限制：这只能在「网页标签页开着」的时候工作（哪怕是后台标签页也行，因为
+      // JS 计时器还在跑）。如果整个浏览器都关掉/手机锁屏太久被系统杀掉进程，就不会再发送——
+      // 纯静态网页做不到"网站完全没开也能收到通知"，那需要另外搭一个服务器/云端定时任务
+      // （比如 Cloudflare Worker 或 GitHub Actions 的 cron）定期调用 API 并推送 Telegram，
+      // 这个不是改这个 HTML 文件本身能做到的，需要额外部署，如果需要可以另外找我搭。----------
       function maGetTgConfig(){
         try{
           return {
@@ -4082,30 +3648,28 @@
         // 只发一条 Telegram、只弹一条浏览器通知——多个信号会在 maRefreshAll 里
         // 合并成一次调用，不会每个 timeframe 各响一次。
         if(isMega){
-          entry.timeframe.split(' + ').forEach(lbl=>maFlashCard(lbl));
+          entry.tf.split(' + ').forEach(lbl=>maFlashCard(entry.symKey, lbl));
         } else {
-          maFlashCard(entry.timeframe);
+          maFlashCard(entry.symKey, entry.tf);
         }
       }
 
-      // entries: [{ isMega, tf1, tf2, type, sessionTag }]  —— 本次刷新里所有"信号发生了变化"的条目，
-      // 打包成一次提醒（一次声音、一条浏览器通知、一条 Telegram 消息），干净不刷屏。
+      // entries: [{ isMega, symKey, symLabel, tf1, tf2, type, sessionTag }]  —— 本次刷新里所有
+      // "信号发生了变化"的条目，打包成一次提醒（一次声音、一条浏览器通知、一条 Telegram 消息），干净不刷屏。
       function maFireBatchNotify(entries){
         if(!entries.length) return;
         if(maMuted) return; // 静音时：卡片高亮和历史记录照常，但没有声音/系统通知/Telegram
+        if(maOnlySessionNotify() && !maInSessionWindow()) return; // 只在 14:30–24:00 MYT 交易时段推送，其余时间只记历史不打扰
         maPlaySound(1);
-        // 每条消息都带上货币/品种名称（activeSymbol.label），这样切换品种扫描、
-        // 或者以后多品种同时跑的时候，Telegram 消息也能一眼看出是哪个货币的信号。
-        const symLabel = (activeSymbol.icon||'💱') + ' ' + activeSymbol.label;
         const lines = entries.map(e=>{
           const label = e.type==='bullish' ? '底背离(下跌结束)' : '顶背离(上涨结束)';
           const tag = e.sessionTag ? (e.sessionTag+' ') : '';
-          if(e.isMega) return '⚠️ 注意! ' + symLabel + ' ' + tag + e.tf1 + ' + ' + e.tf2 + ' 共振 ' + label;
-          return symLabel + ' ' + tag + e.tf1 + ' ' + label;
+          if(e.isMega) return '⚠️ 注意! ' + tag + e.symLabel + ' ' + e.tf1 + ' + ' + e.tf2 + ' 共振 ' + label;
+          return tag + e.symLabel + ' ' + e.tf1 + ' ' + label;
         });
         const text = lines.join('\n');
         if('Notification' in window && Notification.permission==='granted'){
-          try{ new Notification('MACD 背离提醒', { body: text }); }catch(e){}
+          try{ new Notification('背离扫描提醒', { body: text }); }catch(e){}
         }
         maSendTelegram(text);
       }
@@ -4148,54 +3712,59 @@
         }
       }
 
-      function maStatusParts(r){
-        if(!r || r.status!=='waiting' && r.status!=='ok') return { parts:['WAITING'], cls:'waiting' };
-        if(r.status==='waiting') return { parts:['WAITING'], cls:'waiting', reason:r.reason };
-        const parts = []; let cls = null;
-        const lastIdx = r.closes.length-1;
-        if(r.cross && r.cross.idx===lastIdx){
-          if(r.cross.type==='golden'){ parts.push('🟢 BULLISH / GOLDEN CROSS'); cls='long'; }
-          else { parts.push('🔴 BEARISH / DEATH CROSS'); cls='short'; }
-        }
-        if(r.div){
-          if(r.div.type==='bearish'){
-            parts.push(r.div.confirmed ? '🔴 CONFIRMED BEARISH DIVERGENCE' : '🟡 POTENTIAL BEARISH DIVERGENCE');
-            if(!cls) cls = r.div.confirmed ? 'short' : 'watch';
-          } else {
-            parts.push(r.div.confirmed ? '🟢 CONFIRMED BULLISH DIVERGENCE' : '🟡 POTENTIAL BULLISH DIVERGENCE');
-            if(!cls) cls = r.div.confirmed ? 'long' : 'watch';
-          }
-        }
-        if(!parts.length){ parts.push('WAITING'); cls = 'waiting'; }
-        return { parts, cls };
-      }
-
-      function maLastSignalFor(label){
-        // 从 Signal History 里找这个 timeframe 最近一次记录的信号，让"上一次信号"是永久保留的记录，
-        // 不会因为已经过了那根K线、卡片状态回到 WAITING，就看起来好像从来没侦测到过。
-        const e = maSignalHistory.find(x=>x.timeframe===label);
-        if(!e) return 'Last Signal: —';
-        return 'Last Signal: ' + e.typeLabel + ' @ ' + new Date(e.time).toLocaleString('zh-CN',{hour12:false, month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+      // ---------- 背离扫描主视图：不再是"一次只看一个货币"，而是把 8 个货币 × 17 个 timeframe
+      // 里所有"有信号"（CONFIRMED 或 POTENTIAL）的组合收集起来，按强弱排序，集中显示成一份列表。
+      // 没信号（WAITING）的组合不占地方，不需要手动切换货币。----------
+      function maBuildSignalList(){
+        const list = [];
+        MA_SYMBOLS.forEach(sym=>{
+          const bySymbol = maResultsBySymbol[sym.key];
+          if(!bySymbol) return;
+          MA_TIMEFRAMES.forEach(tf=>{
+            const r = bySymbol[tf.label];
+            if(!r || r.status!=='ok' || !r.div) return;
+            list.push({ sym, tf: tf.label, r });
+          });
+        });
+        // 排序：CONFIRMED 在前、POTENTIAL 在后；同类再按 timeframe 分钟数从大到小（大级别更重要）
+        const tfMinutes = {}; MA_TIMEFRAMES.forEach(tf=>{ tfMinutes[tf.label]=tf.minutes; });
+        list.sort((a,b)=>{
+          const sa = a.r.div.confirmed ? 0 : 1, sb = b.r.div.confirmed ? 0 : 1;
+          if(sa!==sb) return sa-sb;
+          return tfMinutes[b.tf] - tfMinutes[a.tf];
+        });
+        return list;
       }
 
       function maRenderGrid(){
         const mount = document.getElementById('ma-grid-mount');
         if(!mount) return;
-        mount.innerHTML = MA_TIMEFRAMES.map(tf=>{
-          const r = maResults[tf.label];
-          const { parts, cls } = maStatusParts(r);
-          const lastSigTxt = maLastSignalFor(tf.label);
+        const list = maBuildSignalList();
+        if(!list.length){
+          mount.innerHTML = '<div class="empty-state">目前 8 个货币都没有背离信号，扫描仍在背景进行中（轮到 <b>' +
+            (MA_SYMBOLS[maSymbolIndex]?MA_SYMBOLS[maSymbolIndex].label:'—') + '</b>）…</div>';
+          return;
+        }
+        mount.innerHTML = list.map(item=>{
+          const { sym, tf, r } = item;
+          const isBear = r.div.type==='bearish';
+          const strong = r.div.confirmed;
+          const cls = isBear ? 'short' : 'long';
+          const cardId = 'ma-card-'+sym.key+'-'+tf;
+          const active = (maSelected.symKey===sym.key && maSelected.tf===tf) ? ' active' : '';
+          const typeLabel = isBear ? '顶背离 · 看跌' : '底背离 · 看涨';
+          const strengthTag = strong ? '<span class="ma-tag-strong">强势 CONFIRMED</span>' : '<span class="ma-tag-weak">潜在 POTENTIAL</span>';
           return (
-            '<div class="ma-card ' + (cls||'waiting') + (tf.label===maSelectedTF?' active':'') + '" data-tf="' + tf.label + '" id="ma-card-' + tf.label + '">' +
-              '<div class="ma-card-tf">' + tf.label + '</div>' +
-              '<div class="ma-card-status">' + parts.join('<br>') + '</div>' +
-              '<div class="ma-card-meta">' + lastSigTxt + '</div>' +
+            '<div class="ma-card ' + cls + (strong?' strong':' weak') + active + '" data-sym="' + sym.key + '" data-tf="' + tf + '" id="' + cardId + '">' +
+              '<div class="ma-card-top"><span class="ma-card-sym">' + sym.icon + ' ' + sym.label + '</span><span class="ma-card-tf">' + tf + '</span></div>' +
+              '<div class="ma-card-status">' + (isBear?'🔴':'🟢') + ' ' + typeLabel + '</div>' +
+              '<div class="ma-card-meta">' + strengthTag + '</div>' +
             '</div>'
           );
         }).join('');
         mount.querySelectorAll('.ma-card').forEach(el=>{
           el.addEventListener('click', ()=>{
-            maSelectedTF = el.dataset.tf;
+            maSelected = { symKey: el.dataset.sym, tf: el.dataset.tf };
             mount.querySelectorAll('.ma-card').forEach(c=>c.classList.remove('active'));
             el.classList.add('active');
             maRenderChart();
@@ -4204,23 +3773,26 @@
       }
 
       function maRenderChart(){
+        const sym = MA_SYMBOLS.find(s=>s.key===maSelected.symKey) || MA_SYMBOLS[0];
         const labelEl = document.getElementById('ma-chart-tf-label');
-        if(labelEl) labelEl.textContent = maSelectedTF;
+        if(labelEl) labelEl.textContent = sym.icon + ' ' + sym.label + ' · ' + maSelected.tf;
         const mount = document.getElementById('ma-chart-mount');
         const subEl = document.getElementById('ma-chart-sub');
         if(!mount) return;
-        const r = maResults[maSelectedTF];
+        const bySymbol = maResultsBySymbol[sym.key] || {};
+        const r = bySymbol[maSelected.tf];
         if(subEl){
           if(r && r.status==='ok'){
             const trend = r.macdNow!=null ? (r.macdNow>=0 ? 'Trend: MACD > 0 轴上' : 'Trend: MACD < 0 轴下') : 'Trend: —';
             const candleTxt = r.lastCandleTime ? ('Candle Closed: ' + new Date(r.lastCandleTime*1000).toISOString().slice(5,16).replace('T',' ')) : '';
             subEl.textContent = trend + (candleTxt ? '　·　' + candleTxt : '');
           } else {
-            subEl.textContent = (r && r.reason) ? r.reason : '';
+            subEl.textContent = (r && r.reason) ? r.reason : '该货币还没扫描到，稍候会自动轮到';
           }
         }
         if(!r || r.status!=='ok' || !r.series){
           mount.innerHTML = '<div class="empty-state">' + (r && r.reason ? r.reason : '暂无数据') + '</div>';
+          maRenderAnnotationList();
           return;
         }
         const N = Math.min(90, r.closes.length);
@@ -4229,6 +3801,7 @@
         const macd = r.series.macd.slice(-N);
         const signal = r.series.signal.slice(-N);
         const hist = r.series.hist.slice(-N);
+        const ema50 = (r.ema50||[]).slice(-N);
 
         const W = 720, PAD = 30, priceH = 90, macdH = 130, gap = 18;
         const macdTop = 12 + priceH + gap;
@@ -4248,10 +3821,11 @@
         const zeroY = yMacd(0);
 
         const priceLine = closes.map((v,i)=> v==null ? '' : (xAt(i)+','+yPrice(v))).filter(Boolean).join(' ');
+        const ema50Line = ema50.map((v,i)=> v==null ? '' : (xAt(i)+','+yPrice(v))).filter(Boolean).join(' ');
         const macdLine = macd.map((v,i)=> v==null ? '' : (xAt(i)+','+yMacd(v))).filter(Boolean).join(' ');
         const sigLine = signal.map((v,i)=> v==null ? '' : (xAt(i)+','+yMacd(v))).filter(Boolean).join(' ');
         const barW = Math.max(2, ((W-2*PAD)/N) * 0.6);
-        // TradingView 风格四色 Histogram：正值变大 = 深绿（动能增强），正值变小 = 浅绿（动能减弱）；
+        // TradingView 风格四色 Histogram：正值变大 = 深绿/青（动能增强），正值变小 = 浅绿（动能减弱）；
         // 负值变大（更负）= 深红（下跌动能增强），负值变小（回缩）= 浅红（下跌动能减弱）。
         const histBars = hist.map((v,i)=>{
           if(v==null) return '';
@@ -4292,18 +3866,50 @@
           }
         }
 
+        // 已保存的标注（画圈+备注）：叠加画在图上对应的 K 线位置
+        const notes = maGetAnnotations(sym.key, maSelected.tf);
+        const annoMarkers = notes.map(n=>{
+          const i = n.idx - offset;
+          if(i<0 || i>=N) return '';
+          const px = xAt(i), py = yPrice(closes[i]);
+          return '<circle class="ma-anno-dot" cx="'+px+'" cy="'+py+'" r="7" data-anno-id="'+n.id+'"></circle>';
+        }).join('');
+
         mount.innerHTML =
-          '<svg viewBox="0 0 '+W+' '+svgH+'" style="width:100%;height:auto;display:block;">' +
+          '<svg viewBox="0 0 '+W+' '+svgH+'" style="width:100%;height:auto;display:block;" id="ma-chart-svg">' +
+            '<polyline points="'+ema50Line+'" fill="none" stroke="#9d7bff" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.85"/>' +
             '<polyline points="'+priceLine+'" fill="none" stroke="var(--accent)" stroke-width="1.6"/>' +
             '<line x1="'+PAD+'" y1="'+zeroY+'" x2="'+(W-PAD)+'" y2="'+zeroY+'" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 3"/>' +
             histBars +
             '<polyline points="'+macdLine+'" fill="none" stroke="var(--accent)" stroke-width="1.6"/>' +
             '<polyline points="'+sigLine+'" fill="none" stroke="#ff9f43" stroke-width="1.4"/>' +
-            divMarkers +
-          '</svg>' + divNote;
+            divMarkers + annoMarkers +
+          '</svg>' + divNote +
+          '<div class="ma-chart-legend"><span><i style="background:#9d7bff"></i>EMA50</span><span><i style="background:var(--accent)"></i>MACD</span><span><i style="background:#ff9f43"></i>Signal</span></div>';
+
+        // 点击图表任意位置 = 在最近的一根K线上打一个标注（画圈 + 写备注），
+        // 这些标注会存起来，下次你（或另一个 Claude）打开网站时可以读到，用来校正背离判断的准确度。
+        const svgEl = document.getElementById('ma-chart-svg');
+        if(svgEl){
+          svgEl.addEventListener('click', (ev)=>{
+            const rect = svgEl.getBoundingClientRect();
+            const scaleX = W / rect.width;
+            const clickX = (ev.clientX - rect.left) * scaleX;
+            let bestI = 0, bestDist = Infinity;
+            for(let i=0;i<N;i++){
+              const d = Math.abs(xAt(i) - clickX);
+              if(d < bestDist){ bestDist = d; bestI = i; }
+            }
+            maOpenAnnotationForm(sym, maSelected.tf, bestI + offset);
+          });
+        }
+        maRenderAnnotationList();
       }
 
-      async function maRefreshAll(){
+
+      // 每次调用只扫「一个货币」（round-robin 轮流），避免 8 个货币同时拉爆 Twelve Data
+      // 免费额度（8 次/分钟、800 次/天）。forceSymKey 用于"手动点某个货币立刻刷新"的场景。
+      async function maRefreshAll(forceSymKey){
         if(maIsLoading) return;
         maIsLoading = true;
         const errEl = document.getElementById('ma-error');
@@ -4311,29 +3917,35 @@
         if(errEl) errEl.textContent = '';
         if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.style.opacity='.6'; }
         try{
-          const errors = await maFetchAllBases();
-          const symEl = document.getElementById('ma-symbol-label');
-          if(symEl) symEl.textContent = (activeSymbol.icon||'●') + ' ' + activeSymbol.label;
+          let sym;
+          if(forceSymKey){
+            sym = MA_SYMBOLS.find(s=>s.key===forceSymKey) || MA_SYMBOLS[0];
+          } else {
+            sym = MA_SYMBOLS[maSymbolIndex % MA_SYMBOLS.length];
+            maSymbolIndex = (maSymbolIndex + 1) % MA_SYMBOLS.length;
+          }
+          const errors = await maFetchAllBases(sym);
 
-          // 第一遍：把所有 timeframe 都分析完、写进 maResults，
-          // 这样下面判断"主/次时间级别同时背离"时，无论数组顺序如何，
-          // 每个 timeframe 都能拿到它的 ×2/÷2 搭档「当前」的最新结果。
-          MA_TIMEFRAMES.forEach(tf=>{ maResults[tf.label] = maAnalyzeTimeframe(tf); });
+          if(!maResultsBySymbol[sym.key]) maResultsBySymbol[sym.key] = {};
+          const symResults = maResultsBySymbol[sym.key];
+          // 第一遍：把这个货币的所有 timeframe 都分析完，这样下面判断
+          // "主/次时间级别同时背离"时，每个 timeframe 都能拿到它的 ×2/÷2 搭档「当前」的最新结果。
+          MA_TIMEFRAMES.forEach(tf=>{ symResults[tf.label] = maAnalyzeTimeframe(sym, tf); });
 
           const sessionTag = maSessionTag();
           const toNotify = []; // 本次刷新里"信号变了"、需要打包进这一次提醒的条目
 
           // ---------- Cross：只记录历史，不发提醒（提醒只留给背离，按你的要求）----------
           MA_TIMEFRAMES.forEach(tf=>{
-            const r = maResults[tf.label];
+            const r = symResults[tf.label];
             if(!r || r.status!=='ok') return;
             const lastIdx = r.closes.length-1;
             if(r.cross && r.cross.idx===lastIdx){
-              const key = activeSymbol.label+'|'+tf.label+'|'+r.cross.type+'|'+r.lastCandleTime;
+              const key = sym.label+'|'+tf.label+'|'+r.cross.type+'|'+r.lastCandleTime;
               if(!maSeenKeys.has(key)){
                 maSeenKeys.add(key);
                 maPushHistory({
-                  time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
+                  time: Date.now(), symbol:sym.label, timeframe:tf.label,
                   typeLabel: r.cross.type==='golden' ? '🟢 Golden Cross' : '🔴 Death Cross',
                   cls: r.cross.type==='golden' ? 'long' : 'short',
                   macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
@@ -4342,133 +3954,151 @@
             }
           });
 
-          // ---------- 背离：记历史（细粒度去重） + 判断是否要提醒（粗粒度："信号变了才提醒"）----------
+          // ---------- 背离：记历史（细粒度去重，CONFIRMED 和 POTENTIAL 都记）
+          // + 判断是否要提醒（只有 CONFIRMED / 强势背离才推送提醒，POTENTIAL 只进历史和列表，不打扰）----------
           MA_TIMEFRAMES.forEach(tf=>{
-            const r = maResults[tf.label];
-            const notifyKey = 'div:'+tf.label;
-            if(!r || r.status!=='ok' || !r.div || !r.div.confirmed){
-              // 当前没有已确认的背离了 → 清掉"上次通知"的记录，下次再出现同类型信号会重新提醒一次
+            const r = symResults[tf.label];
+            const notifyKey = 'div:'+sym.key+':'+tf.label;
+            if(!r || r.status!=='ok' || !r.div){
               if(maLastNotified[notifyKey]) delete maLastNotified[notifyKey];
               return;
             }
-            const key = activeSymbol.label+'|'+tf.label+'|div-'+r.div.type+'|'+r.div.p2.idx+'|'+r.lastCandleTime;
+            const strengthTag = r.div.confirmed ? 'confirmed' : 'potential';
+            const key = sym.label+'|'+tf.label+'|div-'+r.div.type+'-'+strengthTag+'|'+r.div.p2.idx+'|'+r.lastCandleTime;
             if(!maSeenKeys.has(key)){
               maSeenKeys.add(key);
               maPushHistory({
-                time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label,
-                typeLabel: r.div.type==='bearish' ? '🔴 Bearish Divergence' : '🟢 Bullish Divergence',
+                time: Date.now(), symbol:sym.label, timeframe:tf.label,
+                typeLabel: (r.div.type==='bearish' ? '🔴 顶背离 Bearish' : '🟢 底背离 Bullish') + (r.div.confirmed ? '（强势）' : '（潜在）'),
                 cls: r.div.type==='bearish' ? 'short' : 'long',
                 macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey:key,
               });
             }
+            if(!r.div.confirmed){
+              if(maLastNotified[notifyKey]) delete maLastNotified[notifyKey];
+              return; // 潜在背离不推送提醒，只是标记出来给你自己看
+            }
             if(maLastNotified[notifyKey] !== r.div.type){
               maLastNotified[notifyKey] = r.div.type;
-              toNotify.push({ isMega:false, tf1:tf.label, type:r.div.type, sessionTag });
+              toNotify.push({ isMega:false, symKey:sym.key, symLabel:sym.label, tf:tf.label, type:r.div.type, sessionTag });
             }
           });
 
-          // ---------- 主时间级别 + 次时间级别（×2/÷2）同时背离 → 共振 ----------
-          // maActiveMega：这次刷新里"当前正处于共振状态"的所有配对，用于顶部大横幅展示，
+          // ---------- 主时间级别 + 次时间级别（×2/÷2）同时背离 → 共振（只在这个货币内部找）----------
+          // maActiveMegaBySymbol[sym.key]：这次刷新里"当前正处于共振状态"的所有配对，用于顶部大横幅展示，
           // 和"信号变了才提醒"的 toNotify 是两回事——横幅只要共振还在就一直显示。
-          maActiveMega = [];
+          const activeMega = [];
           const megaSeenPairs = new Set();
           MA_TIMEFRAMES.forEach(tf=>{
-            const r = maResults[tf.label];
+            const r = symResults[tf.label];
             if(!r || r.status!=='ok' || !r.div || !r.div.confirmed) return;
             const partners = maSecondaryLabelsFor(tf.label);
             partners.forEach(partnerLabel=>{
-              const pr = maResults[partnerLabel];
+              const pr = symResults[partnerLabel];
               if(!pr || pr.status!=='ok' || !pr.div || !pr.div.confirmed) return;
               if(pr.div.type !== r.div.type) return; // 类型要一致（同为看涨或同为看跌背离）才算共振
               const pairKey = [tf.label, partnerLabel].sort().join('+');
               if(megaSeenPairs.has(pairKey)) return;
               megaSeenPairs.add(pairKey);
-              maActiveMega.push({ tf1:tf.label, tf2:partnerLabel, type:r.div.type });
+              activeMega.push({ tf1:tf.label, tf2:partnerLabel, type:r.div.type });
 
-              const dedupeKey = activeSymbol.label+'|MEGA|'+pairKey+'|'+r.div.type+'|'+r.div.p2.idx+'|'+pr.div.p2.idx+'|'+r.lastCandleTime+'|'+pr.lastCandleTime;
+              const dedupeKey = sym.label+'|MEGA|'+pairKey+'|'+r.div.type+'|'+r.div.p2.idx+'|'+pr.div.p2.idx+'|'+r.lastCandleTime+'|'+pr.lastCandleTime;
               if(!maSeenKeys.has(dedupeKey)){
                 maSeenKeys.add(dedupeKey);
                 maPushHistory({
-                  time: Date.now(), symbol:activeSymbol.label, timeframe:tf.label+' + '+partnerLabel,
+                  time: Date.now(), symbol:sym.label, timeframe:tf.label+' + '+partnerLabel,
                   typeLabel: (r.div.type==='bearish' ? '🚨 主次共振·看跌大信号' : '🚨 主次共振·看涨大信号'),
                   cls: r.div.type==='bearish' ? 'short' : 'long',
                   macd:r.macdNow, signal:r.sigNow, hist:r.histNow, dedupeKey, mega:true,
                 });
               }
-              const notifyKey = 'mega:'+pairKey;
+              const notifyKey = 'mega:'+sym.key+':'+pairKey;
               if(maLastNotified[notifyKey] !== r.div.type){
                 maLastNotified[notifyKey] = r.div.type;
-                toNotify.push({ isMega:true, tf1:tf.label, tf2:partnerLabel, type:r.div.type, sessionTag });
+                toNotify.push({ isMega:true, symKey:sym.key, symLabel:sym.label, tf1:tf.label, tf2:partnerLabel, type:r.div.type, sessionTag });
               }
             });
           });
-          // 清掉已经不再共振的配对的"上次通知"记录，方便它下次重新触发时能再提醒一次
+          maActiveMegaBySymbol[sym.key] = activeMega;
+          // 清掉这个货币里"已经不再共振"的配对的"上次通知"记录，方便它下次重新触发时能再提醒一次
           Object.keys(maLastNotified).forEach(k=>{
-            if(k.startsWith('mega:') && !megaSeenPairs.has(k.slice(5))) delete maLastNotified[k];
+            if(k.startsWith('mega:'+sym.key+':') && !megaSeenPairs.has(k.slice(('mega:'+sym.key+':').length))) delete maLastNotified[k];
           });
           maSaveLastNotified();
 
           // 所有 flash + 一次性的声音/浏览器通知/Telegram，打包一起发，不刷屏
           toNotify.forEach(e=> maNotify(
-            e.isMega ? { timeframe:e.tf1+' + '+e.tf2 } : { timeframe:e.tf1 },
+            e.isMega ? { symKey:e.symKey, tf:e.tf1+' + '+e.tf2 } : { symKey:e.symKey, tf:e.tf },
             e.isMega
           ));
           maFireBatchNotify(toNotify);
 
           const upEl = document.getElementById('ma-updated');
-          if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN',{hour12:true});
-          if(errEl && errors.length) errEl.textContent = 'MACD Analysis 部分周期获取失败：' + errors.join('；');
+          if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN',{hour12:true}) + '（刚扫完 ' + sym.icon + sym.label + '，下一个轮到 ' + MA_SYMBOLS[maSymbolIndex].label + '）';
+          if(errEl && errors.length) errEl.textContent = sym.label + ' 部分周期获取失败：' + errors.join('；');
           maRenderGrid();
           maRenderChart();
           maRenderMegaBanner();
           maRenderSimple();
         }catch(e){
-          if(errEl) errEl.textContent = 'MACD Analysis 数据获取失败：' + e.message;
+          if(errEl) errEl.textContent = '背离扫描数据获取失败：' + e.message;
         }finally{
           maIsLoading = false;
           if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.style.opacity=''; }
         }
       }
 
-      // ---------- 主次共振大横幅（当前正处于共振状态才显示，横幅内容随每次刷新更新） ----------
+      // ---------- 主次共振大横幅（汇总所有货币当前正处于共振状态的信号，横幅内容随每次刷新更新） ----------
       function maRenderMegaBanner(){
         const mount = document.getElementById('ma-mega-banner');
         if(!mount) return;
-        if(!maActiveMega.length){ mount.innerHTML = ''; return; }
-        mount.innerHTML = maActiveMega.map(m=>{
+        const items = [];
+        MA_SYMBOLS.forEach(sym=>{
+          (maActiveMegaBySymbol[sym.key]||[]).forEach(m=> items.push(Object.assign({sym}, m)));
+        });
+        if(!items.length){ mount.innerHTML = ''; return; }
+        mount.innerHTML = items.map(m=>{
           const isBear = m.type==='bearish';
           const label = isBear ? '顶背离共振(上涨结束)' : '底背离共振(下跌结束)';
           return '<div class="ma-mega-item ' + (isBear?'short':'long') + '">' +
             '<div class="ma-mega-icon">' + (isBear?'🔴':'🟢') + '🚨</div>' +
             '<div class="ma-mega-text">' +
-              '<div class="ma-mega-tf">' + m.tf1 + ' + ' + m.tf2 + '</div>' +
+              '<div class="ma-mega-tf">' + m.sym.icon + ' ' + m.sym.label + ' · ' + m.tf1 + ' + ' + m.tf2 + '</div>' +
               '<div class="ma-mega-type">主次共振 · ' + label + '</div>' +
             '</div>' +
           '</div>';
         }).join('');
       }
 
-      // ---------- 检查清单里的简化概览：小色块网格 + 共振提示，不含设置/图表/历史 ----------
+      // ---------- 检查清单里的简化概览：8 个货币 × 小色块网格 + 共振提示，不含设置/图表/历史 ----------
       function maRenderSimple(){
         const megaMount = document.getElementById('ma-simple-mega-mount');
         const gridMount = document.getElementById('ma-simple-grid-mount');
         if(megaMount){
-          megaMount.innerHTML = maActiveMega.map(m=>{
-            const isBear = m.type==='bearish';
-            return '<span class="ma-simple-mega-chip" style="color:' + (isBear?'var(--short)':'var(--long)') + '">' +
-              '🚨 ' + m.tf1 + '+' + m.tf2 + ' ' + (isBear?'顶背离共振':'底背离共振') +
-            '</span>';
-          }).join('');
+          const chips = [];
+          MA_SYMBOLS.forEach(sym=>{
+            (maActiveMegaBySymbol[sym.key]||[]).forEach(m=>{
+              const isBear = m.type==='bearish';
+              chips.push('<span class="ma-simple-mega-chip" style="color:' + (isBear?'var(--short)':'var(--long)') + '">' +
+                '🚨 ' + sym.label + ' ' + m.tf1 + '+' + m.tf2 + ' ' + (isBear?'顶背离共振':'底背离共振') +
+              '</span>');
+            });
+          });
+          megaMount.innerHTML = chips.join('');
         }
         if(gridMount){
-          gridMount.innerHTML = MA_TIMEFRAMES.map(tf=>{
-            const r = maResults[tf.label];
-            let dot = '⚪', cls = 'waiting';
-            if(r && r.status==='ok' && r.div && r.div.confirmed){
-              if(r.div.type==='bearish'){ dot='🔴'; cls='short'; }
-              else { dot='🟢'; cls='long'; }
-            }
-            return '<div class="ma-simple-chip ' + cls + '"><span class="dot">' + dot + '</span><span class="tf">' + tf.label + '</span></div>';
+          gridMount.innerHTML = MA_SYMBOLS.map(sym=>{
+            const bySymbol = maResultsBySymbol[sym.key] || {};
+            const dots = MA_TIMEFRAMES.map(tf=>{
+              const r = bySymbol[tf.label];
+              let dot = '⚪', cls = 'waiting';
+              if(r && r.status==='ok' && r.div){
+                if(r.div.type==='bearish'){ dot = r.div.confirmed?'🔴':'🟠'; cls='short'; }
+                else { dot = r.div.confirmed?'🟢':'🟡'; cls='long'; }
+              }
+              return '<div class="ma-simple-chip ' + cls + '" title="' + tf.label + '"><span class="dot">' + dot + '</span><span class="tf">' + tf.label + '</span></div>';
+            }).join('');
+            return '<div class="ma-simple-symrow"><div class="ma-simple-symname">' + sym.icon + ' ' + sym.label + '</div><div class="ma-simple-symdots">' + dots + '</div></div>';
           }).join('');
         }
       }
@@ -4478,6 +4108,7 @@
         maRenderGrid();
         maRenderMegaBanner();
         maRenderSimple();
+        maRenderChart();
 
         const refreshBtn = document.getElementById('ma-refresh-btn');
         if(refreshBtn) refreshBtn.addEventListener('click', ()=>maRefreshAll());
@@ -4501,6 +4132,19 @@
           syncMuteBtn();
         });
 
+        const sessionOnlyBtn = document.getElementById('ma-session-only-btn');
+        function syncSessionBtn(){
+          if(!sessionOnlyBtn) return;
+          const on = maOnlySessionNotify();
+          sessionOnlyBtn.textContent = on ? '⏰ 只在 14:30–24:00 提醒' : '⏰ 全天都提醒';
+          sessionOnlyBtn.classList.toggle('ma-mute-off', !on);
+        }
+        syncSessionBtn();
+        if(sessionOnlyBtn) sessionOnlyBtn.addEventListener('click', ()=>{
+          maSaveOnlySessionNotify(!maOnlySessionNotify());
+          syncSessionBtn();
+        });
+
         document.querySelectorAll('[data-view-link]').forEach(btn=>{
           btn.addEventListener('click', ()=>{
             const targetBtn = document.querySelector('.tab-btn[data-view="'+btn.dataset.viewLink+'"]');
@@ -4514,7 +4158,12 @@
           pivotSel.addEventListener('change', (e)=>{
             maPivotStrength = parseInt(e.target.value) || 3;
             try{ localStorage.setItem(MA_PIVOT_STORAGE, String(maPivotStrength)); }catch(err){}
-            MA_TIMEFRAMES.forEach(tf=>{ maResults[tf.label] = maAnalyzeTimeframe(tf); });
+            // Pivot 强度变了，要用「已经缓存的K线数据」把所有已经扫描过的货币重新分析一遍
+            // （不需要重新拉取 Twelve Data，maAnalyzeTimeframe 会直接用 maBaseCache 里的数据）
+            MA_SYMBOLS.forEach(sym=>{
+              if(!maResultsBySymbol[sym.key]) return;
+              MA_TIMEFRAMES.forEach(tf=>{ maResultsBySymbol[sym.key][tf.label] = maAnalyzeTimeframe(sym, tf); });
+            });
             maRenderGrid();
             maRenderChart();
             maRenderSimple();
@@ -4552,12 +4201,18 @@
           alert(ok ? '已发送，请检查 Telegram。' : '发送失败，请检查 Bot Token / Chat ID 是否正确，以及是否已经在 Telegram 里跟这个 Bot 说过一句话（Bot 需要先被用户主动私聊过一次才能发消息）。');
         });
 
-        // 页面打开后延迟启动，错开旧 MACD 扫描器（startMacdScanner）刚打开页面时的那一批请求，
-        // 避免瞬间超过 Twelve Data 免费额度的每分钟请求上限。
+        // 页面打开后延迟启动，避免刚打开页面时和其他模块（市场流动性等）同时打一批请求，
+        // 瞬间超过 Twelve Data 免费额度的每分钟请求上限。
+        // 之后每 MA_AUTO_REFRESH_MS 轮一次：8 个货币轮流扫（一次只扫一个，见 maRefreshAll），
+        // 完整轮完 8 个货币大约要 MA_AUTO_REFRESH_MS × 8。为了不超过免费版 800 次/天的额度，
+        // 非交易时段（14:30–24:00 MYT 之外）会跳过自动刷新，只有交易时段才真正拉取数据——
+        // 点"立即刷新"按钮或切换 Pivot 强度这些手动操作不受这个限制。
         setTimeout(()=>{
-          maRefreshAll();
+          maRefreshAll(); // 打开页面先扫一次，不管是不是交易时段，让你随时看到最新状态
           if(maRefreshTimer) clearInterval(maRefreshTimer);
-          maRefreshTimer = setInterval(maRefreshAll, MA_AUTO_REFRESH_MS);
+          maRefreshTimer = setInterval(()=>{
+            if(maInSessionWindow()) maRefreshAll();
+          }, MA_AUTO_REFRESH_MS);
         }, MA_INITIAL_DELAY_MS);
       }
 
