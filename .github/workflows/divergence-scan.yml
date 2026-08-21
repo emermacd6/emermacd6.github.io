@@ -1,0 +1,38 @@
+# 放到仓库路径：.github/workflows/divergence-scan.yml
+#
+# 每 15 分钟触发一次（UTC 06:00–14:45，覆盖马来西亚时间 14:00–22:45），
+# 脚本自己会判断是否在 14:30–22:00 MYT 窗口内，窗口外直接跳过、不消耗 API 额度。
+name: 背离扫描
+
+on:
+  schedule:
+    - cron: '*/15 6-14 * * *'
+  workflow_dispatch: {}   # 也可以在 GitHub Actions 页面手动点一次运行，方便测试
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 运行背离扫描
+        env:
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/divergence-scan.mjs
+
+      - name: 提交更新后的状态文件
+        run: |
+          git config user.name "divergence-scan-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/scan-state.json
+          git diff --staged --quiet || git commit -m "chore: update scan state [skip ci]"
+          git push
