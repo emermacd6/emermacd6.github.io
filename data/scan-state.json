@@ -1,5 +1,5 @@
 {
-  "symbolIndex": 0,
+  "symbolIndex": 1,
   "lastNotified": {
     "div:EURUSD:6H": "bearish",
     "div:GBPJPY:3H": "bearish",
@@ -13,15 +13,12 @@
     "div:AUDUSD:45M": "bearish",
     "div:AUDUSD:1H": "bearish",
     "div:NZDUSD:6H": "bearish",
-    "div:XAUUSD:15M": "bullish",
-    "div:XAUUSD:3H": "bearish",
     "div:XAUUSD:4H": "bearish",
     "div:AUDCHF:45M": "bullish",
     "div:AUDCHF:1H": "bullish",
     "div:AUDCHF:90M": "bearish",
     "div:NZDUSD:30M": "bearish",
     "div:EURUSD:1H": "bearish",
-    "div:XAUUSD:20M": "bearish",
     "div:EURUSD:23M": "bearish",
     "div:GBPJPY:10M": "bearish",
     "div:GBPJPY:45M": "bearish",
@@ -37,7 +34,6 @@
     "div:EURUSD:10M": "bearish",
     "div:EURUSD:12M": "bearish",
     "div:GBPJPY:20M": "bullish",
-    "div:XAUUSD:7M": "bullish",
     "div:XAUUSD:23M": "bearish",
     "div:EURUSD:45M": "bullish",
     "div:GBPCAD:3M": "bearish",
@@ -76,7 +72,7 @@
       "5M": {
         "type": "bearish",
         "p2": {
-          "idx": 983,
+          "idx": 971,
           "type": "peak",
           "value": 0.8493321281703174,
           "confirmed": true
@@ -86,59 +82,50 @@
       "7M": {
         "type": "bearish",
         "p2": {
-          "idx": 713,
+          "idx": 705,
           "type": "peak",
           "value": 3.5703705470186833,
-          "confirmed": false
+          "confirmed": true
         },
         "confirmed": false
       },
       "10M": {
         "type": "bearish",
         "p2": {
-          "idx": 499,
+          "idx": 495,
           "type": "peak",
-          "value": 4.50725886017608,
-          "confirmed": false
+          "value": 4.551632033756505,
+          "confirmed": true
         },
         "confirmed": false
       },
       "12M": {
         "type": "bearish",
         "p2": {
-          "idx": 416,
+          "idx": 412,
           "type": "peak",
-          "value": 5.081549377081501,
-          "confirmed": false
+          "value": 5.20810157102278,
+          "confirmed": true
         },
         "confirmed": false
       },
-      "15M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 1999,
-          "type": "peak",
-          "value": 6.134943455169378,
-          "confirmed": false
-        },
-        "confirmed": false
-      },
+      "15M": null,
       "20M": {
         "type": "bearish",
         "p2": {
-          "idx": 249,
+          "idx": 246,
           "type": "peak",
-          "value": 8.590722940713931,
-          "confirmed": false
+          "value": 8.590723014033756,
+          "confirmed": true
         },
         "confirmed": false
       },
       "23M": {
         "type": "bearish",
         "p2": {
-          "idx": 168,
+          "idx": 165,
           "type": "peak",
-          "value": 0.004731595202429162,
+          "value": 0.004770986792209442,
           "confirmed": true
         },
         "confirmed": true
@@ -146,7 +133,7 @@
       "30M": {
         "type": "bearish",
         "p2": {
-          "idx": 1974,
+          "idx": 1972,
           "type": "peak",
           "value": 0.02145292176373914,
           "confirmed": true
@@ -158,9 +145,9 @@
       "1H": {
         "type": "bearish",
         "p2": {
-          "idx": 1999,
+          "idx": 1998,
           "type": "peak",
-          "value": 9.736750615050369,
+          "value": 9.80915574325536,
           "confirmed": false
         },
         "confirmed": false
@@ -170,7 +157,7 @@
         "p2": {
           "idx": 999,
           "type": "peak",
-          "value": 9.74737416509015,
+          "value": 10.820557098834797,
           "confirmed": false
         },
         "confirmed": false
@@ -180,7 +167,7 @@
         "p2": {
           "idx": 1499,
           "type": "peak",
-          "value": 14.286843721035439,
+          "value": 14.674558497136786,
           "confirmed": false
         },
         "confirmed": false
@@ -188,7 +175,7 @@
       "3H": {
         "type": "bearish",
         "p2": {
-          "idx": 666,
+          "idx": 665,
           "type": "peak",
           "value": 26.275185991956278,
           "confirmed": false
