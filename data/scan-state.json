@@ -1,5 +1,5 @@
 {
-  "symbolIndex": 4,
+  "symbolIndex": 5,
   "lastNotified": {
     "div:GBPCAD:6H": "bullish",
     "div:NZDUSD:6H": "bearish",
@@ -9,10 +9,8 @@
     "div:AUDUSD:90M": "bearish",
     "div:NZDUSD:90M": "bearish",
     "div:NZDUSD:2H": "bearish",
-    "div:GBPCHF:90M": "bearish",
     "div:XAUUSD:12M": "bearish",
     "div:XAUUSD:45M": "bearish",
-    "div:GBPCHF:15M": "bullish",
     "div:AUDUSD:15M": "bullish",
     "div:AUDUSD:20M": "bullish",
     "div:AUDUSD:23M": "bullish",
@@ -20,9 +18,6 @@
     "div:AUDCHF:10M": "bullish",
     "div:GBPJPY:5M": "bullish",
     "div:GBPCHF:7M": "bearish",
-    "div:GBPCHF:1H": "bearish",
-    "div:GBPCHF:2H": "bearish",
-    "mega:GBPCHF:1H+2H": "bearish",
     "div:AUDUSD:12M": "bullish",
     "div:AUDCHF:7M": "bullish",
     "div:AUDCHF:15M": "bearish",
@@ -49,7 +44,6 @@
     "div:GBPJPY:23M": "bearish",
     "div:GBPCAD:30M": "bearish",
     "div:GBPCAD:45M": "bearish",
-    "div:GBPCHF:4H": "bearish",
     "div:AUDUSD:5M": "bearish",
     "div:AUDUSD:45M": "bullish",
     "div:AUDUSD:1H": "bullish",
@@ -70,7 +64,9 @@
     "div:GBPCAD:2H": "bullish",
     "mega:GBPCAD:10M+5M": "bearish",
     "mega:GBPCAD:10M+20M": "bearish",
-    "mega:GBPCAD:20M+40M": "bearish"
+    "mega:GBPCAD:20M+40M": "bearish",
+    "div:GBPCHF:10M": "bearish",
+    "div:GBPCHF:23M": "bearish"
   },
   "currentSignals": {
     "XAUUSD": {
@@ -573,23 +569,86 @@
       }
     },
     "GBPCHF": {
-      "3M": null,
-      "5M": null,
-      "7M": null,
-      "10M": null,
-      "12M": null,
-      "15M": {
-        "type": "bullish",
+      "3M": {
+        "type": "bearish",
         "p2": {
-          "idx": 1965,
-          "type": "valley",
-          "value": -0.00023435284080242091,
+          "idx": 1612,
+          "type": "peak",
+          "value": 0.00007117130783251824,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "5M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 967,
+          "type": "peak",
+          "value": 0.00008410917933021622,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "7M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 691,
+          "type": "peak",
+          "value": 0.00009520683664709928,
           "confirmed": true
         },
         "confirmed": true
       },
-      "20M": null,
-      "23M": null,
+      "10M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 481,
+          "type": "peak",
+          "value": 0.00015134820424234086,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "12M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 415,
+          "type": "peak",
+          "value": 0.0000887310921002804,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "15M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 1996,
+          "type": "peak",
+          "value": 0.00013778602416691932,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "20M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 247,
+          "type": "peak",
+          "value": 0.00018545734096009348,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "23M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 141,
+          "type": "peak",
+          "value": 0.0003564802672599843,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
       "30M": null,
       "40M": null,
       "45M": null,
@@ -599,7 +658,7 @@
         "p2": {
           "idx": 999,
           "type": "peak",
-          "value": 0.0002602178913004849,
+          "value": 0.0003179098685190951,
           "confirmed": false
         },
         "confirmed": false
@@ -609,7 +668,7 @@
         "p2": {
           "idx": 1499,
           "type": "peak",
-          "value": 0.00039143900505766993,
+          "value": 0.00041773564675740005,
           "confirmed": false
         },
         "confirmed": false
@@ -617,23 +676,14 @@
       "3H": {
         "type": "bearish",
         "p2": {
-          "idx": 666,
+          "idx": 665,
           "type": "peak",
-          "value": 0.0004759024173288662,
+          "value": 0.0004970969737605468,
           "confirmed": false
         },
         "confirmed": false
       },
-      "4H": {
-        "type": "bearish",
-        "p2": {
-          "idx": 1154,
-          "type": "peak",
-          "value": 0.0001380776038946152,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "4H": null,
       "6H": null
     },
     "AUDUSD": {
