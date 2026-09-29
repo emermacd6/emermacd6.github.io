@@ -508,6 +508,17 @@
   .ma-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .ma-symbol{font-family:var(--mono);font-size:12px;color:var(--text-dim);}
   .ma-intro{font-size:12.5px;color:var(--text-dim);line-height:1.7;margin:-4px 0 14px;}
+  .ha-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
+  .ha-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;}
+  .ha-card.long{border-color:var(--long);}
+  .ha-card.short{border-color:var(--short);}
+  .ha-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .ha-card-sym{font-family:var(--disp);font-weight:700;font-size:14px;}
+  .ha-card-status{font-size:12.5px;font-weight:700;}
+  .ha-card-status.long{color:var(--long);}
+  .ha-card-status.short{color:var(--short);}
+  .ha-card-status.flat{color:var(--text-faint);}
+  .ha-card-meta{font-family:var(--mono);font-size:11px;color:var(--text-faint);line-height:1.6;}
   .ma-settings-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .ma-settings-label{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-dim);flex-shrink:0;}
   .ma-error{color:var(--short);font-size:12.5px;margin-bottom:12px;}
@@ -1375,6 +1386,7 @@
       <button class="tab-btn" data-view="liquidity"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s7 7.6 7 12a7 7 0 0 1-14 0c0-4.4 7-12 7-12z"></path></svg> 市场流动性</button>
       <button class="tab-btn active" data-view="checklist"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h3"></path></svg> 检查清单</button>
       <button class="tab-btn" data-view="divscan"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><path d="M15 7h5v5"></path></svg> 背离扫描</button>
+      <button class="tab-btn" data-view="hascan"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="3" height="10"></rect><rect x="10" y="4" width="3" height="16"></rect><rect x="16" y="13" width="3" height="7"></rect></svg> 6H HA</button>
       <button class="tab-btn" data-view="history"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg> 历史记录</button>
       <button class="tab-btn" data-view="dashboard"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8"></rect><rect x="10" y="7" width="4" height="13"></rect><rect x="16" y="3" width="4" height="17"></rect></svg> 仪表盘</button>
       <button class="tab-btn" data-view="wall"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> 留言墙</button>
@@ -1629,6 +1641,20 @@
     </div>
   </section>
 
+  <!-- ================= 6H HEIKIN ASHI SCANNER VIEW ================= -->
+  <section class="view" id="view-hascan">
+    <div class="ma-section" id="ha-section" style="border-bottom:none;">
+      <div class="ma-header">
+        <h2>6H HEIKIN ASHI SCANNER</h2>
+        <div class="ma-header-right">
+          <span class="macd-updated" id="ha-updated">尚未更新</span>
+          <button type="button" class="btn-cancel" id="ha-refresh-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>
+        </div>
+      </div>
+      <p class="ma-intro">扫描 8 个货币（XAUUSD / EURUSD / GBPJPY / GBPCAD / GBPCHF / AUDUSD / AUDCHF / NZDUSD）的 6H Heikin Ashi，只用已收盘的 K 线判断 HA UP / HA DOWN 两根反转形态，每 3 小时自动检查一次；新信号会合并成一条 Telegram 推送（沿用背离扫描的 Bot / 静音 / 时段设置）。</p>
+      <div id="ha-grid-mount" class="ha-grid"></div>
+    </div>
+  </section>
 
   <section class="view" id="view-history">
     <div id="history-profile-bar" class="hist-profile-bar"></div>
@@ -4217,6 +4243,241 @@
       }
 
       if(document.getElementById('ma-section')) maInit();
+
+      // ================= 6H HEIKIN ASHI SCANNER =================
+      // 独立功能：只做 K 线合并 + Heikin Ashi 计算 + 形态判断 + Telegram 推送。
+      // 不读取也不修改背离扫描的任何计算结果（maResultsBySymbol / maActiveMegaBySymbol 等），
+      // 不碰 MACD score / probability / weights / divergence / checklist 逻辑。
+      // 复用：MA_SYMBOLS（同一组 8 个货币）、resolveQuery / getApiKey / activeTimezone（同一个
+      // Twelve Data 数据源与对齐时区）、maSendTelegram / maGetTgConfig（同一个 Telegram Bot）、
+      // maMuted / maOnlySessionNotify / maInSessionWindow（同一套静音与推送时段设置）。
+
+      const HA_BASE_SEC = 7200;              // 2H 原生周期（秒）
+      const HA_BUCKET_SEC = 6 * 3600;        // 6H 目标周期（秒），3 根 2H 合并成 1 根
+      const HA_BASE_SPEC = { interval:'2h', outputsize:500, cacheMs:40*60*1000 };
+      const HA_SCAN_STAGGER_MS = STAGGER_MS * 3; // 8 个货币依次请求之间的错峰间隔
+      const HA_INITIAL_DELAY_MS = 100*1000;      // 页面打开后延迟启动，错开背离扫描 / 市场流动性的请求
+      const HA_AUTO_REFRESH_MS = 3*60*60*1000;   // 每 3 小时自动扫一次（用户确认的 schedule）
+      const HA_SEEN_STORAGE = 'ha_seen_signal_keys_v1';
+
+      const haBaseCache = {};       // symKey -> { data:[{t,o,h,l,c}], at }
+      let haResultsBySymbol = {};   // symKey -> { status:'up'|'down'|null, closeTime, error }
+      let haIsLoading = false;
+      let haRefreshTimer = null;
+
+      function haLoadSeen(){
+        try{ return new Set(JSON.parse(localStorage.getItem(HA_SEEN_STORAGE) || '[]')); }
+        catch(e){ return new Set(); }
+      }
+      let haSeenKeys = haLoadSeen();
+      function haSaveSeen(){
+        try{ localStorage.setItem(HA_SEEN_STORAGE, JSON.stringify(Array.from(haSeenKeys).slice(-500))); }
+        catch(e){}
+      }
+
+      // 拉取原生 2H 的完整 OHLC。背离扫描的 maFetchBase 只保留收盘价（maBaseCache），HA 需要完整
+      // O/H/L/C 才能算 Heikin Ashi 和判断影线，所以单独请求 + 单独缓存，不改动 maFetchBase。
+      async function haFetchBase(sym){
+        const now = Date.now();
+        const cached = haBaseCache[sym.key];
+        if(cached && (now - cached.at) < HA_BASE_SPEC.cacheMs) return cached.data;
+        const query = await resolveQuery(sym);
+        const apiKey = getApiKey();
+        const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(query) +
+          '&interval=' + HA_BASE_SPEC.interval + '&outputsize=' + HA_BASE_SPEC.outputsize +
+          '&timezone=' + encodeURIComponent(activeTimezone.tz) + '&apikey=' + encodeURIComponent(apiKey);
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data.status === 'error' || !data.values) throw new Error(data.message || (sym.label+' 2H 请求失败'));
+        const arr = data.values.map(v=>{
+          const s = v.datetime;
+          const t = Date.UTC(
+            +s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10),
+            s.length>10 ? +s.slice(11,13) : 0, s.length>10 ? +s.slice(14,16) : 0
+          ) / 1000;
+          return { t, o:parseFloat(v.open), h:parseFloat(v.high), l:parseFloat(v.low), c:parseFloat(v.close) };
+        }).reverse(); // 旧→新
+        haBaseCache[sym.key] = { data: arr, at: now };
+        return arr;
+      }
+
+      // 按固定 6 小时边界（对齐 activeTimezone 的挂钟 0 点，00-06-12-18-24）把 3 根 2H 合并成 1 根
+      // 6H：Open=第1根2H的Open，High=三根最高，Low=三根最低，Close=第3根2H的Close。
+      // 必须凑齐 3 根 2H、且原生数据已覆盖到桶的结束时间，才算这根 6H「已收盘」——不满足就
+      // 标记 closed:false，绝不会被当成已收盘 candle 参与判断（不 repaint）。
+      function haAggregate6H(baseArr){
+        if(!baseArr || !baseArr.length) return [];
+        const map = new Map();
+        for(const pt of baseArr){
+          const bStart = Math.floor(pt.t / HA_BUCKET_SEC) * HA_BUCKET_SEC;
+          if(!map.has(bStart)) map.set(bStart, []);
+          map.get(bStart).push(pt);
+        }
+        const keys = Array.from(map.keys()).sort((a,b)=>a-b);
+        const lastBaseTime = baseArr[baseArr.length-1].t;
+        const coverageEnd = lastBaseTime + HA_BASE_SEC;
+        return keys.map(k=>{
+          const pts = map.get(k).sort((a,b)=>a.t-b.t);
+          const closed = pts.length>=3 && (k + HA_BUCKET_SEC) <= coverageEnd;
+          return {
+            t:k,
+            o:pts[0].o,
+            h:Math.max.apply(null, pts.map(p=>p.h)),
+            l:Math.min.apply(null, pts.map(p=>p.l)),
+            c:pts[pts.length-1].c,
+            closed,
+          };
+        });
+      }
+
+      // 标准 Heikin Ashi 递归计算，第一根用 (Open+Close)/2 初始化 HA Open。
+      function haCompute(bars6h){
+        const out = [];
+        let prevHaOpen = null, prevHaClose = null;
+        bars6h.forEach((b,i)=>{
+          const haClose = (b.o + b.h + b.l + b.c) / 4;
+          const haOpen = (i===0) ? (b.o + b.c) / 2 : (prevHaOpen + prevHaClose) / 2;
+          const haHigh = Math.max(b.h, haOpen, haClose);
+          const haLow = Math.min(b.l, haOpen, haClose);
+          out.push({ t:b.t, haOpen, haHigh, haLow, haClose, closed:b.closed });
+          prevHaOpen = haOpen; prevHaClose = haClose;
+        });
+        return out;
+      }
+
+      // HA UP / HA DOWN 判断：只用最后两根「已收盘」HA candle（candle1=较早，candle2=最新）。
+      // 「没有影线」用严格判断（HA High/Low 等于 HA Open），只留一个相对价格 1e-9 的浮点误差；
+      // Candle2 靠趋势方向那一侧的影线不做限制，只要求 body2 > body1（和用户确认的文字规则一致）。
+      function haWickEps(px){ return Math.max(Math.abs(px) * 1e-9, 1e-12); }
+      function haDetectPattern(haBars){
+        const closed = haBars.filter(b=>b.closed);
+        if(closed.length < 2) return null;
+        const c1 = closed[closed.length-2];
+        const c2 = closed[closed.length-1];
+        const body1 = Math.abs(c1.haClose - c1.haOpen);
+        const body2 = Math.abs(c2.haClose - c2.haOpen);
+        if(!(body2 > body1)) return null;
+
+        const c1Bull = c1.haClose > c1.haOpen;
+        const c1Bear = c1.haClose < c1.haOpen;
+        const c2Bull = c2.haClose > c2.haOpen;
+        const c2Bear = c2.haClose < c2.haOpen;
+
+        if(c1Bull && c2Bull && Math.abs(c1.haLow - c1.haOpen) <= haWickEps(c1.haOpen)){
+          return { direction:'up', closeTime: c2.t };
+        }
+        if(c1Bear && c2Bear && Math.abs(c1.haHigh - c1.haOpen) <= haWickEps(c1.haOpen)){
+          return { direction:'down', closeTime: c2.t };
+        }
+        return null;
+      }
+
+      function haFmtTime(t){
+        // 和 haFetchBase 解析 datetime 时的约定一致：按 activeTimezone 的挂钟时间显示，不做真实 UTC 换算
+        const d = new Date(t*1000);
+        const pad = n=>String(n).padStart(2,'0');
+        return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())+' '+pad(d.getUTCHours())+':'+pad(d.getUTCMinutes());
+      }
+
+      async function haScanSymbol(sym){
+        try{
+          const base = await haFetchBase(sym);
+          const bars6h = haAggregate6H(base);
+          const haBars = haCompute(bars6h);
+          const pattern = haDetectPattern(haBars);
+          const closedBars = haBars.filter(b=>b.closed);
+          const lastClosed = closedBars[closedBars.length-1] || null;
+          haResultsBySymbol[sym.key] = {
+            status: pattern ? pattern.direction : null,
+            closeTime: pattern ? pattern.closeTime : (lastClosed ? lastClosed.t : null),
+            error: null,
+          };
+          return pattern;
+        }catch(e){
+          haResultsBySymbol[sym.key] = { status:null, closeTime:null, error: e.message || String(e) };
+          return null;
+        }
+      }
+
+      // 依次扫 8 个货币（错峰请求，避免打爆 Twelve Data 免费额度），把「本次新出现的信号」
+      // （用 pair+6H+direction+candleCloseTime 判重，已发送过的不会重复）合并成一条 Telegram。
+      async function haScanAll(){
+        if(haIsLoading) return;
+        haIsLoading = true;
+        const changed = [];
+        for(const sym of MA_SYMBOLS){
+          const pattern = await haScanSymbol(sym);
+          if(pattern){
+            const fingerprint = sym.key + '|6H|' + pattern.direction + '|' + pattern.closeTime;
+            if(!haSeenKeys.has(fingerprint)){
+              haSeenKeys.add(fingerprint);
+              changed.push({ sym, direction: pattern.direction, closeTime: pattern.closeTime });
+            }
+          }
+          haRenderGrid();
+          await sleep(HA_SCAN_STAGGER_MS);
+        }
+        haIsLoading = false;
+        const upEl = document.getElementById('ha-updated');
+        if(upEl) upEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN',{hour12:true});
+        if(changed.length){
+          haSaveSeen();
+          haFireTelegram(changed);
+        }
+      }
+
+      // Telegram 推送：沿用背离扫描的静音开关 + 14:30–24:00 时段限制（用户确认跟随现有设置），
+      // 不新建 Telegram 系统，直接调用现有 maSendTelegram。
+      function haFireTelegram(changed){
+        if(maMuted) return;
+        if(maOnlySessionNotify() && !maInSessionWindow()) return;
+        const ups = changed.filter(e=>e.direction==='up');
+        const downs = changed.filter(e=>e.direction==='down');
+        let latestCloseTime = 0;
+        changed.forEach(e=>{ if(e.closeTime > latestCloseTime) latestCloseTime = e.closeTime; });
+        const lines = ['🔥 6H HEIKIN ASHI', ''];
+        if(ups.length){ lines.push('🟢 HA UP'); ups.forEach(e=>lines.push(e.sym.label)); lines.push(''); }
+        if(downs.length){ lines.push('🔴 HA DOWN'); downs.forEach(e=>lines.push(e.sym.label)); lines.push(''); }
+        lines.push('TIME:');
+        lines.push(haFmtTime(latestCloseTime));
+        maSendTelegram(lines.join('\n'));
+      }
+
+      function haRenderGrid(){
+        const mount = document.getElementById('ha-grid-mount');
+        if(!mount) return;
+        mount.innerHTML = MA_SYMBOLS.map(sym=>{
+          const r = haResultsBySymbol[sym.key];
+          let cls = 'flat', label = '扫描中…', dot = '⏳', meta = '等待数据';
+          if(r){
+            if(r.error){ cls='flat'; label='请求失败'; dot='⚠️'; meta=r.error; }
+            else{
+              if(r.status==='up'){ cls='long'; label='HA UP'; dot='🟢'; }
+              else if(r.status==='down'){ cls='short'; label='HA DOWN'; dot='🔴'; }
+              else { cls='flat'; label='No Signal'; dot='—'; }
+              meta = r.closeTime ? ('最近收盘 ' + haFmtTime(r.closeTime)) : '等待数据';
+            }
+          }
+          return '<div class="ha-card ' + cls + '">' +
+            '<div class="ha-card-top"><span class="ha-card-sym">' + sym.icon + ' ' + sym.label + '</span>' +
+            '<span class="ha-card-status ' + cls + '">' + dot + ' ' + label + '</span></div>' +
+            '<div class="ha-card-meta">' + meta + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      function haInit(){
+        haRenderGrid();
+        const refreshBtn = document.getElementById('ha-refresh-btn');
+        if(refreshBtn) refreshBtn.addEventListener('click', ()=>haScanAll());
+        setTimeout(()=>{
+          haScanAll();
+          if(haRefreshTimer) clearInterval(haRefreshTimer);
+          haRefreshTimer = setInterval(()=>{ haScanAll(); }, HA_AUTO_REFRESH_MS);
+        }, HA_INITIAL_DELAY_MS);
+      }
+
+      if(document.getElementById('ha-section')) haInit();
     })();
   })();
 
