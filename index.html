@@ -4361,7 +4361,7 @@
 
       // HA UP / HA DOWN 判断：只用最后两根「已收盘」HA candle（candle1=较早，candle2=最新）。
       // 「没有影线」用严格判断（HA High/Low 等于 HA Open），只留一个相对价格 1e-9 的浮点误差；
-      // Candle2 靠趋势方向那一侧的影线不做限制，只要求 body2 > body1（和用户确认的文字规则一致）。
+      // 按你确认的 B 方案：candle1 和 candle2 靠趋势方向那一侧都必须没有影线，且 body2 > body1。
       function haWickEps(px){ return Math.max(Math.abs(px) * 1e-9, 1e-12); }
       function haDetectPattern(haBars){
         const closed = haBars.filter(b=>b.closed);
@@ -4377,10 +4377,15 @@
         const c2Bull = c2.haClose > c2.haOpen;
         const c2Bear = c2.haClose < c2.haOpen;
 
-        if(c1Bull && c2Bull && Math.abs(c1.haLow - c1.haOpen) <= haWickEps(c1.haOpen)){
+        const c1NoLowerWick = Math.abs(c1.haLow - c1.haOpen) <= haWickEps(c1.haOpen);
+        const c2NoLowerWick = Math.abs(c2.haLow - c2.haOpen) <= haWickEps(c2.haOpen);
+        const c1NoUpperWick = Math.abs(c1.haHigh - c1.haOpen) <= haWickEps(c1.haOpen);
+        const c2NoUpperWick = Math.abs(c2.haHigh - c2.haOpen) <= haWickEps(c2.haOpen);
+
+        if(c1Bull && c2Bull && c1NoLowerWick && c2NoLowerWick){
           return { direction:'up', closeTime: c2.closeAt, c1Time: c1.t, c2Time: c2.t };
         }
-        if(c1Bear && c2Bear && Math.abs(c1.haHigh - c1.haOpen) <= haWickEps(c1.haOpen)){
+        if(c1Bear && c2Bear && c1NoUpperWick && c2NoUpperWick){
           return { direction:'down', closeTime: c2.closeAt, c1Time: c1.t, c2Time: c2.t };
         }
         return null;
@@ -4534,9 +4539,19 @@
           const cfg = maGetTgConfig();
           if(!cfg.token || !cfg.chatId){ alert('请先到「背离扫描」页面填写并保存 Bot Token / Chat ID（HA Scanner 用的是同一个 Telegram 设置）。'); return; }
           tgTestBtn.disabled = true; const oldTxt = tgTestBtn.textContent; tgTestBtn.textContent = '发送中...';
-          const ok = await maSendTelegram('✅ 6H HEIKIN ASHI 测试消息，如果你在 Telegram 收到这条，说明推送配置正常。');
+          // 直接调用一次，拿 Telegram 原始返回的错误原因（token 错 / chat not found / bot 被拉黑等），
+          // 方便你判断到底卡在哪一步；不影响 maSendTelegram 本身，背离扫描完全不受影响。
+          let detail = '';
+          try{
+            const res = await fetch('https://api.telegram.org/bot' + encodeURIComponent(cfg.token) + '/sendMessage', {
+              method:'POST', headers:{ 'Content-Type':'application/json' },
+              body: JSON.stringify({ chat_id: cfg.chatId, text: '✅ 6H HEIKIN ASHI 测试消息，如果你在 Telegram 收到这条，说明推送配置正常。' })
+            });
+            const data = await res.json();
+            detail = data.ok ? '' : ('HTTP ' + res.status + '：' + (data.description || '未知错误'));
+          }catch(e){ detail = '网络请求失败：' + (e.message || e); }
           tgTestBtn.disabled = false; tgTestBtn.textContent = oldTxt;
-          alert(ok ? '已发送，请检查 Telegram。' : '发送失败，请检查 Bot Token / Chat ID 是否正确，以及是否已经在 Telegram 里跟这个 Bot 说过一句话。');
+          alert(detail === '' ? '已发送，请检查 Telegram。' : ('发送失败 — ' + detail));
         });
         setTimeout(()=>{
           haScanAll();
