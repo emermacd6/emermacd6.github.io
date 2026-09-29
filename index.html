@@ -508,7 +508,7 @@
   .ma-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .ma-symbol{font-family:var(--mono);font-size:12px;color:var(--text-dim);}
   .ma-intro{font-size:12.5px;color:var(--text-dim);line-height:1.7;margin:-4px 0 14px;}
-  .ha-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
+  .ha-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
   .ha-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;}
   .ha-card.long{border-color:var(--long);}
   .ha-card.short{border-color:var(--short);}
@@ -518,6 +518,8 @@
   .ha-card-status.long{color:var(--long);}
   .ha-card-status.short{color:var(--short);}
   .ha-card-status.flat{color:var(--text-faint);}
+  .ha-card-chart{margin:4px 0 6px;background:var(--bg-chip);border-radius:8px;padding:4px 2px;}
+  .ha-chart-empty{font-size:11px;color:var(--text-faint);text-align:center;padding:30px 0;}
   .ha-card-meta{font-family:var(--mono);font-size:11px;color:var(--text-faint);line-height:1.6;}
   .ma-settings-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .ma-settings-label{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-dim);flex-shrink:0;}
@@ -1649,9 +1651,10 @@
         <div class="ma-header-right">
           <span class="macd-updated" id="ha-updated">尚未更新</span>
           <button type="button" class="btn-cancel" id="ha-refresh-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">⟳ 刷新</button>
+          <button type="button" class="btn-cancel" id="ha-tg-test-btn" style="padding:8px 14px;border-radius:8px;cursor:pointer;">📨 Telegram 测试</button>
         </div>
       </div>
-      <p class="ma-intro">扫描 8 个货币（XAUUSD / EURUSD / GBPJPY / GBPCAD / GBPCHF / AUDUSD / AUDCHF / NZDUSD）的 6H Heikin Ashi，只用已收盘的 K 线判断 HA UP / HA DOWN 两根反转形态，每 3 小时自动检查一次；新信号会合并成一条 Telegram 推送（沿用背离扫描的 Bot / 静音 / 时段设置）。</p>
+      <p class="ma-intro">扫描 8 个货币 + DJ30（XAUUSD / EURUSD / GBPJPY / GBPCAD / GBPCHF / AUDUSD / AUDCHF / NZDUSD / DJ30）的 6H Heikin Ashi，只用已收盘的 K 线判断 HA UP / HA DOWN 两根反转形态，每 3 小时自动检查一次；新信号会合并成一条 Telegram 推送（沿用背离扫描的 Bot / 静音 / 时段设置，可以点上面「Telegram 测试」确认能收到）。</p>
       <div id="ha-grid-mount" class="ha-grid"></div>
     </div>
   </section>
@@ -4259,6 +4262,13 @@
       const HA_INITIAL_DELAY_MS = 100*1000;      // 页面打开后延迟启动，错开背离扫描 / 市场流动性的请求
       const HA_AUTO_REFRESH_MS = 3*60*60*1000;   // 每 3 小时自动扫一次（用户确认的 schedule）
       const HA_SEEN_STORAGE = 'ha_seen_signal_keys_v1';
+      // 独立的 HA 货币列表：8 个货币 + DJ30（道指），不改动 MA_SYMBOLS，所以不会影响背离扫描。
+      // DJ30 沿用市场流动性模块已验证过的候选代码（Twelve Data 对指数代码有时对不上，
+      // 需要多个候选依次尝试，见 resolveQuery）。
+      const HA_SYMBOLS = MA_SYMBOLS.concat([
+        { key:'DJ30', label:'DJ30', icon:'🇺🇸', queries:['DJI','US30/USD','US30'] },
+      ]);
+      const HA_MINI_CANDLES = 6; // 每个货币展示最近 6 根 6H HA candle
 
       const haBaseCache = {};       // symKey -> { data:[{t,o,h,l,c}], at }
       let haResultsBySymbol = {};   // symKey -> { status:'up'|'down'|null, closeTime, error }
@@ -4391,10 +4401,11 @@
             status: pattern ? pattern.direction : null,
             closeTime: pattern ? pattern.closeTime : (lastClosed ? lastClosed.t : null),
             error: null,
+            recentHA: haBars.slice(-HA_MINI_CANDLES), // 最近 6 根（含当前正在形成中的那一根，用于给你看走势，不用于判断信号）
           };
           return pattern;
         }catch(e){
-          haResultsBySymbol[sym.key] = { status:null, closeTime:null, error: e.message || String(e) };
+          haResultsBySymbol[sym.key] = { status:null, closeTime:null, error: e.message || String(e), recentHA:[] };
           return null;
         }
       }
@@ -4405,7 +4416,7 @@
         if(haIsLoading) return;
         haIsLoading = true;
         const changed = [];
-        for(const sym of MA_SYMBOLS){
+        for(const sym of HA_SYMBOLS){
           const pattern = await haScanSymbol(sym);
           if(pattern){
             const fingerprint = sym.key + '|6H|' + pattern.direction + '|' + pattern.closeTime;
@@ -4443,10 +4454,40 @@
         maSendTelegram(lines.join('\n'));
       }
 
+      // 用 SVG 画最近 6 根 6H HA candle 的小走势图。正在形成中的那一根用虚线框 + 半透明表示，
+      // 和已收盘的区分开，避免你误以为那一根也已经确认（不 repaint 的规则只影响信号判断，
+      // 这里只是给你看走势参考）。
+      function haRenderMiniChart(bars){
+        if(!bars || !bars.length) return '<div class="ha-chart-empty">暂无数据</div>';
+        const W = 220, H = 92, padX = 6, padY = 8;
+        const n = bars.length;
+        const slot = (W - padX*2) / n;
+        const bodyW = Math.max(4, slot*0.5);
+        let lo = Infinity, hi = -Infinity;
+        bars.forEach(b=>{ lo = Math.min(lo, b.haLow); hi = Math.max(hi, b.haHigh); });
+        if(!isFinite(lo) || !isFinite(hi) || hi===lo){ hi = lo + 1; }
+        const y = px => padY + (H - padY*2) * (1 - (px - lo) / (hi - lo));
+        const parts = bars.map((b,i)=>{
+          const cx = padX + slot*i + slot/2;
+          const bull = b.haClose >= b.haOpen;
+          const color = bull ? 'var(--long)' : 'var(--short)';
+          const yTop = y(Math.max(b.haOpen, b.haClose));
+          const yBot = y(Math.min(b.haOpen, b.haClose));
+          const bodyH = Math.max(1.5, yBot - yTop);
+          const dash = b.closed ? '' : ' stroke-dasharray="2,2"';
+          const op = b.closed ? '1' : '0.55';
+          return '<g opacity="' + op + '">' +
+            '<line x1="' + cx + '" y1="' + y(b.haHigh) + '" x2="' + cx + '" y2="' + y(b.haLow) + '" stroke="' + color + '" stroke-width="1.4"' + dash + '></line>' +
+            '<rect x="' + (cx - bodyW/2) + '" y="' + yTop + '" width="' + bodyW + '" height="' + bodyH + '" fill="' + color + '"' + dash + ' stroke="' + color + '"></rect>' +
+          '</g>';
+        }).join('');
+        return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="xMidYMid meet">' + parts + '</svg>';
+      }
+
       function haRenderGrid(){
         const mount = document.getElementById('ha-grid-mount');
         if(!mount) return;
-        mount.innerHTML = MA_SYMBOLS.map(sym=>{
+        mount.innerHTML = HA_SYMBOLS.map(sym=>{
           const r = haResultsBySymbol[sym.key];
           let cls = 'flat', label = '扫描中…', dot = '⏳', meta = '等待数据';
           if(r){
@@ -4458,9 +4499,11 @@
               meta = r.closeTime ? ('最近收盘 ' + haFmtTime(r.closeTime)) : '等待数据';
             }
           }
+          const chart = haRenderMiniChart(r && r.recentHA);
           return '<div class="ha-card ' + cls + '">' +
             '<div class="ha-card-top"><span class="ha-card-sym">' + sym.icon + ' ' + sym.label + '</span>' +
             '<span class="ha-card-status ' + cls + '">' + dot + ' ' + label + '</span></div>' +
+            '<div class="ha-card-chart">' + chart + '</div>' +
             '<div class="ha-card-meta">' + meta + '</div>' +
           '</div>';
         }).join('');
@@ -4470,6 +4513,15 @@
         haRenderGrid();
         const refreshBtn = document.getElementById('ha-refresh-btn');
         if(refreshBtn) refreshBtn.addEventListener('click', ()=>haScanAll());
+        const tgTestBtn = document.getElementById('ha-tg-test-btn');
+        if(tgTestBtn) tgTestBtn.addEventListener('click', async ()=>{
+          const cfg = maGetTgConfig();
+          if(!cfg.token || !cfg.chatId){ alert('请先到「背离扫描」页面填写并保存 Bot Token / Chat ID（HA Scanner 用的是同一个 Telegram 设置）。'); return; }
+          tgTestBtn.disabled = true; const oldTxt = tgTestBtn.textContent; tgTestBtn.textContent = '发送中...';
+          const ok = await maSendTelegram('✅ 6H HEIKIN ASHI 测试消息，如果你在 Telegram 收到这条，说明推送配置正常。');
+          tgTestBtn.disabled = false; tgTestBtn.textContent = oldTxt;
+          alert(ok ? '已发送，请检查 Telegram。' : '发送失败，请检查 Bot Token / Chat ID 是否正确，以及是否已经在 Telegram 里跟这个 Bot 说过一句话。');
+        });
         setTimeout(()=>{
           haScanAll();
           if(haRefreshTimer) clearInterval(haRefreshTimer);
