@@ -520,6 +520,9 @@
   .ha-card-status.flat{color:var(--text-faint);}
   .ha-card-chart{margin:4px 0 6px;background:var(--bg-chip);border-radius:8px;padding:4px 2px;}
   .ha-chart-empty{font-size:11px;color:var(--text-faint);text-align:center;padding:30px 0;}
+  .ha-chart-detected{margin-top:4px;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:6px;}
+  .ha-chart-detected.long{color:var(--long);background:var(--long-dim);}
+  .ha-chart-detected.short{color:var(--short);background:var(--short-dim);}
   .ha-card-meta{font-family:var(--mono);font-size:11px;color:var(--text-faint);line-height:1.6;}
   .ma-settings-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .ma-settings-label{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--text-dim);flex-shrink:0;}
@@ -4330,7 +4333,8 @@
           const pts = map.get(k).sort((a,b)=>a.t-b.t);
           const closed = pts.length>=3 && (k + HA_BUCKET_SEC) <= coverageEnd;
           return {
-            t:k,
+            t:k,                    // bucket 开始时间（HA Open 对应的时刻）
+            closeAt:k + HA_BUCKET_SEC, // bucket 结束/收盘时间——展示给用户 & 判重都用这个，不是 t
             o:pts[0].o,
             h:Math.max.apply(null, pts.map(p=>p.h)),
             l:Math.min.apply(null, pts.map(p=>p.l)),
@@ -4349,7 +4353,7 @@
           const haOpen = (i===0) ? (b.o + b.c) / 2 : (prevHaOpen + prevHaClose) / 2;
           const haHigh = Math.max(b.h, haOpen, haClose);
           const haLow = Math.min(b.l, haOpen, haClose);
-          out.push({ t:b.t, haOpen, haHigh, haLow, haClose, closed:b.closed });
+          out.push({ t:b.t, closeAt:b.closeAt, haOpen, haHigh, haLow, haClose, closed:b.closed });
           prevHaOpen = haOpen; prevHaClose = haClose;
         });
         return out;
@@ -4374,10 +4378,10 @@
         const c2Bear = c2.haClose < c2.haOpen;
 
         if(c1Bull && c2Bull && Math.abs(c1.haLow - c1.haOpen) <= haWickEps(c1.haOpen)){
-          return { direction:'up', closeTime: c2.t };
+          return { direction:'up', closeTime: c2.closeAt, c1Time: c1.t, c2Time: c2.t };
         }
         if(c1Bear && c2Bear && Math.abs(c1.haHigh - c1.haOpen) <= haWickEps(c1.haOpen)){
-          return { direction:'down', closeTime: c2.t };
+          return { direction:'down', closeTime: c2.closeAt, c1Time: c1.t, c2Time: c2.t };
         }
         return null;
       }
@@ -4399,9 +4403,10 @@
           const lastClosed = closedBars[closedBars.length-1] || null;
           haResultsBySymbol[sym.key] = {
             status: pattern ? pattern.direction : null,
-            closeTime: pattern ? pattern.closeTime : (lastClosed ? lastClosed.t : null),
+            closeTime: pattern ? pattern.closeTime : (lastClosed ? lastClosed.closeAt : null),
             error: null,
             recentHA: haBars.slice(-HA_MINI_CANDLES), // 最近 6 根（含当前正在形成中的那一根，用于给你看走势，不用于判断信号）
+            pattern: pattern, // {direction, closeTime, c1Time, c2Time} 或 null，给图表标注 1号/2号 用
           };
           return pattern;
         }catch(e){
@@ -4457,16 +4462,21 @@
       // 用 SVG 画最近 6 根 6H HA candle 的小走势图。正在形成中的那一根用虚线框 + 半透明表示，
       // 和已收盘的区分开，避免你误以为那一根也已经确认（不 repaint 的规则只影响信号判断，
       // 这里只是给你看走势参考）。
-      function haRenderMiniChart(bars){
+      function haRenderMiniChart(bars, pattern){
         if(!bars || !bars.length) return '<div class="ha-chart-empty">暂无数据</div>';
-        const W = 220, H = 92, padX = 6, padY = 8;
+        const W = 220, padX = 6, padTop = 8, chartH = 66, labelRowH = 16, padBottom = 6;
+        const H = padTop + chartH + labelRowH + padBottom; // 顶部图表区 + 底部标号区
         const n = bars.length;
         const slot = (W - padX*2) / n;
         const bodyW = Math.max(4, slot*0.5);
         let lo = Infinity, hi = -Infinity;
         bars.forEach(b=>{ lo = Math.min(lo, b.haLow); hi = Math.max(hi, b.haHigh); });
         if(!isFinite(lo) || !isFinite(hi) || hi===lo){ hi = lo + 1; }
-        const y = px => padY + (H - padY*2) * (1 - (px - lo) / (hi - lo));
+        const y = px => padTop + chartH * (1 - (px - lo) / (hi - lo));
+        const labelY = padTop + chartH + labelRowH - 4;
+        // 把判定用到的 candle1 / candle2 时间戳映射成 "1" / "2" 标号，方便你直接对照图表核实
+        const markMap = {};
+        if(pattern){ markMap[pattern.c1Time] = '1'; markMap[pattern.c2Time] = '2'; }
         const parts = bars.map((b,i)=>{
           const cx = padX + slot*i + slot/2;
           const bull = b.haClose >= b.haOpen;
@@ -4476,12 +4486,18 @@
           const bodyH = Math.max(1.5, yBot - yTop);
           const dash = b.closed ? '' : ' stroke-dasharray="2,2"';
           const op = b.closed ? '1' : '0.55';
+          const lbl = markMap[b.t];
+          const lblSvg = lbl ? ('<text x="' + cx + '" y="' + labelY + '" text-anchor="middle" font-size="10" font-weight="700" fill="' + color + '">' + lbl + '号</text>') : '';
           return '<g opacity="' + op + '">' +
             '<line x1="' + cx + '" y1="' + y(b.haHigh) + '" x2="' + cx + '" y2="' + y(b.haLow) + '" stroke="' + color + '" stroke-width="1.4"' + dash + '></line>' +
             '<rect x="' + (cx - bodyW/2) + '" y="' + yTop + '" width="' + bodyW + '" height="' + bodyH + '" fill="' + color + '"' + dash + ' stroke="' + color + '"></rect>' +
-          '</g>';
+          '</g>' + lblSvg;
         }).join('');
-        return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="xMidYMid meet">' + parts + '</svg>';
+        const svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="xMidYMid meet">' + parts + '</svg>';
+        const badge = pattern
+          ? ('<div class="ha-chart-detected ' + (pattern.direction==='up'?'long':'short') + '">检测到 HA ' + (pattern.direction==='up'?'UP':'DOWN') + '</div>')
+          : '';
+        return svg + badge;
       }
 
       function haRenderGrid(){
@@ -4499,7 +4515,7 @@
               meta = r.closeTime ? ('最近收盘 ' + haFmtTime(r.closeTime)) : '等待数据';
             }
           }
-          const chart = haRenderMiniChart(r && r.recentHA);
+          const chart = haRenderMiniChart(r && r.recentHA, r && r.pattern);
           return '<div class="ha-card ' + cls + '">' +
             '<div class="ha-card-top"><span class="ha-card-sym">' + sym.icon + ' ' + sym.label + '</span>' +
             '<span class="ha-card-status ' + cls + '">' + dot + ' ' + label + '</span></div>' +
