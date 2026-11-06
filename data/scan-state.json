@@ -39,16 +39,16 @@
     "mega:GBPCAD:20M+40M": "bearish",
     "div:GBPCHF:10M": "bearish",
     "div:GBPCHF:23M": "bearish",
-    "div:AUDUSD:40M": "bullish",
+    "div:AUDUSD:40M": "bearish",
     "div:AUDCHF:23M": "bearish",
-    "div:NZDUSD:5M": "bearish",
+    "div:NZDUSD:5M": "bullish",
     "div:NZDUSD:12M": "bullish",
     "mega:NZDUSD:10M+5M": "bullish",
     "div:EURUSD:7M": "bearish",
     "mega:EURUSD:15M+30M": "bearish",
     "div:GBPJPY:3M": "bullish",
     "div:GBPJPY:15M": "bearish",
-    "div:GBPJPY:20M": "bearish",
+    "div:GBPJPY:20M": "bullish",
     "div:GBPJPY:1H": "bullish",
     "div:GBPJPY:90M": "bearish",
     "div:GBPJPY:2H": "bearish",
@@ -93,7 +93,7 @@
     "div:GBPJPY:3H": "bearish",
     "div:AUDUSD:5M": "bullish",
     "div:AUDCHF:3M": "bearish",
-    "div:AUDCHF:5M": "bearish",
+    "div:AUDCHF:5M": "bullish",
     "div:NZDUSD:3M": "bearish",
     "div:NZDUSD:20M": "bearish",
     "div:NZDUSD:23M": "bearish",
@@ -107,14 +107,14 @@
     "div:AUDUSD:90M": "bearish",
     "div:AUDUSD:2H": "bearish",
     "div:AUDUSD:4H": "bearish",
-    "div:EURUSD:5M": "bearish",
+    "div:EURUSD:5M": "bullish",
     "div:GBPJPY:12M": "bearish",
     "div:GBPCHF:12M": "bullish",
     "div:GBPCHF:15M": "bullish",
     "div:AUDUSD:15M": "bearish",
     "div:AUDUSD:3H": "bearish",
     "mega:AUDUSD:3H+90M": "bearish",
-    "div:AUDCHF:10M": "bearish",
+    "div:AUDCHF:10M": "bullish",
     "div:EURUSD:40M": "bearish",
     "div:AUDUSD:20M": "bearish",
     "div:AUDUSD:6H": "bearish",
@@ -123,7 +123,7 @@
     "mega:EURUSD:2H+4H": "bullish",
     "div:GBPCAD:1H": "bearish",
     "div:AUDUSD:30M": "bearish",
-    "div:AUDCHF:7M": "bearish",
+    "div:AUDCHF:7M": "bullish",
     "mega:GBPCAD:1H+2H": "bearish",
     "mega:GBPCAD:2H+4H": "bearish",
     "div:GBPCHF:45M": "bullish",
@@ -166,7 +166,7 @@
     "mega:AUDCHF:3H+90M": "bullish",
     "mega:AUDCHF:3H+6H": "bearish",
     "div:XAUUSD:12M": "bullish",
-    "div:NZDUSD:3H": "bearish",
+    "div:NZDUSD:3H": "bullish",
     "mega:GBPCAD:1H+30M": "bearish",
     "mega:AUDUSD:20M+40M": "bullish",
     "div:AUDCHF:40M": "bullish",
@@ -204,233 +204,189 @@
     "div:XAUUSD:3H": "bullish",
     "mega:XAUUSD:45M+90M": "bearish",
     "mega:XAUUSD:3H+6H": "bullish",
-    "mega:EURUSD:45M+90M": "bearish"
+    "mega:EURUSD:45M+90M": "bearish",
+    "mega:AUDCHF:10M+5M": "bullish"
   },
   "currentSignals": {
     "XAUUSD": {
-      "3M": {
-        "type": "bullish",
-        "p2": {
-          "idx": 1662,
-          "type": "valley",
-          "value": -3.0162558311594694,
-          "confirmed": true
-        },
-        "confirmed": false
-      },
+      "3M": null,
       "5M": null,
       "7M": null,
-      "10M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 474,
-          "type": "peak",
-          "value": 1.5310096384801,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
-      "12M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 407,
-          "type": "peak",
-          "value": 2.8860442991181117,
-          "confirmed": true
-        },
-        "confirmed": false
-      },
-      "15M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 1991,
-          "type": "peak",
-          "value": 3.614041514757446,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "10M": null,
+      "12M": null,
+      "15M": null,
       "20M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 243,
-          "type": "peak",
-          "value": 6.174309373044707,
+          "idx": 196,
+          "type": "valley",
+          "value": -4.548797971871863,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "23M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 212,
-          "type": "peak",
-          "value": 7.663650085056361,
-          "confirmed": true
+          "idx": 216,
+          "type": "valley",
+          "value": -0.9036337395700684,
+          "confirmed": false
         },
         "confirmed": false
       },
       "30M": {
         "type": "bearish",
         "p2": {
-          "idx": 1981,
+          "idx": 1933,
           "type": "peak",
           "value": 26.049862669268805,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "40M": {
         "type": "bearish",
         "p2": {
-          "idx": 95,
+          "idx": 75,
           "type": "peak",
-          "value": 25.821678943436837,
+          "value": 31.03675944008546,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "45M": {
         "type": "bearish",
         "p2": {
-          "idx": 1970,
+          "idx": 1938,
           "type": "peak",
           "value": 28.243608685516847,
           "confirmed": true
         },
+        "confirmed": true
+      },
+      "1H": {
+        "type": "bullish",
+        "p2": {
+          "idx": 1999,
+          "type": "valley",
+          "value": -8.175845519680024,
+          "confirmed": false
+        },
         "confirmed": false
       },
-      "1H": null,
       "90M": {
         "type": "bearish",
         "p2": {
-          "idx": 966,
+          "idx": 950,
           "type": "peak",
           "value": 5.6303381726324915,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "2H": {
         "type": "bearish",
         "p2": {
-          "idx": 1407,
+          "idx": 1395,
           "type": "peak",
           "value": 10.770384994384585,
           "confirmed": true
         },
         "confirmed": true
       },
-      "3H": {
-        "type": "bullish",
-        "p2": {
-          "idx": 592,
-          "type": "valley",
-          "value": -4.160356989178581,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "3H": null,
       "4H": null,
-      "6H": {
-        "type": "bullish",
-        "p2": {
-          "idx": 386,
-          "type": "valley",
-          "value": -14.827072930984286,
-          "confirmed": true
-        },
-        "confirmed": true
-      }
+      "6H": null
     },
     "EURUSD": {
-      "3M": {
-        "type": "bullish",
-        "p2": {
-          "idx": 1665,
-          "type": "valley",
-          "value": -0.00014763536067263772,
-          "confirmed": false
-        },
-        "confirmed": false
-      },
+      "3M": null,
       "5M": {
         "type": "bullish",
         "p2": {
-          "idx": 998,
+          "idx": 956,
           "type": "valley",
-          "value": -0.00022344871824642176,
-          "confirmed": false
+          "value": -0.00031934231927999157,
+          "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "7M": {
         "type": "bullish",
         "p2": {
           "idx": 713,
           "type": "valley",
-          "value": -0.0003372520225530806,
+          "value": -0.0004657176521056794,
           "confirmed": false
         },
         "confirmed": false
       },
-      "10M": null,
-      "12M": {
-        "type": "bearish",
+      "10M": {
+        "type": "bullish",
         "p2": {
-          "idx": 294,
-          "type": "peak",
-          "value": 0.0005703257441695975,
-          "confirmed": true
+          "idx": 499,
+          "type": "valley",
+          "value": -0.0003879404466653469,
+          "confirmed": false
         },
-        "confirmed": true
+        "confirmed": false
+      },
+      "12M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 416,
+          "type": "valley",
+          "value": -0.0005220231225724348,
+          "confirmed": false
+        },
+        "confirmed": false
       },
       "15M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 1902,
-          "type": "peak",
-          "value": 0.0006800719527313426,
-          "confirmed": true
+          "idx": 1999,
+          "type": "valley",
+          "value": -0.0006604880077636377,
+          "confirmed": false
         },
-        "confirmed": true
+        "confirmed": false
       },
       "20M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 177,
-          "type": "peak",
-          "value": 0.000794767049339784,
-          "confirmed": true
+          "idx": 249,
+          "type": "valley",
+          "value": -0.0007757347327059794,
+          "confirmed": false
         },
         "confirmed": false
       },
       "23M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 154,
-          "type": "peak",
-          "value": 0.0009326891273668814,
-          "confirmed": true
+          "idx": 216,
+          "type": "valley",
+          "value": -0.000904246118547114,
+          "confirmed": false
         },
-        "confirmed": true
+        "confirmed": false
       },
       "30M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 1950,
-          "type": "peak",
-          "value": 0.0011637476585140138,
-          "confirmed": true
+          "idx": 1999,
+          "type": "valley",
+          "value": -0.0012182215009037822,
+          "confirmed": false
         },
-        "confirmed": true
+        "confirmed": false
       },
       "40M": {
         "type": "bearish",
         "p2": {
-          "idx": 88,
+          "idx": 52,
           "type": "peak",
-          "value": 0.001369991511199986,
+          "value": 0.0013863630974855212,
           "confirmed": true
         },
         "confirmed": true
@@ -438,37 +394,37 @@
       "45M": {
         "type": "bearish",
         "p2": {
-          "idx": 1988,
+          "idx": 1956,
           "type": "peak",
           "value": 0.0008186183947509473,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "1H": {
         "type": "bearish",
         "p2": {
-          "idx": 1992,
+          "idx": 1968,
           "type": "peak",
           "value": 0.0009906863018662726,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "90M": {
         "type": "bearish",
         "p2": {
-          "idx": 994,
+          "idx": 978,
           "type": "peak",
           "value": 0.001292483477081774,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "2H": {
         "type": "bearish",
         "p2": {
-          "idx": 1495,
+          "idx": 1483,
           "type": "peak",
           "value": 0.001482247956841487,
           "confirmed": true
@@ -478,7 +434,7 @@
       "3H": {
         "type": "bearish",
         "p2": {
-          "idx": 632,
+          "idx": 624,
           "type": "peak",
           "value": 0.0006149594146418469,
           "confirmed": true
@@ -489,104 +445,122 @@
       "6H": {
         "type": "bullish",
         "p2": {
-          "idx": 485,
+          "idx": 481,
           "type": "valley",
           "value": -0.00029303792213042357,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       }
     },
     "GBPJPY": {
-      "3M": null,
+      "3M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 1645,
+          "type": "peak",
+          "value": 0.04380649858310903,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
       "5M": {
         "type": "bearish",
         "p2": {
-          "idx": 987,
+          "idx": 986,
           "type": "peak",
-          "value": 0.06845643253626577,
+          "value": 0.06384121052852265,
           "confirmed": true
         },
         "confirmed": false
       },
-      "7M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 689,
-          "type": "peak",
-          "value": 0.014704275195356331,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "7M": null,
       "10M": null,
       "12M": null,
       "15M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 1987,
-          "type": "peak",
-          "value": 0.028353703317634427,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
-      "20M": null,
-      "23M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 181,
-          "type": "peak",
-          "value": 0.026284248356603257,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
-      "30M": null,
-      "40M": null,
-      "45M": null,
-      "1H": null,
-      "90M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 950,
-          "type": "peak",
-          "value": 0.2148279501431034,
+          "idx": 1979,
+          "type": "valley",
+          "value": -0.1453410644830626,
           "confirmed": true
         },
         "confirmed": false
       },
+      "20M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 235,
+          "type": "valley",
+          "value": -0.1623346454601915,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "23M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 204,
+          "type": "valley",
+          "value": -0.17262776035826732,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "30M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 1988,
+          "type": "valley",
+          "value": -0.20278292580738366,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "40M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 117,
+          "type": "valley",
+          "value": -0.24789406151313642,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "45M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 1991,
+          "type": "valley",
+          "value": -0.2770354032609248,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
+      "1H": null,
+      "90M": null,
       "2H": {
         "type": "bearish",
         "p2": {
-          "idx": 1466,
+          "idx": 1454,
           "type": "peak",
           "value": 0.2264296515743638,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "3H": null,
       "4H": null,
       "6H": null
     },
     "GBPCAD": {
-      "3M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 1644,
-          "type": "peak",
-          "value": 0.0008705971927183143,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "3M": null,
       "5M": {
         "type": "bullish",
         "p2": {
-          "idx": 973,
+          "idx": 995,
           "type": "valley",
-          "value": -0.00037893465468008536,
+          "value": -0.00039499895072592217,
           "confirmed": true
         },
         "confirmed": false
@@ -594,41 +568,50 @@
       "7M": {
         "type": "bullish",
         "p2": {
-          "idx": 695,
+          "idx": 697,
           "type": "valley",
-          "value": -0.0005242464630708099,
+          "value": -0.00017845126786064647,
           "confirmed": true
         },
         "confirmed": false
       },
       "10M": {
-        "type": "bullish",
+        "type": "bearish",
         "p2": {
-          "idx": 487,
-          "type": "valley",
-          "value": -0.0007093855577731123,
-          "confirmed": true
-        },
-        "confirmed": false
-      },
-      "12M": {
-        "type": "bullish",
-        "p2": {
-          "idx": 406,
-          "type": "valley",
-          "value": -0.000782078204851322,
+          "idx": 448,
+          "type": "peak",
+          "value": 0.00011091645756700075,
           "confirmed": true
         },
         "confirmed": true
       },
-      "15M": null,
-      "20M": null,
+      "12M": null,
+      "15M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 1957,
+          "type": "peak",
+          "value": 0.00032389889959461016,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "20M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 210,
+          "type": "peak",
+          "value": 0.0007424312648101061,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
       "23M": {
         "type": "bearish",
         "p2": {
-          "idx": 145,
+          "idx": 182,
           "type": "peak",
-          "value": 0.0007038594326944647,
+          "value": 0.0008432037557877248,
           "confirmed": true
         },
         "confirmed": true
@@ -636,19 +619,19 @@
       "30M": {
         "type": "bearish",
         "p2": {
-          "idx": 1971,
+          "idx": 1972,
           "type": "peak",
-          "value": 0.0005395534979575345,
+          "value": 0.0009898753999524335,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "40M": {
         "type": "bearish",
         "p2": {
-          "idx": 104,
+          "idx": 68,
           "type": "peak",
-          "value": 0.0006533597576796613,
+          "value": 0.0006809723582821281,
           "confirmed": true
         },
         "confirmed": false
@@ -656,7 +639,7 @@
       "45M": {
         "type": "bearish",
         "p2": {
-          "idx": 1980,
+          "idx": 1948,
           "type": "peak",
           "value": 0.0006811564186413044,
           "confirmed": true
@@ -666,7 +649,7 @@
       "1H": {
         "type": "bearish",
         "p2": {
-          "idx": 1985,
+          "idx": 1961,
           "type": "peak",
           "value": 0.0009957191089442485,
           "confirmed": true
@@ -676,19 +659,19 @@
       "90M": {
         "type": "bearish",
         "p2": {
-          "idx": 925,
+          "idx": 993,
           "type": "peak",
-          "value": 0.00032375082343638617,
+          "value": 0.001533374972993773,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
       "2H": {
         "type": "bearish",
         "p2": {
-          "idx": 1492,
+          "idx": 1494,
           "type": "peak",
-          "value": 0.002081698331573234,
+          "value": 0.00196396041875202,
           "confirmed": true
         },
         "confirmed": false
@@ -696,7 +679,7 @@
       "3H": {
         "type": "bearish",
         "p2": {
-          "idx": 661,
+          "idx": 653,
           "type": "peak",
           "value": 0.0025272308376327324,
           "confirmed": true
@@ -707,7 +690,7 @@
       "6H": {
         "type": "bullish",
         "p2": {
-          "idx": 463,
+          "idx": 459,
           "type": "valley",
           "value": -0.002520762881508043,
           "confirmed": true
@@ -716,88 +699,79 @@
       }
     },
     "GBPCHF": {
-      "3M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 1604,
-          "type": "peak",
-          "value": 0.0002644167254981511,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "3M": null,
       "5M": {
         "type": "bearish",
         "p2": {
-          "idx": 959,
+          "idx": 999,
           "type": "peak",
-          "value": 0.0003774132509308803,
+          "value": 0.00018463452837136352,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "7M": {
+        "type": "bearish",
+        "p2": {
+          "idx": 713,
+          "type": "peak",
+          "value": 0.0001744960273788454,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "10M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 477,
+          "type": "valley",
+          "value": -0.0003434191831910294,
           "confirmed": true
         },
         "confirmed": false
       },
-      "7M": null,
-      "10M": null,
       "12M": null,
-      "15M": null,
-      "20M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 202,
-          "type": "peak",
-          "value": 0.00003233003036751114,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
-      "23M": null,
-      "30M": {
+      "15M": {
         "type": "bullish",
         "p2": {
-          "idx": 1893,
+          "idx": 1944,
           "type": "valley",
-          "value": -0.0007255464782323084,
+          "value": -0.0004169051935600798,
           "confirmed": true
         },
         "confirmed": true
       },
-      "40M": {
-        "type": "bearish",
+      "20M": {
+        "type": "bullish",
         "p2": {
-          "idx": 91,
-          "type": "peak",
-          "value": 0.00047852327454722676,
+          "idx": 228,
+          "type": "valley",
+          "value": -0.0005085851535164831,
           "confirmed": true
         },
         "confirmed": false
       },
-      "45M": {
+      "23M": {
         "type": "bullish",
         "p2": {
-          "idx": 1927,
+          "idx": 181,
           "type": "valley",
-          "value": -0.0010386092511518452,
+          "value": -0.0004371533585150189,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
-      "1H": {
-        "type": "bullish",
-        "p2": {
-          "idx": 1946,
-          "type": "valley",
-          "value": -0.0013739153526313164,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "30M": null,
+      "40M": null,
+      "45M": null,
+      "1H": null,
       "90M": null,
       "2H": null,
       "3H": null,
       "4H": {
         "type": "bearish",
         "p2": {
-          "idx": 1158,
+          "idx": 1152,
           "type": "peak",
           "value": 0.00034882667023716785,
           "confirmed": true
@@ -807,7 +781,7 @@
       "6H": {
         "type": "bearish",
         "p2": {
-          "idx": 483,
+          "idx": 479,
           "type": "peak",
           "value": 0.0003556756046341203,
           "confirmed": true
@@ -816,54 +790,63 @@
       }
     },
     "AUDUSD": {
-      "3M": {
+      "3M": null,
+      "5M": {
         "type": "bullish",
         "p2": {
-          "idx": 1560,
+          "idx": 927,
           "type": "valley",
-          "value": -0.00006247285394156421,
+          "value": -0.0006992055711453338,
           "confirmed": true
         },
         "confirmed": true
       },
-      "5M": null,
-      "7M": null,
-      "10M": null,
-      "12M": null,
+      "7M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 690,
+          "type": "valley",
+          "value": -0.0003243968460964197,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "10M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 499,
+          "type": "valley",
+          "value": -0.00010304609100053597,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "12M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 402,
+          "type": "valley",
+          "value": -0.0006540025146997142,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
       "15M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 1972,
-          "type": "peak",
-          "value": 0.00018041522411005317,
+          "idx": 1974,
+          "type": "valley",
+          "value": -0.0013787095215866962,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
-      "20M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 230,
-          "type": "peak",
-          "value": 0.0001913093374855679,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
-      "23M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 200,
-          "type": "peak",
-          "value": 0.00017627177003343153,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
+      "20M": null,
+      "23M": null,
       "30M": {
         "type": "bearish",
         "p2": {
-          "idx": 1985,
+          "idx": 1937,
           "type": "peak",
           "value": 0.00023715194601781064,
           "confirmed": true
@@ -873,17 +856,17 @@
       "40M": {
         "type": "bearish",
         "p2": {
-          "idx": 109,
+          "idx": 73,
           "type": "peak",
-          "value": 0.00045658578130325367,
+          "value": 0.0004595957831931008,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "45M": {
         "type": "bearish",
         "p2": {
-          "idx": 1989,
+          "idx": 1957,
           "type": "peak",
           "value": 0.0004739065593188929,
           "confirmed": true
@@ -893,7 +876,7 @@
       "1H": {
         "type": "bearish",
         "p2": {
-          "idx": 1988,
+          "idx": 1964,
           "type": "peak",
           "value": 0.0006400673636388632,
           "confirmed": true
@@ -902,11 +885,20 @@
       },
       "90M": null,
       "2H": null,
-      "3H": null,
+      "3H": {
+        "type": "bearish",
+        "p2": {
+          "idx": 559,
+          "type": "peak",
+          "value": 0.0008733158371244665,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
       "4H": {
         "type": "bearish",
         "p2": {
-          "idx": 1154,
+          "idx": 1148,
           "type": "peak",
           "value": 0.0006908424620672982,
           "confirmed": true
@@ -916,7 +908,7 @@
       "6H": {
         "type": "bearish",
         "p2": {
-          "idx": 470,
+          "idx": 466,
           "type": "peak",
           "value": 0.0008552308223443994,
           "confirmed": true
@@ -928,89 +920,98 @@
       "3M": {
         "type": "bearish",
         "p2": {
-          "idx": 1626,
+          "idx": 1663,
           "type": "peak",
-          "value": 0.0002116168633238269,
+          "value": 0.00016587118710043036,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "5M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 927,
+          "type": "valley",
+          "value": -0.0004709700972835851,
           "confirmed": true
         },
         "confirmed": true
       },
-      "5M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 975,
-          "type": "peak",
-          "value": 0.0002841603381298352,
-          "confirmed": true
-        },
-        "confirmed": false
-      },
       "7M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 696,
-          "type": "peak",
-          "value": 0.0003677557654320207,
+          "idx": 662,
+          "type": "valley",
+          "value": -0.0005679632720421157,
           "confirmed": true
         },
         "confirmed": true
       },
       "10M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 499,
-          "type": "peak",
-          "value": 0.0000494902918828366,
-          "confirmed": false
+          "idx": 483,
+          "type": "valley",
+          "value": -0.00021541987756923398,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "12M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 403,
+          "type": "valley",
+          "value": -0.0003037372404774974,
+          "confirmed": true
         },
         "confirmed": false
       },
-      "12M": null,
       "15M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 1910,
-          "type": "peak",
-          "value": 0.00048553510444782066,
+          "idx": 1988,
+          "type": "valley",
+          "value": -0.00042959368540473886,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
       "20M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 182,
-          "type": "peak",
-          "value": 0.0005929974740384036,
+          "idx": 231,
+          "type": "valley",
+          "value": -0.0011871845175949192,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
       "23M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 158,
-          "type": "peak",
-          "value": 0.0006572086406203548,
+          "idx": 201,
+          "type": "valley",
+          "value": -0.0013400009828093973,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
       "30M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 1954,
-          "type": "peak",
-          "value": 0.0006400905849743843,
+          "idx": 1986,
+          "type": "valley",
+          "value": -0.0015582327682116537,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
       },
       "40M": null,
       "45M": {
         "type": "bullish",
         "p2": {
-          "idx": 1953,
+          "idx": 1921,
           "type": "valley",
           "value": -0.0012390924827819783,
           "confirmed": true
@@ -1020,7 +1021,7 @@
       "1H": {
         "type": "bullish",
         "p2": {
-          "idx": 1965,
+          "idx": 1941,
           "type": "valley",
           "value": -0.001329979109181867,
           "confirmed": true
@@ -1030,7 +1031,7 @@
       "90M": {
         "type": "bullish",
         "p2": {
-          "idx": 977,
+          "idx": 961,
           "type": "valley",
           "value": -0.0015501003602523822,
           "confirmed": true
@@ -1040,78 +1041,105 @@
       "2H": {
         "type": "bullish",
         "p2": {
-          "idx": 1495,
+          "idx": 1470,
           "type": "valley",
-          "value": -0.0005904432050519715,
+          "value": -0.002050511579989256,
           "confirmed": true
         },
         "confirmed": false
       },
       "3H": null,
-      "4H": null,
+      "4H": {
+        "type": "bearish",
+        "p2": {
+          "idx": 1121,
+          "type": "peak",
+          "value": 0.0009791933178761036,
+          "confirmed": true
+        },
+        "confirmed": false
+      },
       "6H": null
     },
     "NZDUSD": {
-      "3M": {
-        "type": "bullish",
-        "p2": {
-          "idx": 1656,
-          "type": "valley",
-          "value": -0.00017948497145359177,
-          "confirmed": true
-        },
-        "confirmed": false
-      },
+      "3M": null,
       "5M": {
         "type": "bullish",
         "p2": {
-          "idx": 993,
+          "idx": 977,
           "type": "valley",
-          "value": -0.0002926424959897034,
+          "value": -0.00006445269892874084,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "7M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 679,
+          "type": "valley",
+          "value": -0.0004552052594584133,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
+      "10M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 499,
+          "type": "valley",
+          "value": -0.00017363205455112052,
+          "confirmed": false
+        },
+        "confirmed": false
+      },
+      "12M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 396,
+          "type": "valley",
+          "value": -0.0006866831757592617,
           "confirmed": true
         },
         "confirmed": false
       },
-      "7M": null,
-      "10M": null,
-      "12M": null,
-      "15M": null,
-      "20M": {
-        "type": "bearish",
+      "15M": {
+        "type": "bullish",
         "p2": {
-          "idx": 178,
-          "type": "peak",
-          "value": 0.0007112379044685868,
+          "idx": 1982,
+          "type": "valley",
+          "value": -0.000814505744594185,
           "confirmed": true
         },
-        "confirmed": true
+        "confirmed": false
+      },
+      "20M": {
+        "type": "bullish",
+        "p2": {
+          "idx": 240,
+          "type": "valley",
+          "value": -0.0010418123154737335,
+          "confirmed": true
+        },
+        "confirmed": false
       },
       "23M": {
-        "type": "bearish",
+        "type": "bullish",
         "p2": {
-          "idx": 154,
-          "type": "peak",
-          "value": 0.0007803316525630821,
-          "confirmed": true
-        },
-        "confirmed": true
-      },
-      "30M": {
-        "type": "bearish",
-        "p2": {
-          "idx": 1981,
-          "type": "peak",
-          "value": 0.0007093739813882616,
+          "idx": 206,
+          "type": "valley",
+          "value": -0.0011606519978633045,
           "confirmed": true
         },
         "confirmed": false
       },
+      "30M": null,
       "40M": {
         "type": "bearish",
         "p2": {
-          "idx": 111,
+          "idx": 75,
           "type": "peak",
-          "value": 0.0007643226775132517,
+          "value": 0.0007622974655194792,
           "confirmed": true
         },
         "confirmed": false
@@ -1119,47 +1147,56 @@
       "45M": {
         "type": "bearish",
         "p2": {
-          "idx": 1986,
+          "idx": 1954,
           "type": "peak",
           "value": 0.0007380342808491758,
           "confirmed": true
         },
         "confirmed": false
       },
-      "1H": null,
+      "1H": {
+        "type": "bullish",
+        "p2": {
+          "idx": 1916,
+          "type": "valley",
+          "value": -0.0003904579825861898,
+          "confirmed": true
+        },
+        "confirmed": true
+      },
       "90M": null,
       "2H": null,
       "3H": {
         "type": "bullish",
         "p2": {
-          "idx": 655,
+          "idx": 638,
           "type": "valley",
-          "value": -0.0007108784794158662,
+          "value": -0.0004808803173729226,
           "confirmed": true
         },
-        "confirmed": false
+        "confirmed": true
       },
       "4H": {
         "type": "bullish",
         "p2": {
-          "idx": 1190,
+          "idx": 1199,
           "type": "valley",
-          "value": -0.0008996852893674578,
-          "confirmed": true
+          "value": -0.0018335601345579322,
+          "confirmed": false
         },
         "confirmed": false
       },
       "6H": {
         "type": "bullish",
         "p2": {
-          "idx": 494,
+          "idx": 499,
           "type": "valley",
-          "value": -0.0011007544375246647,
-          "confirmed": true
+          "value": -0.0015394031944658826,
+          "confirmed": false
         },
         "confirmed": false
       }
     }
   },
-  "snapshotSentDate": "2026-11-05"
+  "snapshotSentDate": "2026-11-06"
 }
